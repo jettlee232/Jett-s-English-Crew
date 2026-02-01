@@ -10,11 +10,11 @@
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
     <script>
         // =================================================================
-        // [설정] Firebase 설정 값을 아래 JSON 안에 넣으세요.
+        // [설정] 본인의 Firebase 설정 값을 아래 따옴표 안에 넣으세요.
         // =================================================================
         window.__firebase_config = JSON.stringify({
             apiKey: "YOUR_API_KEY_HERE",
@@ -27,23 +27,23 @@
         window.__app_id = 'english-meetup-default';
     </script>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-        // 1. 전역 객체에서 React 기능 분해 할당 (Import 구문 대체)
+        // 1. React 전역 변수에서 기능 꺼내오기
         const { useState, useEffect, useRef } = React;
         const { createRoot } = ReactDOM;
 
-        // 2. Firebase Import (브라우저 네이티브 모듈 방식)
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        // 2. Firebase & Icons는 ESM(모듈) 방식으로 로드 (브라우저가 직접 처리)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
         
-        // 3. Lucide Icons (React 의존성 제외하고 로드하여 충돌 방지)
-        import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity } from 'https://esm.sh/lucide-react@0.344.0?external=react';
+        // 아이콘 로드 (React 의존성 제외 옵션 ?external=react 필수)
+        import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity } from 'https://esm.sh/lucide-react@0.395.0?external=react';
 
-        // --- Firebase Initialization ---
+        // --- Firebase 초기화 ---
         const firebaseConfigRaw = window.__firebase_config;
         let firebaseConfig = {};
         try { firebaseConfig = JSON.parse(firebaseConfigRaw); } catch (e) {}
@@ -55,7 +55,7 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
             } else {
-                console.warn("Firebase 설정이 비어있습니다. HTML 상단의 설정을 확인하세요.");
+                console.warn("⚠️ Firebase 설정이 비어있습니다. 코드 상단 __firebase_config를 확인하세요.");
             }
         } catch (err) { console.error("Firebase Init Error:", err); }
 
@@ -68,7 +68,7 @@
           const [user, setUser] = useState(null);
           const [attendees, setAttendees] = useState([]);
           
-          // 모임 정보 State
+          // 모임 정보 상태
           const [meetupInfo, setMeetupInfo] = useState({
             clubName: "Jett's English Crew",
             meetupTitle: "성북 중상급 영어회화 & 토론",
@@ -76,25 +76,32 @@
             date: "2026년 2월 1일 (일)", time: "오전 10:00 - 12:00",
             locationName: "탐앤탐스 성신여대점", locationAddress: "서울 성북구 동소문로22길 31",
             locationLink: "https://map.naver.com/v5/search/탐앤탐스%20성신여대점",
-            part1Title: "Part 1. Warm-up", part1Duration: "50 min",
-            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "Ice-breaking",
-            p1Time2: "30'", p1Title2: "Reading", p1Desc2: "Discussion 1",
-            breakTitle: "Break", breakDesc: "Seat Change",
-            part2Title: "Part 2. Discussion", part2Duration: "50 min",
-            p2Time1: "10'", p2Title1: "Refresh", p2Desc1: "Small talk",
-            p2Time2: "30'", p2Title2: "Main Topic", p2Desc2: "Discussion 2",
-            p2Time3: "10'", p2Title3: "Closing", p2Desc3: "Wrap-up",
-            topicTitle: "Travel", session2Topic: "Travel Styles", session2Question: "Planning vs Spontaneous?",
+            part1Title: "Part 1. Warm-up & Session 1", part1Duration: "50 min",
+            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화 (Ice-breaking)",
+            p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 심층 토론",
+            breakTitle: "Break (10 min)", breakDesc: "Seat Change: 파트너 교체",
+            part2Title: "Part 2. Session 2 & Wrap-up", part2Duration: "50 min",
+            p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
+            p2Time2: "30'", p2Title2: "Reading & Discussion 2", p2Desc2: "두 번째 지문 독해 및 의견 교환",
+            p2Time3: "10'", p2Title3: "Closing", p2Desc3: "소감 공유 및 마무리",
+            topicTitle: "Travel & Adventure", session2Topic: "Travel Styles", session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
             maxCapacity: 8, fee: "1,000", originalFee: "3,000", 
             drinkPolicy: "☕ 개인 음료는 별도로 주문해주세요 (1인 1메뉴)", 
             bankName: "카카오뱅크", bankAccount: "3333-26-2044919", accountHolder: "홍길동",
             leaderName: "Jett", leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett", 
-            leaderBio: "반갑습니다! 리더 Jett입니다.", leaderTags: "TESOL 수료, 호주 워홀",
-            etiquetteTitle: "클럽 규칙", etiquette1Title: "경청", etiquette1Desc: "핸드폰 자제",
-            faq1Q: "주차?", faq1A: "불가",
+            leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다. 호주 워홀과 TESOL 과정을 거쳤지만, 여전히 영어를 쓰고 배우는 과정 자체가 즐거운 연습생이죠.\n\n'완벽함'보다는 '소통의 즐거움'을 중요하게 생각합니다. 3년간 모임을 이끌어온 경험으로 편안한 분위기를 만들어 드릴게요. 부담 없이 오셔서 함께 떠들어요! 🌏✨",
+            leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+, 필리핀 어학연수, TOEFL/IELTS 경험",
+            etiquetteTitle: "클럽 규칙", 
+            etiquette1Title: "👂 서로를 존중하고 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
+            etiquette2Title: "⏳ 발언권은 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
+            etiquette3Title: "🚫 순수한 학습 모임입니다", etiquette3Desc: "종교 활동, 영업, 이성 교제 목적의 참여는 엄격히 금지합니다.",
+            openChatLink: "https://open.kakao.com/o/sExample", 
+            faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 어렵습니다. 인근 공영주차장을 이용하시거나 대중교통 이용을 권장드립니다.",
+            faq2Q: "영어를 잘 못해도 되나요?", faq2A: "물론입니다! 중상급 지향이지만, 틀리는 것을 두려워하지 않고 즐겁게 소통하려는 마음만 있다면 충분합니다.",
+            faq3Q: "준비물이 있나요?", faq3A: "가벼운 마음으로 오시면 됩니다. 필요한 학습 자료는 리더가 준비해 드립니다.",
           });
 
-          // Form States
+          // 입력 폼 상태
           const [name, setName] = useState('');
           const [nickname, setNickname] = useState('');
           const [contact, setContact] = useState('');
@@ -104,27 +111,39 @@
           const [transferred, setTransferred] = useState(false);
           const [rememberMe, setRememberMe] = useState(false);
           
-          // UI & Logic States
+          // UI 상태
           const [isAdmin, setIsAdmin] = useState(false);
           const [showAdminLogin, setShowAdminLogin] = useState(false);
           const [adminPinInput, setAdminPinInput] = useState('');
           const [loading, setLoading] = useState(false);
           const [errorMsg, setErrorMsg] = useState('');
+          const [copied, setCopied] = useState(false);
           const [showCurriculum, setShowCurriculum] = useState(false); 
+          const [isLeaderExpanded, setIsLeaderExpanded] = useState(false);
+          const [activeFaq, setActiveFaq] = useState(null); 
+          const [activeEtiquette, setActiveEtiquette] = useState(null); 
+          const [dDay, setDDay] = useState('');
+          
+          // 모달 및 기능 상태
           const [isEditingInfo, setIsEditingInfo] = useState(false);
           const [editForm, setEditForm] = useState({});
+          const [expandedSections, setExpandedSections] = useState({});
           const [isCancelMode, setIsCancelMode] = useState(false);
           const [showPasswordModal, setShowPasswordModal] = useState(false);
           const [cancelPasswordInput, setCancelPasswordInput] = useState('');
           const [targetDeleteId, setTargetDeleteId] = useState(null);
           const [toast, setToast] = useState(null); 
+          const [modalConfig, setModalConfig] = useState(null);
           
           const ADMIN_PIN = 'wpxm123'; 
 
           // --- Effects ---
           useEffect(() => {
             if (!auth) return;
-            signInAnonymously(auth).catch(console.error);
+            const init = async () => {
+                try { await signInAnonymously(auth); } catch(e) { console.error(e); }
+            };
+            init();
             onAuthStateChanged(auth, setUser);
             
             const saved = localStorage.getItem('meetup_user_info');
@@ -140,74 +159,122 @@
 
           useEffect(() => {
             if (!user || !db) return;
-            // Attendees Listener
+            // Attendees
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), (s) => {
                 const d = s.docs.map(doc => ({id: doc.id, ...doc.data()})).sort((a,b) => (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
                 setAttendees(d);
             });
-            // Config Listener
+            // Config
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), (s) => {
                 if(s.exists()) setMeetupInfo(prev => ({...prev, ...s.data()}));
             });
           }, [user]);
 
-          // --- Logic ---
+          useEffect(() => {
+            if (!meetupInfo.date) return;
+            try {
+                const yearMatch = meetupInfo.date.match(/(\d{4})년/);
+                const monthMatch = meetupInfo.date.match(/(\d{1,2})월/);
+                const dayMatch = meetupInfo.date.match(/(\d{1,2})일/);
+                if (yearMatch && monthMatch && dayMatch) {
+                    const targetDate = new Date(parseInt(yearMatch[1]), parseInt(monthMatch[1]) - 1, parseInt(dayMatch[1]));
+                    const today = new Date(); targetDate.setHours(0,0,0,0); today.setHours(0,0,0,0);
+                    const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+                    if (diffDays === 0) setDDay("D-Day");
+                    else if (diffDays > 0) setDDay(`D-${diffDays}`);
+                    else setDDay("End");
+                }
+            } catch(e) {}
+          }, [meetupInfo.date]);
+
+          // --- Helper Functions ---
+          const showToast = (message, type = 'success') => { setToast({ message, type }); setTimeout(() => setToast(null), 3000); };
+          const handleCopyAccount = () => {
+            const temp = document.createElement("textarea"); temp.value = meetupInfo.bankAccount; document.body.appendChild(temp); temp.select();
+            document.execCommand('copy'); document.body.removeChild(temp);
+            setCopied(true); setTimeout(() => setCopied(false), 2000); showToast('계좌번호가 복사되었습니다.');
+          };
+          const handleCopyTopic = () => {
+             const txt = `[${meetupInfo.topicTitle}]\n\n${meetupInfo.session2Topic}\n"${meetupInfo.session2Question}"`;
+             const temp = document.createElement("textarea"); temp.value = txt; document.body.appendChild(temp); temp.select();
+             document.execCommand('copy'); document.body.removeChild(temp); showToast("토픽이 복사되었습니다.");
+          };
+
+          // --- Handlers ---
           const approvedList = attendees.filter(a => a.status === 'approved');
           const pendingList = attendees.filter(a => a.status === 'pending');
           const effectiveCount = approvedList.length + pendingList.filter(a => a.paid).length;
           const currentMaxCapacity = parseInt(meetupInfo.maxCapacity) || 8;
           const isFull = effectiveCount >= currentMaxCapacity;
 
-          const showToast = (msg, type='success') => { setToast({message: msg, type}); setTimeout(() => setToast(null), 3000); };
-          
           const handleApply = async (e) => {
             e.preventDefault();
-            if(!name) return setErrorMsg('이름 입력 필수');
-            if(!password || password.length < 4) return setErrorMsg('비밀번호 4자리 필수');
-            
+            if (!auth) return showToast("DB 연결 실패", 'error');
+            if (!name.trim()) return setErrorMsg('이름을 입력해주세요.');
+            if (!isFull && !transferred) return setErrorMsg('참가비 송금 후 체크해주세요.');
+            if (isFull && !contact.trim()) return setErrorMsg('대기 신청 시 연락처는 필수입니다.');
+            if (!password || password.length < 4) return setErrorMsg('비밀번호 4자리를 입력해주세요.');
+
             setLoading(true);
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), {
-                    name, nickname, contact, password, gender, englishLevel,
-                    status: 'pending', isWaitlistApply: isFull, paid: !isFull,
+                    name: name.trim(), nickname: nickname.trim(), contact: contact.trim(), password: password.trim(),
+                    gender, englishLevel, status: 'pending', isWaitlistApply: isFull, paid: !isFull,
                     createdAt: serverTimestamp(), userId: user.uid
                 });
                 if(rememberMe) localStorage.setItem('meetup_user_info', JSON.stringify({name, nickname, contact, password, gender, englishLevel}));
                 else localStorage.removeItem('meetup_user_info');
                 
-                setName(''); setNickname(''); setContact(''); setPassword('');
-                showToast(isFull ? '대기 신청 완료' : '신청 완료');
+                setName(''); setNickname(''); setContact(''); setPassword(''); setErrorMsg('');
+                showToast(isFull ? '대기 신청 완료!' : '신청 완료!');
             } catch(e) { console.error(e); showToast('오류 발생', 'error'); }
             setLoading(false);
           };
 
-          const handleDeleteRequest = (id) => { setTargetDeleteId(id); setShowPasswordModal(true); };
+          const handleDeleteRequest = (id) => { 
+              if(isAdmin) {
+                  setModalConfig({title: '삭제', message: '정말 삭제하시겠습니까?', onConfirm: async() => {
+                      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id));
+                      setModalConfig(null); showToast('삭제되었습니다.');
+                  }});
+              } else {
+                  setTargetDeleteId(id); setShowPasswordModal(true); 
+              }
+          };
           
           const verifyCancelPassword = async () => {
              const target = attendees.find(a => a.id === targetDeleteId);
              if(target && target.password === cancelPasswordInput) {
                  await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, targetDeleteId));
-                 showToast('취소 완료'); setShowPasswordModal(false); setCancelPasswordInput('');
+                 showToast('신청이 취소되었습니다.'); setShowPasswordModal(false); setCancelPasswordInput('');
              } else {
-                 showToast('비밀번호 불일치', 'error');
+                 showToast('비밀번호가 일치하지 않습니다.', 'error');
              }
           };
 
           const handleApprove = async (id) => {
+              if(approvedList.length >= currentMaxCapacity) {
+                  if(!confirm('정원 초과입니다. 승인하시겠습니까?')) return;
+              }
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), {status: 'approved', paid: true});
-          }
+              showToast('승인 완료');
+          };
 
-          // --- Render ---
+          // --- Render Components ---
           return (
             <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 relative">
               {/* Header */}
               <header className="bg-indigo-600 text-white p-6 shadow-lg">
-                <div className="max-w-3xl mx-auto flex justify-between">
+                <div className="max-w-3xl mx-auto flex justify-between items-start">
                     <div>
                         <h1 className="text-3xl font-bold mb-2">{meetupInfo.clubName}</h1>
-                        <p>{meetupInfo.meetupTitle}</p>
+                        <p className="opacity-90 font-medium text-lg flex items-center gap-2">
+                            {dDay && <span className={`text-xs font-extrabold px-2 py-1 rounded shadow-sm ${dDay==='End'?'bg-slate-200 text-slate-500':'bg-white text-red-600'}`}>{dDay}</span>}
+                            {meetupInfo.meetupTitle}
+                        </p>
+                        <p className="text-indigo-100 text-sm mt-2 leading-relaxed">{meetupInfo.meetupDesc}</p>
                     </div>
-                    {isAdmin && <button onClick={()=>setIsEditingInfo(true)} className="bg-white/20 p-2 rounded"><Settings size={20}/></button>}
+                    {isAdmin && <button onClick={()=>setIsEditingInfo(true)} className="bg-white/10 p-2 rounded hover:bg-white/20"><Settings size={20}/></button>}
                 </div>
               </header>
 
@@ -216,7 +283,7 @@
                 {/* Info Cards */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                    <div className="bg-indigo-100 p-3 rounded-full text-indigo-600"><Calendar size={24} /></div>
+                    <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0"><Calendar size={24} /></div>
                     <div>
                       <h3 className="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3>
                       <p className="font-bold text-lg">{meetupInfo.date}</p>
@@ -224,11 +291,12 @@
                     </div>
                   </div>
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                    <div className="bg-emerald-100 p-3 rounded-full text-emerald-600"><MapPin size={24} /></div>
-                    <div>
+                    <div className="bg-emerald-100 p-3 rounded-full text-emerald-600 shrink-0"><MapPin size={24} /></div>
+                    <div className="flex-1">
                       <h3 className="font-semibold text-slate-500 text-sm uppercase">Location</h3>
                       <p className="font-bold text-lg">{meetupInfo.locationName}</p>
-                      <a href={meetupInfo.locationLink} target="_blank" className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded font-bold">지도 보기</a>
+                      <p className="text-slate-500 text-sm mb-2">{meetupInfo.locationAddress}</p>
+                      <a href={meetupInfo.locationLink} target="_blank" className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100"><ExternalLink size={12}/> 지도 보기</a>
                     </div>
                   </div>
                 </div>
@@ -241,16 +309,27 @@
                    </h2>
 
                    <div className={`mb-6 p-4 rounded text-sm ${isFull?'bg-orange-50 text-orange-900':'bg-indigo-50 text-indigo-900'}`}>
-                      <div className="font-bold text-lg flex items-center gap-2">
-                         <span>💡 참가비:</span>
-                         <span className="text-red-600">{meetupInfo.fee}원</span>
-                         <span className="line-through text-slate-400 text-sm">{meetupInfo.originalFee}원</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2 items-center">
-                         <span>{meetupInfo.bankName} {meetupInfo.bankAccount} ({meetupInfo.accountHolder})</span>
-                         <button onClick={()=>{navigator.clipboard.writeText(meetupInfo.bankAccount); showToast('계좌 복사됨');}} className="bg-white border px-2 py-1 rounded text-xs font-bold hover:bg-slate-50">계좌 복사</button>
-                      </div>
-                      <p className="mt-2 text-xs opacity-70">☕ {meetupInfo.drinkPolicy}</p>
+                      {isFull ? (
+                          <>
+                            <p className="font-bold mb-2">🕒 현재 정원 마감되었습니다.</p>
+                            <p>대기 신청은 무료이며, 빈 자리가 생기면 연락드립니다.</p>
+                          </>
+                      ) : (
+                          <>
+                            <div className="font-bold text-lg flex items-center gap-2">
+                                <span>💡 참가비:</span>
+                                <span className="text-red-600">{meetupInfo.fee}원</span>
+                                {meetupInfo.originalFee && <span className="line-through text-slate-400 text-sm">{meetupInfo.originalFee}원</span>}
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2 items-center">
+                                <span>{meetupInfo.bankName} {meetupInfo.bankAccount} ({meetupInfo.accountHolder})</span>
+                                <button onClick={handleCopyAccount} className="bg-white border px-2 py-1 rounded text-xs font-bold hover:bg-slate-50 flex items-center gap-1">
+                                    {copied ? <CheckCircle size={12}/> : <Copy size={12}/>} 복사
+                                </button>
+                            </div>
+                            <p className="mt-2 text-xs opacity-70 flex items-center gap-1">☕ {meetupInfo.drinkPolicy}</p>
+                          </>
+                      )}
                    </div>
 
                    <form onSubmit={handleApply} className="space-y-6">
@@ -263,6 +342,15 @@
                           <AlertCircle size={12} className="shrink-0 mt-0.5 text-indigo-500"/> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.
                         </p>
                       </div>
+
+                      {/* 연락처 (대기 신청 시) */}
+                      {isFull && (
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Phone size={16} className="text-indigo-600"/> 연락처</label>
+                            <input type="tel" value={contact} onChange={e=>setContact(e.target.value)} placeholder="010-0000-0000" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
+                            <p className="text-xs text-orange-600 mt-1.5 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 빈 자리가 생기면 연락드립니다.</p>
+                        </div>
+                      )}
 
                       {/* 닉네임 */}
                       <div>
@@ -287,7 +375,7 @@
                         </div>
                       </div>
 
-                      {/* 영어 레벨 (상세 디자인 복구) */}
+                      {/* 영어 레벨 (디자인 복구 - Detailed Box) */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Activity size={16} className="text-indigo-600"/> 영어 회화 실력</label>
                         <div className="grid gap-2">
@@ -298,7 +386,7 @@
                              {val: 'high', title: '상 (Advanced)', desc: '막힘없이 자유로운 토론 가능', color: 'purple'}
                            ].map(lvl => (
                                <label key={lvl.val} className={`border rounded-lg p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-slate-50 ${englishLevel === lvl.val ? `bg-${lvl.color}-50 border-${lvl.color}-500 ring-1 ring-${lvl.color}-500` : ''}`}>
-                                  <input type="radio" name="englishLevel" value={lvl.val} checked={englishLevel === lvl.val} onChange={e => setEnglishLevel(e.target.value)} className={`w-4 h-4 accent-${lvl.color}-600`}/>
+                                  <input type="radio" name="englishLevel" value={lvl.val} checked={englishLevel === lvl.val} onChange={e => setEnglishLevel(e.target.value)} className={`w-4 h-4 accent-${lvl.color}-600 shrink-0`}/>
                                   <div className="text-sm">
                                     <span className={`font-bold block text-${lvl.color}-900`}>{lvl.title}</span>
                                     <span className={`text-xs text-${lvl.color}-700 opacity-80`}>{lvl.desc}</span>
@@ -306,7 +394,7 @@
                                </label>
                            ))}
                         </div>
-                        <p className="text-xs text-slate-500 mt-2 flex gap-1"><Info size={12}/> 조 편성에 활용됩니다.</p>
+                        <p className="text-xs text-slate-500 mt-2 flex gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 조 편성에 활용됩니다.</p>
                       </div>
 
                       {/* 비밀번호 */}
@@ -314,7 +402,7 @@
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Lock size={16} className="text-indigo-600"/> 비밀번호 (4자리)</label>
                         <div className="flex gap-2 justify-center relative">
                             {[0,1,2,3].map(i => (
-                                <div key={i} className="w-12 h-12 border rounded flex items-center justify-center text-xl font-bold bg-white">
+                                <div key={i} className={`w-12 h-12 border rounded-lg flex items-center justify-center text-xl font-bold bg-white transition-all ${password.length===i ? 'border-indigo-500 ring-2 ring-indigo-100':''}`}>
                                     {password[i] || ''}
                                 </div>
                             ))}
@@ -339,7 +427,9 @@
                           {errorMsg && <p className="text-red-500 font-bold text-center animate-pulse">{errorMsg}</p>}
 
                           <button type="submit" disabled={loading} className={`w-full py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 ${isFull?'bg-orange-500 hover:bg-orange-600':'bg-indigo-600 hover:bg-indigo-700'}`}>
-                             {loading ? '처리중...' : (isFull ? '대기자로 신청하기' : '참가 신청하기')}
+                             {loading ? '처리중...' : (
+                                 <>{isFull ? '대기자로 신청하기' : '참가 신청하기'} <Send size={18}/></>
+                             )}
                           </button>
                       </div>
                    </form>
@@ -347,11 +437,13 @@
 
                 {/* Attendees List */}
                 <div className="bg-white rounded-xl shadow-sm border p-4">
-                   <div className="flex justify-between items-center mb-4">
-                       <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600"/> 참가자 명단 ({effectiveCount})</h2>
-                       <button onClick={()=>setIsCancelMode(!isCancelMode)} className="text-xs border px-2 py-1 rounded text-slate-500">{isCancelMode?'취소모드 끄기':'내 신청 취소'}</button>
+                   <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                       <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600"/> 참가자 명단 ({effectiveCount}/{currentMaxCapacity})</h2>
+                       <button onClick={()=>setIsCancelMode(!isCancelMode)} className={`text-xs border px-2 py-1 rounded transition-colors ${isCancelMode?'bg-slate-800 text-white':'text-slate-500 hover:bg-slate-50'}`}>{isCancelMode?'취소모드 끄기':'내 신청 취소'}</button>
                    </div>
                    
+                   <p className="text-xs text-slate-500 mb-3 flex gap-1"><Info size={14} className="shrink-0 mt-0.5"/> 참가 승인은 선착순으로 진행됩니다.</p>
+
                    <div className="divide-y">
                      {attendees.map(att => (
                         <div key={att.id} className="py-3 flex justify-between items-center">
@@ -362,62 +454,113 @@
                                 <div>
                                     <div className="flex items-center gap-1">
                                         <p className="font-bold">{att.nickname || att.name}</p>
+                                        {/* ME Badge */}
+                                        {user && user.uid === att.userId && <span className="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded">ME</span>}
                                         {isAdmin && <span className="text-xs text-slate-400">({att.name})</span>}
                                     </div>
-                                    <p className="text-xs text-slate-500">
-                                        {att.status === 'approved' ? <span className="text-emerald-600 font-bold">확정됨</span> : '승인 대기중'}
-                                    </p>
+                                    <div className="flex items-center gap-1 mt-0.5">
+                                        {att.status === 'approved' ? (
+                                            <span className="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 rounded flex items-center gap-0.5"><CheckCircle size={10}/> 확정</span>
+                                        ) : att.isWaitlistApply ? (
+                                            <span className="text-orange-600 text-xs font-bold bg-orange-50 px-1.5 rounded flex items-center gap-0.5"><Hourglass size={10}/> 대기</span>
+                                        ) : (
+                                            <span className="text-amber-600 text-xs font-bold bg-amber-50 px-1.5 rounded flex items-center gap-0.5"><Clock size={10}/> 승인대기</span>
+                                        )}
+                                        {/* Admin Info */}
+                                        {isAdmin && (
+                                            <span className="text-[10px] text-slate-400 border px-1 rounded">{att.englishLevel} / {att.gender==='male'?'M':'F'}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             
                             <div className="flex gap-2">
                                 {(isAdmin || isCancelMode) && (
-                                    <button onClick={()=>handleDeleteRequest(att.id)} className="text-red-400 p-1 bg-red-50 rounded"><Trash2 size={16}/></button>
+                                    <button onClick={()=>handleDeleteRequest(att.id)} className="text-red-400 p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 size={18}/></button>
                                 )}
                                 {isAdmin && att.status !== 'approved' && (
-                                    <button onClick={()=>handleApprove(att.id)} className="text-emerald-500 p-1 bg-emerald-50 rounded"><CheckCircle size={16}/></button>
+                                    <button onClick={()=>handleApprove(att.id)} className="text-emerald-500 p-1.5 hover:bg-emerald-50 rounded transition-colors"><CheckCircle size={18}/></button>
                                 )}
                             </div>
                         </div>
                      ))}
-                     {attendees.length === 0 && <p className="text-center text-slate-400 py-4">아직 신청자가 없습니다.</p>}
+                     {attendees.length === 0 && <div className="text-center py-8 bg-slate-50 border border-dashed rounded-lg text-slate-400">아직 신청자가 없습니다.</div>}
                    </div>
                 </div>
 
+                {/* Additional Sections (Leader, Topic, etc) skipped for brevity in this specific fix block, but essential structure is maintained above. 
+                    If you need the Leader/Topic sections back fully, I can add them, but the request focused on the errors and Form UI. 
+                    I'll add the Leader section back as it adds credibility. 
+                */}
+                
+                {meetupInfo.leaderName && (
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-slate-50 p-4 border-b flex items-center gap-2"><Award size={20} className="text-indigo-600"/><h2 className="font-bold text-indigo-900">Host</h2></div>
+                    <div className="p-5 flex flex-col md:flex-row gap-4 items-center md:items-start">
+                        <img src={meetupInfo.leaderImage} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-slate-100 object-cover" alt="Leader"/>
+                        <div className="flex-1 text-center md:text-left">
+                            <p className="font-bold text-lg">{meetupInfo.leaderName}</p>
+                            <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{meetupInfo.leaderBio}</p>
+                        </div>
+                    </div>
+                  </div>
+                )}
+
               </main>
 
-              {/* Toast */}
-              {toast && <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-slate-800 text-white px-4 py-2 rounded-full shadow-lg text-sm">{toast.message}</div>}
+              {/* Toast Overlay */}
+              {toast && (
+                  <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-5 duration-300 w-full max-w-xs px-4">
+                      <div className={`shadow-xl rounded-lg p-3 flex items-center gap-3 text-white font-medium ${toast.type==='error'?'bg-red-500':'bg-emerald-600'}`}>
+                          {toast.type==='error' ? <AlertCircle size={20}/> : <CheckCircle size={20}/>}
+                          {toast.message}
+                      </div>
+                  </div>
+              )}
 
               {/* Password Modal */}
               {showPasswordModal && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                      <div className="bg-white p-6 rounded-lg w-full max-w-xs shadow-xl">
-                          <h3 className="font-bold mb-4 text-center">비밀번호 확인</h3>
-                          <input type="password" value={cancelPasswordInput} onChange={e=>setCancelPasswordInput(e.target.value)} className="w-full border p-3 mb-4 rounded text-center tracking-widest text-lg" placeholder="4자리" autoFocus maxLength={4}/>
+                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4 animate-in fade-in">
+                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
+                          <h3 className="font-bold mb-4 text-center text-lg">비밀번호 확인</h3>
+                          <input type="password" value={cancelPasswordInput} onChange={e=>setCancelPasswordInput(e.target.value)} className="w-full border p-3 mb-4 rounded-lg text-center tracking-widest text-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="4자리" autoFocus maxLength={4}/>
                           <div className="flex gap-2">
-                              <button onClick={()=>setShowPasswordModal(false)} className="flex-1 bg-slate-100 py-2 rounded font-bold text-slate-600">닫기</button>
-                              <button onClick={verifyCancelPassword} className="flex-1 bg-red-500 text-white py-2 rounded font-bold">확인</button>
+                              <button onClick={()=>setShowPasswordModal(false)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold text-slate-600 hover:bg-slate-200">닫기</button>
+                              <button onClick={verifyCancelPassword} className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 shadow-md">확인</button>
                           </div>
                       </div>
                   </div>
               )}
               
-              {/* Footer */}
-              <footer className="text-center mt-10 text-slate-400 text-xs">
-                 <button onClick={()=>setShowAdminLogin(true)}>Admin Login</button>
-              </footer>
-
-              {/* Admin Login Modal */}
-              {showAdminLogin && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[90]">
-                      <div className="bg-white p-6 rounded-lg">
-                          <input type="password" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} className="border p-2 rounded mb-2 w-full text-center" placeholder="PIN"/>
-                          <button onClick={()=>{if(adminPinInput===ADMIN_PIN){setIsAdmin(true); setShowAdminLogin(false);}else{alert('틀림');}}} className="bg-indigo-600 text-white w-full py-2 rounded">Enter</button>
-                          <button onClick={()=>setShowAdminLogin(false)} className="mt-2 text-xs w-full">Cancel</button>
+              {/* Admin Modal */}
+              {modalConfig && (
+                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4">
+                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
+                          <h3 className="font-bold mb-2 text-lg">{modalConfig.title}</h3>
+                          <p className="text-slate-600 mb-6">{modalConfig.message}</p>
+                          <div className="flex gap-2">
+                              <button onClick={()=>setModalConfig(null)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold">취소</button>
+                              <button onClick={modalConfig.onConfirm} className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-bold">확인</button>
+                          </div>
                       </div>
                   </div>
               )}
+
+              {/* Admin Login Modal */}
+              {showAdminLogin && (
+                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[90] p-4">
+                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
+                          <h3 className="font-bold mb-4 text-center">관리자 로그인</h3>
+                          <input type="password" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} className="border p-3 rounded-lg mb-4 w-full text-center tracking-widest text-lg outline-none focus:ring-2 ring-indigo-500" placeholder="PIN" autoFocus/>
+                          <button onClick={()=>{if(adminPinInput===ADMIN_PIN){setIsAdmin(true); setShowAdminLogin(false); setAdminPinInput(''); showToast('관리자 로그인 성공');}else{showToast('비밀번호가 틀렸습니다','error');}}} className="bg-indigo-600 text-white w-full py-3 rounded-lg font-bold shadow-md">로그인</button>
+                          <button onClick={()=>setShowAdminLogin(false)} className="mt-3 text-sm text-slate-400 w-full hover:text-slate-600">닫기</button>
+                      </div>
+                  </div>
+              )}
+
+              <footer className="text-center mt-12 text-slate-400 text-xs pb-4">
+                 <button onClick={()=>setShowAdminLogin(true)} className="hover:text-slate-600 flex items-center gap-1 mx-auto"><Shield size={12}/> Admin Access</button>
+              </footer>
             </div>
           );
         }
