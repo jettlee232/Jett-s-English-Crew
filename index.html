@@ -7,6 +7,9 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
     <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
 
     <script type="importmap">
@@ -38,29 +41,27 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-        import React, { useState, useEffect, useRef } from 'react';
-        import { createRoot } from 'react-dom/client';
+        // 전역 객체 사용
+        const { useState, useEffect, useRef } = React;
+        const { createRoot } = ReactDOM;
+
+        // 모듈 Import
         import { initializeApp } from 'firebase/app';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-        
-        // [수정 완료] 여기에 'User' 아이콘을 추가했습니다!
-        import { Users, User, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity } from 'lucide-react';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+        import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity, User, MessageSquare } from 'lucide-react';
 
-        // --- Firebase Init ---
+        // Firebase 초기화
         const firebaseConfigRaw = window.__firebase_config;
         let firebaseConfig = {};
         try { firebaseConfig = JSON.parse(firebaseConfigRaw); } catch (e) {}
         
         let app, auth, db;
         try {
-            // API Key가 설정되어 있을 때만 초기화
             if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-            } else {
-                console.warn("⚠️ Firebase 설정이 비어있습니다. 코드 상단을 확인하세요.");
             }
         } catch (err) { console.error("Firebase Init Error:", err); }
 
@@ -73,38 +74,48 @@
           const [user, setUser] = useState(null);
           const [attendees, setAttendees] = useState([]);
           
+          // --- 데이터 상태 (초기값 복구) ---
           const [meetupInfo, setMeetupInfo] = useState({
+            // Header
             clubName: "Jett's English Crew",
             meetupTitle: "성북 중상급 영어회화 & 토론",
             meetupDesc: "일상 회화를 자유롭게 구사하는 것을 넘어서 더 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
+            // Basic Info
             date: "2026년 2월 1일 (일)", time: "오전 10:00 - 12:00",
             locationName: "탐앤탐스 성신여대점", locationAddress: "서울 성북구 동소문로22길 31",
             locationLink: "https://map.naver.com/v5/search/탐앤탐스%20성신여대점",
+            // Curriculum
             part1Title: "Part 1. Warm-up & Session 1", part1Duration: "50 min",
-            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "Ice-breaking",
+            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화 (Ice-breaking)",
             p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 심층 토론",
             breakTitle: "Break (10 min)", breakDesc: "Seat Change: 파트너 교체",
             part2Title: "Part 2. Session 2 & Wrap-up", part2Duration: "50 min",
             p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
             p2Time2: "30'", p2Title2: "Reading & Discussion 2", p2Desc2: "두 번째 지문 독해 및 의견 교환",
             p2Time3: "10'", p2Title3: "Closing", p2Desc3: "소감 공유 및 마무리",
-            topicTitle: "Travel & Adventure", session2Topic: "Travel Styles", session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
+            // Topic
+            topicTitle: "Travel & Adventure", session2Topic: "Travel Styles", 
+            session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
+            // Settings
             maxCapacity: 8, fee: "1,000", originalFee: "3,000", 
             drinkPolicy: "☕ 개인 음료는 별도로 주문해주세요 (1인 1메뉴)", 
             bankName: "카카오뱅크", bankAccount: "3333-26-2044919", accountHolder: "홍길동",
-            leaderName: "Jett", leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett", 
-            leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다.",
-            leaderTags: "TESOL 수료, 호주 워킹홀리데이",
+            // Leader
+            leaderName: "Jett", leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett&backgroundColor=c0aede", 
+            leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다. '완벽함'보다는 '소통의 즐거움'을 중요하게 생각합니다.",
+            leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+",
+            // Rules & FAQ
             etiquetteTitle: "클럽 규칙", 
-            etiquette1Title: "👂 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
-            etiquette2Title: "⏳ 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
-            etiquette3Title: "🚫 순수 학습", etiquette3Desc: "영업, 이성 교제 목적의 참여는 금지합니다.",
+            etiquette1Title: "👂 서로를 존중하고 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
+            etiquette2Title: "⏳ 발언권은 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
+            etiquette3Title: "🚫 순수한 학습 모임입니다", etiquette3Desc: "종교 활동, 영업, 이성 교제 목적의 참여는 엄격히 금지합니다.",
             openChatLink: "https://open.kakao.com/o/sExample", 
-            faq1Q: "주차 가능한가요?", faq1A: "불가합니다.",
-            faq2Q: "영어를 잘 못해도 되나요?", faq2A: "즐겁게 소통하려는 마음만 있다면 충분합니다.",
-            faq3Q: "준비물이 있나요?", faq3A: "가벼운 마음으로 오시면 됩니다.",
+            faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 어렵습니다. 인근 공영주차장을 이용하시거나 대중교통 이용을 권장드립니다.",
+            faq2Q: "영어를 잘 못해도 되나요?", faq2A: "물론입니다! 중상급 지향이지만, 틀리는 것을 두려워하지 않고 즐겁게 소통하려는 마음만 있다면 충분합니다.",
+            faq3Q: "준비물이 있나요?", faq3A: "가벼운 마음으로 오시면 됩니다. 필요한 학습 자료는 리더가 준비해 드립니다.",
           });
 
+          // 폼 상태
           const [name, setName] = useState('');
           const [nickname, setNickname] = useState('');
           const [contact, setContact] = useState('');
@@ -114,28 +125,34 @@
           const [transferred, setTransferred] = useState(false);
           const [rememberMe, setRememberMe] = useState(false);
           
+          // UI 상태
           const [isAdmin, setIsAdmin] = useState(false);
           const [showAdminLogin, setShowAdminLogin] = useState(false);
           const [adminPinInput, setAdminPinInput] = useState('');
           const [loading, setLoading] = useState(false);
           const [errorMsg, setErrorMsg] = useState('');
           const [copied, setCopied] = useState(false);
-          const [showCurriculum, setShowCurriculum] = useState(false); 
           const [dDay, setDDay] = useState('');
+          
+          // 접기/펴기 상태
+          const [showCurriculum, setShowCurriculum] = useState(false);
+          const [isLeaderExpanded, setIsLeaderExpanded] = useState(false);
+          const [activeFaq, setActiveFaq] = useState(null);
+          const [activeEtiquette, setActiveEtiquette] = useState(null);
+
+          // 모달 상태
           const [isEditingInfo, setIsEditingInfo] = useState(false);
           const [editForm, setEditForm] = useState({});
-          const [expandedSections, setExpandedSections] = useState({});
           const [isCancelMode, setIsCancelMode] = useState(false);
           const [showPasswordModal, setShowPasswordModal] = useState(false);
           const [cancelPasswordInput, setCancelPasswordInput] = useState('');
           const [targetDeleteId, setTargetDeleteId] = useState(null);
           const [toast, setToast] = useState(null); 
           const [modalConfig, setModalConfig] = useState(null);
-          const [activeFaq, setActiveFaq] = useState(null);
-          const [activeEtiquette, setActiveEtiquette] = useState(null);
           
           const ADMIN_PIN = 'wpxm123'; 
 
+          // --- Effects ---
           useEffect(() => {
             if (!auth) return;
             signInAnonymously(auth).catch(console.error);
@@ -177,16 +194,15 @@
             } catch(e) {}
           }, [meetupInfo.date]);
 
+          // --- Handlers ---
           const showToast = (msg, type='success') => { setToast({message: msg, type}); setTimeout(() => setToast(null), 3000); };
           const handleCopyAccount = () => {
-            const temp = document.createElement("textarea"); temp.value = meetupInfo.bankAccount; document.body.appendChild(temp); temp.select();
-            document.execCommand('copy'); document.body.removeChild(temp);
+            navigator.clipboard.writeText(meetupInfo.bankAccount);
             setCopied(true); setTimeout(() => setCopied(false), 2000); showToast('계좌번호가 복사되었습니다.');
           };
           const handleCopyTopic = () => {
              const txt = `[${meetupInfo.topicTitle}]\n\n${meetupInfo.session2Topic}\n"${meetupInfo.session2Question}"`;
-             const temp = document.createElement("textarea"); temp.value = txt; document.body.appendChild(temp); temp.select();
-             document.execCommand('copy'); document.body.removeChild(temp); showToast("토픽이 복사되었습니다.");
+             navigator.clipboard.writeText(txt); showToast("토픽이 복사되었습니다.");
           };
 
           const approvedList = attendees.filter(a => a.status === 'approved');
@@ -197,7 +213,7 @@
 
           const handleApply = async (e) => {
             e.preventDefault();
-            if (!auth) return showToast("DB 연결 실패 (설정을 확인하세요)", 'error');
+            if (!auth) return showToast("DB 연결 실패", 'error');
             if (!name.trim()) return setErrorMsg('이름을 입력해주세요.');
             if (!isFull && !transferred) return setErrorMsg('참가비 송금 후 체크해주세요.');
             if (isFull && !contact.trim()) return setErrorMsg('대기 신청 시 연락처는 필수입니다.');
@@ -248,8 +264,10 @@
               showToast('승인 완료');
           };
 
+          // --- Render ---
           return (
             <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 relative">
+              {/* Header */}
               <header className="bg-indigo-600 text-white p-6 shadow-lg">
                 <div className="max-w-3xl mx-auto flex justify-between items-start">
                     <div>
@@ -265,6 +283,8 @@
               </header>
 
               <main className="max-w-3xl mx-auto p-4 space-y-6 -mt-6">
+                
+                {/* Info Cards */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
                     <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0"><Calendar size={24} /></div>
@@ -285,6 +305,87 @@
                   </div>
                 </div>
 
+                {/* --- Leader Section (복구됨) --- */}
+                {meetupInfo.leaderName && (
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50">
+                      <Award size={20} className="text-indigo-600" />
+                      <h2 className="font-bold text-lg text-indigo-900">Meet Your Host</h2>
+                    </div>
+                    <div className="p-6">
+                      <div className="flex flex-col md:flex-row gap-6 items-start">
+                         <div className="shrink-0 flex flex-col items-center justify-center w-full md:w-48 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <div className="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl overflow-hidden border-4 border-white shadow-md mb-3">
+                              <img src={meetupInfo.leaderImage} alt="Leader" className="w-full h-full object-cover"/>
+                            </div>
+                            <div className="text-center w-full">
+                              <p className="font-bold text-xl text-slate-800">{meetupInfo.leaderName}</p>
+                              <p className="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">Leader</p>
+                              <button onClick={() => setIsLeaderExpanded(!isLeaderExpanded)} className="w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg md:hidden">
+                                  {isLeaderExpanded ? '접기' : '소개 보기'} {isLeaderExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                              </button>
+                            </div>
+                         </div>
+                         <div className={`flex-1 flex flex-col justify-center space-y-5 ${isLeaderExpanded ? 'block' : 'hidden'} md:flex`}>
+                             <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{meetupInfo.leaderBio}</div>
+                             {meetupInfo.leaderTags && (
+                              <div>
+                                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Activity size={12}/> Background</h3>
+                                <div className="flex flex-wrap gap-2">
+                                  {meetupInfo.leaderTags.split(',').map((tag, idx) => (
+                                    <span key={idx} className="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm flex items-center gap-1.5">
+                                      <CheckCircle size={12} className="text-indigo-400"/> {tag.trim()}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                         </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- Topic Section (복구됨) --- */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                  <div className="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100">
+                    <MessageCircle size={20} className="text-indigo-600" />
+                    <h2 className="font-bold text-lg text-indigo-900">This Week's Topic</h2>
+                    <button onClick={handleCopyTopic} className="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-50"><Copy size={12}/> 토픽 복사</button>
+                  </div>
+                  <div className="p-5">
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+                      <h4 className="font-bold text-indigo-600 text-sm mb-2">Today's Discussion</h4>
+                      <p className="text-slate-700 text-sm italic whitespace-pre-wrap">"{meetupInfo.session2Question}"</p>
+                    </div>
+                    <button onClick={() => setShowCurriculum(!showCurriculum)} className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 mb-4">
+                      <span className="flex items-center gap-2"><BookOpen size={18}/> 상세 커리큘럼 확인하기</span>
+                      {showCurriculum ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                    </button>
+                    {showCurriculum && (
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-6">
+                        <div>
+                            <h3 className="font-bold text-indigo-800">{meetupInfo.part1Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part1Duration}</span></h3>
+                            <div className="mt-2 space-y-2">
+                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time1}</span> <span>{meetupInfo.p1Title1} - {meetupInfo.p1Desc1}</span></div>
+                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time2}</span> <span>{meetupInfo.p1Title2} - {meetupInfo.p1Desc2}</span></div>
+                            </div>
+                        </div>
+                        <div className="bg-amber-50 p-3 rounded text-amber-800 text-sm font-bold flex gap-2"><ArrowRightLeft size={16}/> {meetupInfo.breakTitle}: {meetupInfo.breakDesc}</div>
+                        <div>
+                            <h3 className="font-bold text-indigo-800">{meetupInfo.part2Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part2Duration}</span></h3>
+                            <div className="mt-2 space-y-2">
+                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time1}</span> <span>{meetupInfo.p2Title1} - {meetupInfo.p2Desc1}</span></div>
+                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time2}</span> <span>{meetupInfo.p2Title2} - {meetupInfo.p2Desc2}</span></div>
+                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time3}</span> <span>{meetupInfo.p2Title3} - {meetupInfo.p2Desc3}</span></div>
+                            </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Apply Form */}
                 <div className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${isFull ? 'border-orange-500' : 'border-indigo-500'}`}>
                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                      <Banknote className={isFull?"text-orange-500":"text-indigo-500"} /> 
@@ -316,14 +417,17 @@
                    </div>
 
                    <form onSubmit={handleApply} className="space-y-6">
+                      {/* 이름 */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><User size={16} className="text-indigo-600"/> 이름 (예금주)</label>
                         <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="ex) 홍길동" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
+                        {/* 디자인 복구: 안내 문구 */}
                         <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
                           <AlertCircle size={12} className="shrink-0 mt-0.5 text-indigo-500"/> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.
                         </p>
                       </div>
 
+                      {/* 연락처 (대기 신청 시) */}
                       {isFull && (
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Phone size={16} className="text-indigo-600"/> 연락처</label>
@@ -332,14 +436,17 @@
                         </div>
                       )}
 
+                      {/* 닉네임 */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Smile size={16} className="text-indigo-600"/> 영어 이름 (Nickname)</label>
                         <input type="text" value={nickname} onChange={e=>setNickname(e.target.value)} placeholder="ex) Gil" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
+                        {/* 디자인 복구: 안내 문구 */}
                         <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
                           <Info size={12} className="shrink-0 mt-0.5 text-slate-400"/> 참가 확정 명단에는 이 영어 이름으로 표시됩니다.
                         </p>
                       </div>
 
+                      {/* 성별 */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Users size={16} className="text-indigo-600"/> 성별</label>
                         <div className="flex gap-3">
@@ -352,6 +459,7 @@
                         </div>
                       </div>
 
+                      {/* 영어 레벨 (디자인 복구: 상세 박스형) */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Activity size={16} className="text-indigo-600"/> 영어 회화 실력</label>
                         <div className="grid gap-2">
@@ -373,6 +481,7 @@
                         <p className="text-xs text-slate-500 mt-2 flex gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 조 편성에 활용됩니다.</p>
                       </div>
 
+                      {/* 비밀번호 */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Lock size={16} className="text-indigo-600"/> 비밀번호 (4자리)</label>
                         <div className="flex gap-2 justify-center relative">
@@ -386,6 +495,7 @@
                         <p className="text-xs text-center text-slate-500 mt-2">신청 취소 시 본인 확인을 위해 사용됩니다.</p>
                       </div>
 
+                      {/* 하단 버튼 및 체크박스 */}
                       <div className="space-y-4">
                           {!isFull && (
                             <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
@@ -409,6 +519,7 @@
                    </form>
                 </div>
 
+                {/* Attendees List */}
                 <div className="bg-white rounded-xl shadow-sm border p-4">
                    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                        <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600"/> 참가자 명단 ({effectiveCount}/{currentMaxCapacity})</h2>
@@ -459,18 +570,40 @@
                    </div>
                 </div>
 
-                {meetupInfo.leaderName && (
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="bg-slate-50 p-4 border-b flex items-center gap-2"><Award size={20} className="text-indigo-600"/><h2 className="font-bold text-indigo-900">Host</h2></div>
-                    <div className="p-5 flex flex-col md:flex-row gap-4 items-center md:items-start">
-                        <img src={meetupInfo.leaderImage} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-slate-100 object-cover" alt="Leader"/>
-                        <div className="flex-1 text-center md:text-left">
-                            <p className="font-bold text-lg">{meetupInfo.leaderName}</p>
-                            <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{meetupInfo.leaderBio}</p>
+                {/* Rules & FAQ (복구됨) */}
+                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><ThumbsUp size={20}/> Club Etiquette</div>
+                    {[1,2,3].map(i => (
+                        <div key={i} className="border-b last:border-0">
+                            <button onClick={()=>setActiveEtiquette(activeEtiquette===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between">
+                                <span>{meetupInfo[`etiquette${i}Title`]}</span>
+                                <ChevronDown size={16} className={`transition-transform ${activeEtiquette===i?'rotate-180':''}`}/>
+                            </button>
+                            {activeEtiquette===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">{meetupInfo[`etiquette${i}Desc`]}</div>}
                         </div>
-                    </div>
-                  </div>
-                )}
+                    ))}
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><HelpCircle size={20}/> FAQ</div>
+                    {[1,2,3].map(i => (
+                        <div key={i} className="border-b last:border-0">
+                            <button onClick={()=>setActiveFaq(activeFaq===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between">
+                                <span>Q. {meetupInfo[`faq${i}Q`]}</span>
+                                <ChevronDown size={16} className={`transition-transform ${activeFaq===i?'rotate-180':''}`}/>
+                            </button>
+                            {activeFaq===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">A. {meetupInfo[`faq${i}A`]}</div>}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Footer Contact */}
+                <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center">
+                  <h3 className="font-bold text-indigo-900 mb-2">궁금한 점이 더 있으신가요?</h3>
+                  <a href={meetupInfo.openChatLink} target="_blank" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg shadow-sm transition-all active:scale-95">
+                    <MessageSquare size={18} /> 카카오톡 오픈채팅방 바로가기
+                  </a>
+                </div>
 
               </main>
 
