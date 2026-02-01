@@ -72,28 +72,23 @@
             appId: "YOUR_APP_ID"
         };
         
-        // Firebase 설정 확인 로직
-        const firebaseConfig = firebaseConfigObj;
-        const appId = 'default-app-id'; // 필요 시 수정 가능
-        const __initial_auth_token = undefined; // 필요 시 토큰 입력
-
         // Initialize Firebase
         let app, auth, db;
         try {
-            app = initializeApp(firebaseConfig);
+            app = initializeApp(firebaseConfigObj);
             auth = getAuth(app);
             db = getFirestore(app);
         } catch (e) {
-            console.error("Firebase 초기화 실패. 위 firebaseConfigObj 값을 확인해주세요.", e);
+            console.error("Firebase 초기화 실패. firebaseConfigObj 값을 확인해주세요.", e);
         }
 
-        // Collection References
+        const appId = 'default-app-id'; 
         const ATTENDEES_COLLECTION = 'english_meetup_attendees';
         const CONFIG_COLLECTION = 'english_meetup_config'; 
         const CONFIG_DOC_ID = 'meetup_info'; 
+        const ADMIN_PIN = 'wpxm123'; 
 
         function EnglishMeetupRSVP() {
-            // Firebase 설정이 누락되었을 때 보여줄 화면
             if (!app) {
                 return (
                     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
@@ -112,44 +107,31 @@
             const [user, setUser] = useState(null);
             const [attendees, setAttendees] = useState([]);
             
-            // --- Dynamic Meetup Info State ---
+            // Meetup Info State
             const [meetupInfo, setMeetupInfo] = useState({
-                // 1. Header Info
                 clubName: "Jett's English Crew",
                 meetupTitle: "성북 중상급 영어회화 & 토론",
                 meetupDesc: "일상 회화를 자유롭게 구사하는 것을 넘어서 더 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
-                
-                // 2. Basic Info
                 date: "2026년 2월 1일 (일)",
                 time: "오전 10:00 - 12:00",
                 locationName: "탐앤탐스 성신여대점",
                 locationAddress: "서울 성북구 동소문로22길 31",
                 locationLink: "https://map.naver.com/v5/search/탐앤탐스%20성신여대점",
-
-                // --- Curriculum Part 1 (Simplified for Mobile) ---
                 part1Title: "Part 1. Warm-up & Session 1",
                 part1Duration: "50 min",
                 p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화 (Ice-breaking)",
                 p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 심층 토론",
                 p1Time3: "", p1Title3: "", p1Desc3: "",
-
-                // --- Intermission ---
                 breakTitle: "Break (10 min)",
                 breakDesc: "Seat Change: 파트너 교체",
-
-                // --- Curriculum Part 2 (Simplified for Mobile) ---
                 part2Title: "Part 2. Session 2 & Wrap-up",
                 part2Duration: "50 min",
                 p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
                 p2Time2: "30'", p2Title2: "Reading & Discussion 2", p2Desc2: "두 번째 지문 독해 및 의견 교환",
                 p2Time3: "10'", p2Title3: "Closing", p2Desc3: "소감 공유 및 마무리",
-
-                // Topic
                 topicTitle: "Travel & Adventure",
                 session2Topic: "Travel Styles",
                 session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
-
-                // Settings
                 maxCapacity: 8,
                 fee: "1,000",
                 originalFee: "3,000", 
@@ -157,14 +139,10 @@
                 bankName: "카카오뱅크",
                 bankAccount: "3333-26-2044919",
                 accountHolder: "홍길동",
-
-                // Leader Info
                 leaderName: "Jett",
                 leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett&backgroundColor=c0aede", 
                 leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다. 호주 워홀과 TESOL 과정을 거쳤지만, 여전히 영어를 쓰고 배우는 과정 자체가 즐거운 연습생이죠.\n\n'완벽함'보다는 '소통의 즐거움'을 중요하게 생각합니다. 3년간 모임을 이끌어온 경험으로 편안한 분위기를 만들어 드릴게요. 부담 없이 오셔서 함께 떠들어요! 🌏✨",
                 leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+, 필리핀 어학연수, TOEFL/IELTS 경험",
-
-                // Etiquette
                 etiquetteTitle: "클럽 규칙",
                 etiquette1Title: "👂 서로를 존중하고 경청해요",
                 etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요. 무례한 언행이나 과도한 사생활 질문은 No!",
@@ -172,8 +150,6 @@
                 etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요. (한 턴에 2~3분 이내로 말하기)",
                 etiquette3Title: "🚫 순수한 학습 모임입니다",
                 etiquette3Desc: "종교 활동, 영업, 이성 교제 목적의 참여는 엄격히 금지하며 강퇴 사유가 됩니다.",
-
-                // FAQ & Contact
                 openChatLink: "https://open.kakao.com/o/sExample", 
                 faq1Q: "주차 가능한가요?",
                 faq1A: "탐앤탐스 건물 내 주차는 어렵습니다. 인근 공영주차장을 이용하시거나 대중교통 이용을 권장드립니다.",
@@ -183,7 +159,7 @@
                 faq3A: "가벼운 마음으로 오시면 됩니다. 필요한 학습 자료는 리더가 준비해 드립니다. 개인 필기구 정도만 챙겨주세요."
             });
 
-            // Form State
+            // State
             const [name, setName] = useState('');
             const [nickname, setNickname] = useState('');
             const [contact, setContact] = useState('');
@@ -192,55 +168,37 @@
             const [englishLevel, setEnglishLevel] = useState('mid'); 
             const [transferred, setTransferred] = useState(false);
             const [rememberMe, setRememberMe] = useState(false); 
-            const [isLeaderExpanded, setIsLeaderExpanded] = useState(false); // Leader Expand State
+            const [isLeaderExpanded, setIsLeaderExpanded] = useState(false);
             
-            // UI State
             const [isAdmin, setIsAdmin] = useState(false);
             const [adminPinInput, setAdminPinInput] = useState('');
             const [showAdminLogin, setShowAdminLogin] = useState(false);
             const [loading, setLoading] = useState(false);
             const [errorMsg, setErrorMsg] = useState('');
             const [copied, setCopied] = useState(false);
-            const [linkCopied, setLinkCopied] = useState(false);
             const [activeFaq, setActiveFaq] = useState(null); 
             const [activeEtiquette, setActiveEtiquette] = useState(null); 
             const [showCurriculum, setShowCurriculum] = useState(false); 
             const [dDay, setDDay] = useState('');
             const [isPwFocused, setIsPwFocused] = useState(false);
             const [expandedSections, setExpandedSections] = useState({
-                header: true,
-                basic: false,
-                curriculum: false,
-                topic: false,
-                leader: false,
-                rules: false
+                header: true, basic: false, curriculum: false, topic: false, leader: false, rules: false
             });
             
-            // Cancel Logic States
             const [isCancelMode, setIsCancelMode] = useState(false);
             const [showPasswordModal, setShowPasswordModal] = useState(false);
             const [cancelPasswordInput, setCancelPasswordInput] = useState('');
             const [targetDeleteId, setTargetDeleteId] = useState(null);
             
-            // Refs
             const cancelPwInputRef = useRef(null);
-
-            // Custom UI States
             const [modalConfig, setModalConfig] = useState(null); 
             const [toast, setToast] = useState(null); 
-            
-            // Edit Info Modal State
             const [isEditingInfo, setIsEditingInfo] = useState(false);
             const [editForm, setEditForm] = useState({});
 
-            // Constants
-            const ADMIN_PIN = 'wpxm123'; 
-
-            // --- Auth & Data Loading & Remember Me ---
+            // Auth & Load Data
             useEffect(() => {
                 let mounted = true;
-                
-                // Load saved user info
                 const savedInfo = localStorage.getItem('meetup_user_info');
                 if (savedInfo) {
                     try {
@@ -258,15 +216,11 @@
                 }
 
                 const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token); 
-                    } else {
-                    await signInAnonymously(auth);
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Authentication failed:", error);
                     }
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                }
                 };
                 initAuth();
                 
@@ -279,35 +233,28 @@
                 };
             }, []);
 
-            // Fetch Attendees
             useEffect(() => {
                 if (!user) return;
                 const q = collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION);
                 const unsubscribe = onSnapshot(q, (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                setAttendees(data);
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    setAttendees(data);
                 }, (err) => console.error("Attendees fetch error", err));
                 return () => unsubscribe();
             }, [user]);
 
-            // Fetch Meetup Info
             useEffect(() => {
                 if (!user) return;
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID);
                 const unsubscribe = onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setMeetupInfo(prev => ({ ...prev, ...data }));
-                }
+                    if (docSnap.exists()) {
+                        setMeetupInfo(prev => ({ ...prev, ...docSnap.data() }));
+                    }
                 }, (err) => console.error("Config fetch error", err));
                 return () => unsubscribe();
             }, [user]);
 
-            // Calculate D-Day
             useEffect(() => {
                 if (!meetupInfo.date) return;
                 try {
@@ -320,77 +267,43 @@
                         const today = new Date();
                         targetDate.setHours(0,0,0,0);
                         today.setHours(0,0,0,0);
-                        
                         const diffTime = targetDate - today;
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        
                         if (diffDays === 0) setDDay("D-Day");
                         else if (diffDays > 0) setDDay(`D-${diffDays}`);
                         else setDDay("End");
-                    } else {
-                        setDDay('');
-                    }
-                } catch(e) {
-                    console.error("Date parsing error", e);
-                    setDDay('');
-                }
+                    } else setDDay('');
+                } catch(e) { setDDay(''); }
             }, [meetupInfo.date]);
 
-            // --- Helper Functions ---
+            // Helper Functions
             const showToast = (message, type = 'success') => {
                 setToast({ message, type });
                 setTimeout(() => setToast(null), 3000);
             };
-
             const closeModal = () => setModalConfig(null);
-
-            const toggleFaq = (idx) => {
-                setActiveFaq(activeFaq === idx ? null : idx);
-            };
-
-            const toggleEtiquette = (idx) => {
-                setActiveEtiquette(activeEtiquette === idx ? null : idx);
-            };
-
+            const toggleFaq = (idx) => setActiveFaq(activeFaq === idx ? null : idx);
+            const toggleEtiquette = (idx) => setActiveEtiquette(activeEtiquette === idx ? null : idx);
+            
             const copyToClipboard = (text) => {
                 const textArea = document.createElement("textarea");
                 textArea.value = text;
                 document.body.appendChild(textArea);
                 textArea.select();
-                try {
-                document.execCommand('copy');
-                return true;
-                } catch (err) {
-                console.error('Copy failed', err);
-                return false;
-                } finally {
-                document.body.removeChild(textArea);
-                }
+                try { document.execCommand('copy'); return true; } 
+                catch (err) { return false; } 
+                finally { document.body.removeChild(textArea); }
             };
             
-            // CSV Download Logic
             const downloadAttendeesCSV = () => {
-                if (attendees.length === 0) {
-                showToast('다운로드할 데이터가 없습니다.', 'error');
-                return;
-                }
+                if (attendees.length === 0) { showToast('다운로드할 데이터가 없습니다.', 'error'); return; }
                 const BOM = '\uFEFF';
                 const headers = ['이름(Name)', '닉네임(Nickname)', '연락처(Contact)', '성별(Gender)', '레벨(Level)', '상태(Status)', '입금여부(Paid)', '신청시간(Time)'];
-                
                 const rows = attendees.map(a => {
-                const timeStr = a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleString() : '';
-                return [
-                    a.name,
-                    a.nickname,
-                    a.contact,
-                    a.gender,
-                    a.englishLevel,
-                    a.status,
-                    a.paid ? 'Yes' : 'No',
-                    timeStr
-                ].map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(',');
+                    const timeStr = a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleString() : '';
+                    return [a.name, a.nickname, a.contact, a.gender, a.englishLevel, a.status, a.paid ? 'Yes' : 'No', timeStr]
+                        .map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(',');
                 });
-
                 const csvContent = BOM + headers.join(',') + '\n' + rows.join('\n');
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
@@ -404,63 +317,42 @@
             
             const handleCopyTopic = () => {
                 const topicText = `[${meetupInfo.topicTitle}]\n\n${meetupInfo.session2Topic}\n"${meetupInfo.session2Question}"`;
-                if (copyToClipboard(topicText)) {
-                    showToast("토론 주제가 복사되었습니다!", "success");
-                } else {
-                    showToast("복사에 실패했습니다.", "error");
-                }
+                if (copyToClipboard(topicText)) showToast("토론 주제가 복사되었습니다!", "success");
+                else showToast("복사에 실패했습니다.", "error");
             };
 
             const handleCopyAccount = () => {
-                const accountText = meetupInfo.bankAccount;
-                if (copyToClipboard(accountText)) {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-                showToast('계좌번호가 복사되었습니다.', 'success');
-                } else {
-                showToast("복사에 실패했습니다.", "error");
-                }
+                if (copyToClipboard(meetupInfo.bankAccount)) {
+                    setCopied(true); setTimeout(() => setCopied(false), 2000);
+                    showToast('계좌번호가 복사되었습니다.', 'success');
+                } else showToast("복사에 실패했습니다.", "error");
             };
             
             const getISODateFromKoreanString = (koreanDateString) => {
                 try {
                     const matches = koreanDateString.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
                     if (matches) {
-                        const y = matches[1];
-                        const m = matches[2].padStart(2, '0');
-                        const d = matches[3].padStart(2, '0');
-                        return `${y}-${m}-${d}`;
+                        return `${matches[1]}-${matches[2].padStart(2, '0')}-${matches[3].padStart(2, '0')}`;
                     }
-                } catch (e) {
-                    return '';
-                }
+                } catch (e) { return ''; }
                 return '';
             };
             
             const handlePasswordChange = (e) => {
                 const val = e.target.value;
-                if (/[^0-9]/.test(val) && val !== '') {
-                    showToast("숫자만 입력 가능합니다.", "error");
-                    return;
-                }
+                if (/[^0-9]/.test(val) && val !== '') { showToast("숫자만 입력 가능합니다.", "error"); return; }
                 setPassword(val);
             };
 
             const handleImageUpload = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 500 * 1024) { 
-                showToast("이미지 파일 크기는 500KB 이하여야 합니다.", "error");
-                return;
-                }
+                if (file.size > 500 * 1024) { showToast("이미지 파일 크기는 500KB 이하여야 합니다.", "error"); return; }
                 const reader = new FileReader();
-                reader.onloadend = () => {
-                setEditForm(prev => ({ ...prev, leaderImage: reader.result }));
-                };
+                reader.onloadend = () => setEditForm(prev => ({ ...prev, leaderImage: reader.result }));
                 reader.readAsDataURL(file);
             };
 
-            // --- Filtering ---
             const approvedList = attendees.filter(a => a.status === 'approved');
             const pendingList = attendees.filter(a => a.status === 'pending');
             const paidPendingCount = pendingList.filter(a => a.paid).length;
@@ -468,7 +360,6 @@
             const currentMaxCapacity = parseInt(meetupInfo.maxCapacity) || 8;
             const isFull = effectiveCount >= currentMaxCapacity;
 
-            // --- Handlers ---
             const handleContactChange = (e) => {
                 let val = e.target.value.replace(/[^0-9]/g, '');
                 if (val.length > 11) val = val.slice(0, 11);
@@ -477,846 +368,291 @@
 
             const handleApply = async (e) => {
                 e.preventDefault();
-                
-                if (!name.trim()) {
-                setErrorMsg('이름(예금주)을 입력해주세요.');
-                return;
-                }
-
+                if (!name.trim()) { setErrorMsg('이름(예금주)을 입력해주세요.'); return; }
                 const isWaitlist = effectiveCount >= currentMaxCapacity;
-
-                if (!isWaitlist && !transferred) {
-                setErrorMsg('참가비를 송금한 후 체크해주세요.');
-                return;
-                }
-                
-                if (isWaitlist && !contact.trim()) {
-                    setErrorMsg('대기 신청 시 연락처 입력은 필수입니다.');
-                    return;
-                }
-
-                if (!password || password.length < 4) {
-                    setErrorMsg('신청 취소를 위한 비밀번호 4자리를 입력해주세요.');
-                    return;
-                }
+                if (!isWaitlist && !transferred) { setErrorMsg('참가비를 송금한 후 체크해주세요.'); return; }
+                if (isWaitlist && !contact.trim()) { setErrorMsg('대기 신청 시 연락처 입력은 필수입니다.'); return; }
+                if (!password || password.length < 4) { setErrorMsg('신청 취소를 위한 비밀번호 4자리를 입력해주세요.'); return; }
 
                 setLoading(true);
                 try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), {
-                    name: name.trim(),
-                    nickname: nickname.trim(),
-                    contact: contact.trim(),
-                    password: password.trim(),
-                    gender: gender,
-                    englishLevel: englishLevel,
-                    status: 'pending', 
-                    isWaitlistApply: isWaitlist,
-                    paid: !isWaitlist, 
-                    createdAt: serverTimestamp(),
-                    userId: user.uid
-                });
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), {
+                        name: name.trim(), nickname: nickname.trim(), contact: contact.trim(),
+                        password: password.trim(), gender, englishLevel,
+                        status: 'pending', isWaitlistApply: isWaitlist, paid: !isWaitlist, 
+                        createdAt: serverTimestamp(), userId: user.uid
+                    });
 
-                if (rememberMe) {
-                    localStorage.setItem('meetup_user_info', JSON.stringify({
-                        name, nickname, contact, password, gender, englishLevel
-                    }));
-                } else {
-                    localStorage.removeItem('meetup_user_info');
-                }
+                    if (rememberMe) localStorage.setItem('meetup_user_info', JSON.stringify({ name, nickname, contact, password, gender, englishLevel }));
+                    else localStorage.removeItem('meetup_user_info');
 
-                setName('');
-                setNickname('');
-                setContact('');
-                setPassword('');
-                setGender('female');
-                setEnglishLevel('mid');
-                setTransferred(false);
-                setErrorMsg('');
-                
-                if (isWaitlist) {
-                    showToast('대기자로 신청되었습니다! 빈 자리가 생기면 연락드리겠습니다.', 'info');
-                } else {
-                    showToast('신청이 완료되었습니다! 명단에서 상태를 확인해주세요.', 'success');
-                }
-                } catch (err) {
-                console.error(err);
-                showToast('신청 중 오류가 발생했습니다.', 'error');
-                } finally {
-                setLoading(false);
-                }
+                    setName(''); setNickname(''); setContact(''); setPassword('');
+                    setGender('female'); setEnglishLevel('mid'); setTransferred(false); setErrorMsg('');
+                    showToast(isWaitlist ? '대기자로 신청되었습니다! 연락드리겠습니다.' : '신청이 완료되었습니다!', isWaitlist ? 'info' : 'success');
+                } catch (err) { console.error(err); showToast('신청 중 오류가 발생했습니다.', 'error'); } 
+                finally { setLoading(false); }
             };
 
-            // --- Admin & Cancellation Actions ---
             const executeApprove = async (id) => {
                 try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), {
-                    status: 'approved',
-                    paid: true
-                });
-                showToast('승인 처리가 완료되었습니다.', 'success');
-                closeModal();
-                } catch (err) {
-                console.error(err);
-                showToast('승인 처리 중 오류가 발생했습니다.', 'error');
-                }
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), { status: 'approved', paid: true });
+                    showToast('승인 처리가 완료되었습니다.', 'success'); closeModal();
+                } catch (err) { showToast('오류가 발생했습니다.', 'error'); }
             };
 
             const handleApproveClick = (id) => {
                 if (approvedList.length >= currentMaxCapacity) {
-                setModalConfig({
-                    title: '정원 초과 승인',
-                    message: `현재 확정된 인원이 이미 정원(${currentMaxCapacity}명)입니다. 그래도 추가 승인하시겠습니까?`,
-                    confirmText: '추가 승인',
-                    isDestructive: false,
-                    onConfirm: () => executeApprove(id)
-                });
-                } else {
-                executeApprove(id);
-                }
+                    setModalConfig({
+                        title: '정원 초과 승인',
+                        message: `현재 확정 인원이 정원(${currentMaxCapacity}명)입니다. 추가 승인하시겠습니까?`,
+                        confirmText: '추가 승인', isDestructive: false, onConfirm: () => executeApprove(id)
+                    });
+                } else executeApprove(id);
             };
 
             const executeDelete = async (id) => {
                 try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id));
-                showToast('신청이 취소(삭제)되었습니다.', 'success');
-                closeModal();
-                setShowPasswordModal(false);
-                setCancelPasswordInput('');
-                setIsCancelMode(false); 
-                } catch (err) {
-                console.error(err);
-                showToast('삭제 중 오류가 발생했습니다.', 'error');
-                }
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id));
+                    showToast('삭제되었습니다.', 'success'); closeModal(); setShowPasswordModal(false); setCancelPasswordInput(''); setIsCancelMode(false);
+                } catch (err) { showToast('오류가 발생했습니다.', 'error'); }
             };
 
             const executeResetAttendees = async () => {
-                setLoading(true); 
+                setLoading(true);
                 try {
-                const batch = writeBatch(db);
-                attendees.forEach(att => {
-                    const ref = doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, att.id);
-                    batch.delete(ref);
-                });
-                await batch.commit();
-                showToast('참가자 명단이 초기화되었습니다.', 'success');
-                closeModal();
-                } catch (err) {
-                console.error(err);
-                showToast('초기화 중 오류가 발생했습니다.', 'error');
-                } finally {
-                setLoading(false);
-                }
+                    const batch = writeBatch(db);
+                    attendees.forEach(att => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, att.id)));
+                    await batch.commit();
+                    showToast('초기화되었습니다.', 'success'); closeModal();
+                } catch (err) { showToast('오류가 발생했습니다.', 'error'); } 
+                finally { setLoading(false); }
             };
 
             const handleDeleteRequest = (id) => {
                 if (isAdmin) {
-                    setModalConfig({
-                        title: '참가 내역 삭제',
-                        message: '관리자 권한으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
-                        confirmText: '삭제하기',
-                        isDestructive: true,
-                        onConfirm: () => executeDelete(id)
-                    });
+                    setModalConfig({ title: '참가 내역 삭제', message: '관리자 권한으로 삭제하시겠습니까?', confirmText: '삭제하기', isDestructive: true, onConfirm: () => executeDelete(id) });
                 } else {
-                    setTargetDeleteId(id);
-                    setCancelPasswordInput('');
-                    setShowPasswordModal(true);
+                    setTargetDeleteId(id); setCancelPasswordInput(''); setShowPasswordModal(true);
                 }
             };
 
             const handleResetClick = () => {
-                setModalConfig({
-                title: '참가자 명단 초기화',
-                message: '정말로 모든 참가자 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 다음 일정을 위해 명단을 비울 때 사용합니다.',
-                confirmText: '모두 삭제 및 초기화',
-                isDestructive: true,
-                onConfirm: executeResetAttendees
-                });
+                setModalConfig({ title: '명단 초기화', message: '정말로 모든 데이터를 삭제하시겠습니까?', confirmText: '초기화', isDestructive: true, onConfirm: executeResetAttendees });
             };
             
             const verifyCancelPassword = () => {
-                const targetAttendee = attendees.find(a => a.id === targetDeleteId);
-                if (targetAttendee && targetAttendee.password === cancelPasswordInput) {
-                    executeDelete(targetDeleteId);
-                } else {
-                    showToast('비밀번호가 일치하지 않습니다.', 'error');
-                    setCancelPasswordInput('');
-                    if (cancelPwInputRef.current) {
-                        cancelPwInputRef.current.focus();
-                    }
+                const target = attendees.find(a => a.id === targetDeleteId);
+                if (target && target.password === cancelPasswordInput) executeDelete(targetDeleteId);
+                else {
+                    showToast('비밀번호가 일치하지 않습니다.', 'error'); setCancelPasswordInput('');
+                    if (cancelPwInputRef.current) cancelPwInputRef.current.focus();
                 }
             };
 
             const toggleAdmin = () => {
-                if (isAdmin) {
-                setIsAdmin(false);
-                setAdminPinInput('');
-                setIsCancelMode(false);
-                showToast('관리자 모드가 종료되었습니다.', 'info');
-                } else {
-                setShowAdminLogin(!showAdminLogin);
-                }
+                if (isAdmin) { setIsAdmin(false); setAdminPinInput(''); setIsCancelMode(false); showToast('관리자 모드 종료', 'info'); } 
+                else setShowAdminLogin(!showAdminLogin);
             };
 
             const verifyPin = () => {
-                if (adminPinInput === ADMIN_PIN) {
-                setIsAdmin(true);
-                setShowAdminLogin(false);
-                setAdminPinInput('');
-                showToast('관리자님 환영합니다.', 'success');
-                } else {
-                showToast('비밀번호가 틀렸습니다.', 'error');
-                }
+                if (adminPinInput === ADMIN_PIN) { setIsAdmin(true); setShowAdminLogin(false); setAdminPinInput(''); showToast('관리자님 환영합니다.', 'success'); } 
+                else showToast('비밀번호 오류', 'error');
             };
 
-            const openEditModal = () => {
-                setEditForm({ ...meetupInfo });
-                setIsEditingInfo(true);
-            };
-
-            const toggleEditSection = (section) => {
-                setExpandedSections(prev => ({
-                    ...prev,
-                    [section]: !prev[section]
-                }));
-            };
+            const openEditModal = () => { setEditForm({ ...meetupInfo }); setIsEditingInfo(true); };
+            const toggleEditSection = (section) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
             const saveInfo = async () => {
                 try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), editForm);
-                setIsEditingInfo(false);
-                showToast('모임 설정이 수정되었습니다.', 'success');
-                } catch (err) {
-                console.error(err);
-                showToast('설정 수정 중 오류가 발생했습니다.', 'error');
-                }
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), editForm);
+                    setIsEditingInfo(false); showToast('설정이 수정되었습니다.', 'success');
+                } catch (err) { showToast('오류가 발생했습니다.', 'error'); }
             };
 
             const EditSectionHeader = ({ title, sectionKey }) => (
-                <button 
-                    onClick={() => toggleEditSection(sectionKey)}
-                    className="w-full flex items-center justify-between p-3 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                    <span>{title}</span>
-                    {expandedSections[sectionKey] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                <button onClick={() => toggleEditSection(sectionKey)} className="w-full flex items-center justify-between p-3 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 hover:bg-slate-100 transition-colors">
+                    <span>{title}</span> {expandedSections[sectionKey] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
             );
 
             return (
                 <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 relative">
-                {/* Toast Notification */}
-                {toast && (
-                    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-5 duration-300 w-full max-w-sm px-4">
-                    <div className={`shadow-lg rounded-lg p-4 flex items-center gap-3 text-white font-medium ${
-                        toast.type === 'error' ? 'bg-red-500' : 
-                        toast.type === 'info' ? 'bg-indigo-500' : 'bg-emerald-500'
-                    }`}>
-                        {toast.type === 'error' ? <AlertCircle size={20} /> : 
-                        toast.type === 'info' ? <Info size={20} /> : <CheckCircle size={20} />}
-                        {toast.message}
-                    </div>
-                    </div>
-                )}
-
-                {/* Confirmation Modal (Admin) */}
-                {modalConfig && (
-                    <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-100 transition-all">
-                        <div className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className={`p-3 rounded-full ${modalConfig.isDestructive ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                            <AlertTriangle size={24} />
+                    {toast && (
+                        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-5 w-full max-w-sm px-4">
+                            <div className={`shadow-lg rounded-lg p-4 flex items-center gap-3 text-white font-medium ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'info' ? 'bg-indigo-500' : 'bg-emerald-500'}`}>
+                                {toast.type === 'error' ? <AlertCircle size={20} /> : toast.type === 'info' ? <Info size={20} /> : <CheckCircle size={20} />}
+                                {toast.message}
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">{modalConfig.title}</h3>
                         </div>
-                        <p className="text-slate-600 mb-6 leading-relaxed">
-                            {modalConfig.message}
-                        </p>
-                        <div className="flex gap-3">
-                            <button 
-                            onClick={closeModal}
-                            className="flex-1 py-2.5 px-4 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-colors"
-                            >
-                            취소
-                            </button>
-                            <button 
-                            onClick={modalConfig.onConfirm}
-                            className={`flex-1 py-2.5 px-4 text-white font-bold rounded-lg transition-colors shadow-sm ${
-                                modalConfig.isDestructive ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'
-                            }`}
-                            >
-                            {modalConfig.confirmText}
-                            </button>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                )}
-
-                {/* User Cancel Password Modal */}
-                {showPasswordModal && (
-                    <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-100 transition-all">
-                        <div className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-3 rounded-full bg-slate-100 text-slate-600">
-                            <Lock size={24} />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">신청 취소 확인</h3>
-                        </div>
-                        <p className="text-slate-600 mb-4 text-sm">
-                            신청 시 설정한 비밀번호 4자리를 입력해주세요.
-                        </p>
-                        
-                        <div className="relative flex gap-3 justify-center mb-6">
-                            {[0, 1, 2, 3].map((i) => {
-                            const isActive = isPwFocused && cancelPasswordInput.length === i;
-                            return (
-                                <div key={i} className={`w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xl font-bold transition-all ${
-                                    isActive 
-                                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200' 
-                                    : 'border-slate-200 bg-white text-slate-700'
-                                }`}>
-                                {cancelPasswordInput.length > i ? cancelPasswordInput[i] : ''}
-                                </div>
-                            );
-                            })}
-                            <input 
-                            ref={cancelPwInputRef}
-                            type="tel"
-                            maxLength={4}
-                            value={cancelPasswordInput}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9]/g, '');
-                                setCancelPasswordInput(val);
-                            }}
-                            onFocus={() => setIsPwFocused(true)} 
-                            onBlur={() => setIsPwFocused(false)}
-                            onClick={() => setCancelPasswordInput('')} 
-                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            autoFocus
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            />
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button 
-                            onClick={() => setShowPasswordModal(false)}
-                            className="flex-1 py-2.5 px-4 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-colors"
-                            >
-                            닫기
-                            </button>
-                            <button 
-                            onClick={verifyCancelPassword}
-                            className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors shadow-sm"
-                            >
-                            취소하기
-                            </button>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                )}
-
-                {/* Edit Info Modal */}
-                {isEditingInfo && (
-                    <div className="fixed inset-0 bg-black/60 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
-                        <h3 className="font-bold text-lg flex items-center gap-2">
-                            <Settings size={20} className="text-indigo-600" /> 모임 정보 수정
-                        </h3>
-                        <button onClick={() => setIsEditingInfo(false)} className="text-slate-400 hover:text-slate-600">
-                            <XCircle size={24} />
-                        </button>
-                        </div>
-                        
-                        <div className="overflow-y-auto">
-                           <div className="border-b border-slate-100">
-                             <EditSectionHeader title="1. 헤더 설정 (Header)" sectionKey="header" />
-                             {expandedSections.header && (
-                                <div className="p-4 space-y-3 bg-white">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">모임 이름 (Club Name)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.clubName || ''} onChange={e => setEditForm({...editForm, clubName: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">메인 타이틀 (Title)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.meetupTitle || ''} onChange={e => setEditForm({...editForm, meetupTitle: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">모임 설명 (Description)</label>
-                                        <textarea className="w-full p-2 border rounded h-16" value={editForm.meetupDesc || ''} onChange={e => setEditForm({...editForm, meetupDesc: e.target.value})} />
-                                    </div>
-                                </div>
-                             )}
-                           </div>
-
-                           <div className="border-b border-slate-100">
-                            <EditSectionHeader title="2. 기본 정보 (Date, Time, Location)" sectionKey="basic" />
-                            {expandedSections.basic && (
-                                <div className="p-4 space-y-3 bg-white">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-1">날짜 (Date)</label>
-                                            <div className="flex gap-2 items-center">
-                                                <input 
-                                                    type="text" 
-                                                    className="flex-1 p-2 border rounded" 
-                                                    value={editForm.date || ''} 
-                                                    onChange={e => setEditForm({...editForm, date: e.target.value})} 
-                                                />
-                                                <div className="relative">
-                                                    <input 
-                                                        type="date" 
-                                                        className="absolute opacity-0 inset-0 w-full h-full cursor-pointer"
-                                                        value={getISODateFromKoreanString(editForm.date || '')}
-                                                        onChange={(e) => {
-                                                            if(!e.target.value) return;
-                                                            const d = new Date(e.target.value);
-                                                            const days = ['일', '월', '화', '수', '목', '금', '토'];
-                                                            const formatted = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
-                                                            setEditForm(prev => ({...prev, date: formatted}));
-                                                        }}
-                                                    />
-                                                    <button className="p-2 bg-slate-100 border rounded text-slate-600 hover:bg-slate-200">
-                                                        <Calendar size={18} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-1">시간 (Time)</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={editForm.time || ''} onChange={e => setEditForm({...editForm, time: e.target.value})} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">장소명 (Place Name)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.locationName || ''} onChange={e => setEditForm({...editForm, locationName: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">주소 (Address)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.locationAddress || ''} onChange={e => setEditForm({...editForm, locationAddress: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">지도 링크 (Map URL)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.locationLink || ''} onChange={e => setEditForm({...editForm, locationLink: e.target.value})} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-1">정원 (Max)</label>
-                                            <input type="number" className="w-full p-2 border rounded" value={editForm.maxCapacity || 8} onChange={e => setEditForm({...editForm, maxCapacity: e.target.value})} />
-                                         </div>
-                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-1">참가비 (Fee)</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={editForm.fee || ''} onChange={e => setEditForm({...editForm, fee: e.target.value})} />
-                                         </div>
-                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-1">기존 참가비</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={editForm.originalFee || ''} onChange={e => setEditForm({...editForm, originalFee: e.target.value})} />
-                                         </div>
-                                    </div>
-                                    <div>
-                                         <label className="block text-xs font-bold text-slate-500 mb-1">계좌번호 (Bank Account)</label>
-                                         <div className="flex gap-2">
-                                            <input type="text" className="flex-1 p-2 border rounded" placeholder="은행명" value={editForm.bankName || ''} onChange={e => setEditForm({...editForm, bankName: e.target.value})} />
-                                            <input type="text" className="flex-[2] p-2 border rounded" placeholder="계좌번호" value={editForm.bankAccount || ''} onChange={e => setEditForm({...editForm, bankAccount: e.target.value})} />
-                                            <input type="text" className="flex-1 p-2 border rounded" placeholder="예금주" value={editForm.accountHolder || ''} onChange={e => setEditForm({...editForm, accountHolder: e.target.value})} />
-                                         </div>
-                                    </div>
-                                </div>
-                            )}
-                           </div>
-
-                           <div className="border-b border-slate-100">
-                            <EditSectionHeader title="3. 커리큘럼 (Curriculum)" sectionKey="curriculum" />
-                            {expandedSections.curriculum && (
-                                <div className="p-4 space-y-4 bg-white">
-                                    <div className="border border-indigo-100 rounded p-3 bg-indigo-50/30">
-                                        <h4 className="text-sm font-bold text-indigo-700 mb-2">Part 1</h4>
-                                        <div className="grid grid-cols-3 gap-2 mb-2">
-                                            <input type="text" className="col-span-2 p-1.5 border rounded text-sm" placeholder="Title" value={editForm.part1Title || ''} onChange={e => setEditForm({...editForm, part1Title: e.target.value})} />
-                                            <input type="text" className="p-1.5 border rounded text-sm" placeholder="Duration" value={editForm.part1Duration || ''} onChange={e => setEditForm({...editForm, part1Duration: e.target.value})} />
-                                        </div>
-                                        {[1, 2, 3].map(i => (
-                                            <div key={`p1-${i}`} className="mb-2 last:mb-0 border-t border-slate-200 pt-2 mt-2">
-                                                <div className="flex gap-2 mb-1">
-                                                    <input type="text" className="w-16 p-1 border rounded text-xs" placeholder="Time" value={editForm[`p1Time${i}`] || ''} onChange={e => setEditForm({...editForm, [`p1Time${i}`]: e.target.value})} />
-                                                    <input type="text" className="flex-1 p-1 border rounded text-xs font-bold" placeholder="Item Title" value={editForm[`p1Title${i}`] || ''} onChange={e => setEditForm({...editForm, [`p1Title${i}`]: e.target.value})} />
-                                                </div>
-                                                <textarea className="w-full p-1 border rounded text-xs h-12" placeholder="Description" value={editForm[`p1Desc${i}`] || ''} onChange={e => setEditForm({...editForm, [`p1Desc${i}`]: e.target.value})} />
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="border border-amber-100 rounded p-3 bg-amber-50/30">
-                                        <h4 className="text-sm font-bold text-amber-700 mb-2">Intermission</h4>
-                                        <input type="text" className="w-full p-1.5 border rounded text-sm mb-1" placeholder="Break Title" value={editForm.breakTitle || ''} onChange={e => setEditForm({...editForm, breakTitle: e.target.value})} />
-                                        <textarea className="w-full p-1.5 border rounded text-sm h-10" placeholder="Break Description" value={editForm.breakDesc || ''} onChange={e => setEditForm({...editForm, breakDesc: e.target.value})} />
-                                    </div>
-
-                                    <div className="border border-indigo-100 rounded p-3 bg-indigo-50/30">
-                                        <h4 className="text-sm font-bold text-indigo-700 mb-2">Part 2</h4>
-                                        <div className="grid grid-cols-3 gap-2 mb-2">
-                                            <input type="text" className="col-span-2 p-1.5 border rounded text-sm" placeholder="Title" value={editForm.part2Title || ''} onChange={e => setEditForm({...editForm, part2Title: e.target.value})} />
-                                            <input type="text" className="p-1.5 border rounded text-sm" placeholder="Duration" value={editForm.part2Duration || ''} onChange={e => setEditForm({...editForm, part2Duration: e.target.value})} />
-                                        </div>
-                                        {[1, 2, 3].map(i => (
-                                            <div key={`p2-${i}`} className="mb-2 last:mb-0 border-t border-slate-200 pt-2 mt-2">
-                                                <div className="flex gap-2 mb-1">
-                                                    <input type="text" className="w-16 p-1 border rounded text-xs" placeholder="Time" value={editForm[`p2Time${i}`] || ''} onChange={e => setEditForm({...editForm, [`p2Time${i}`]: e.target.value})} />
-                                                    <input type="text" className="flex-1 p-1 border rounded text-xs font-bold" placeholder="Item Title" value={editForm[`p2Title${i}`] || ''} onChange={e => setEditForm({...editForm, [`p2Title${i}`]: e.target.value})} />
-                                                </div>
-                                                <textarea className="w-full p-1 border rounded text-xs h-12" placeholder="Description" value={editForm[`p2Desc${i}`] || ''} onChange={e => setEditForm({...editForm, [`p2Desc${i}`]: e.target.value})} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                           </div>
-
-                           <div className="border-b border-slate-100">
-                            <EditSectionHeader title="4. 주제 (Topic)" sectionKey="topic" />
-                            {expandedSections.topic && (
-                                <div className="p-4 space-y-3 bg-white">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">대주제 (Main Theme)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.topicTitle || ''} onChange={e => setEditForm({...editForm, topicTitle: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">토론 주제 (Session 2 Topic)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.session2Topic || ''} onChange={e => setEditForm({...editForm, session2Topic: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">토론 질문 (Discussion Question)</label>
-                                        <textarea className="w-full p-2 border rounded h-20" value={editForm.session2Question || ''} onChange={e => setEditForm({...editForm, session2Question: e.target.value})} />
-                                    </div>
-                                </div>
-                            )}
-                           </div>
-
-                           <div className="border-b border-slate-100">
-                            <EditSectionHeader title="5. 리더 및 기타 (Leader, Etiquette, FAQ)" sectionKey="leader" />
-                            {expandedSections.leader && (
-                                <div className="p-4 space-y-3 bg-white">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">리더 이름</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.leaderName || ''} onChange={e => setEditForm({...editForm, leaderName: e.target.value})} />
-                                    </div>
-                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">리더 이미지 (URL 또는 파일 업로드)</label>
-                                        <div className="flex flex-col gap-2">
-                                            <input 
-                                                type="text" 
-                                                className="w-full p-2 border rounded text-xs" 
-                                                placeholder="이미지 URL 입력"
-                                                value={editForm.leaderImage || ''} 
-                                                onChange={e => setEditForm({...editForm, leaderImage: e.target.value})} 
-                                            />
-                                            <div className="flex items-center gap-2">
-                                                <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2 px-3 rounded flex items-center gap-1 transition-colors">
-                                                    <Upload size={14} />
-                                                    파일 선택
-                                                    <input 
-                                                        type="file" 
-                                                        accept="image/*" 
-                                                        className="hidden" 
-                                                        onChange={handleImageUpload}
-                                                    />
-                                                </label>
-                                                <span className="text-[10px] text-slate-400">max 500KB</span>
-                                            </div>
-                                             {editForm.leaderImage && (
-                                                <div className="mt-1 w-16 h-16 rounded-full overflow-hidden border border-slate-200">
-                                                    <img src={editForm.leaderImage} alt="Preview" className="w-full h-full object-cover" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">리더 소개 (Bio)</label>
-                                        <textarea className="w-full p-2 border rounded h-24" value={editForm.leaderBio || ''} onChange={e => setEditForm({...editForm, leaderBio: e.target.value})} />
-                                    </div>
-                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">리더 태그 (콤마로 구분)</label>
-                                        <input type="text" className="w-full p-2 border rounded" value={editForm.leaderTags || ''} onChange={e => setEditForm({...editForm, leaderTags: e.target.value})} />
-                                    </div>
-                                    
-                                    <div className="pt-2 border-t border-slate-100 mt-2">
-                                        <label className="block text-xs font-bold text-slate-500 mb-2">FAQ 수정</label>
-                                         {[1, 2, 3].map(i => (
-                                            <div key={`faq-${i}`} className="mb-2">
-                                                <input type="text" className="w-full p-1.5 border rounded text-sm mb-1 font-bold" placeholder={`Q${i}`} value={editForm[`faq${i}Q`] || ''} onChange={e => setEditForm({...editForm, [`faq${i}Q`]: e.target.value})} />
-                                                <textarea className="w-full p-1.5 border rounded text-sm h-12" placeholder={`A${i}`} value={editForm[`faq${i}A`] || ''} onChange={e => setEditForm({...editForm, [`faq${i}A`]: e.target.value})} />
-                                            </div>
-                                         ))}
-                                    </div>
-                                </div>
-                            )}
-                           </div>
-                        </div>
-
-                        <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-2 shrink-0">
-                          <button 
-                            onClick={() => setIsEditingInfo(false)}
-                            className="flex-1 py-3 bg-white border border-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-50"
-                          >
-                            취소
-                          </button>
-                          <button 
-                            onClick={saveInfo}
-                            className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2"
-                          >
-                            <Save size={18} /> 설정 저장
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                )}
-
-                {/* Header */}
-                <header className="bg-indigo-600 text-white p-6 shadow-lg">
-                    <div className="max-w-3xl mx-auto flex justify-between items-start">
-                    <div>
-                        <h1 className="text-3xl font-bold mb-2">{meetupInfo.clubName}</h1>
-                        <p className="opacity-90 font-medium text-lg mb-2 flex items-center gap-2">
-                        {dDay && (
-                            <span className={`text-xs font-extrabold px-2 py-1 rounded shadow-sm ${dDay === 'End' ? 'bg-slate-200 text-slate-500' : 'bg-white text-red-600'}`}>
-                                {dDay}
-                            </span>
-                        )}
-                        {meetupInfo.meetupTitle}
-                        </p>
-                        <p className="text-indigo-100 text-sm leading-relaxed max-w-xl">
-                        {meetupInfo.meetupDesc}
-                        </p>
-                    </div>
-                    {isAdmin && (
-                        <button 
-                        onClick={openEditModal}
-                        className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm transition-colors"
-                        title="모임 정보 및 설정 수정"
-                        >
-                        <Settings size={20} />
-                        </button>
                     )}
-                    </div>
-                </header>
 
-                <main className="max-w-3xl mx-auto p-4 space-y-6 -mt-6">
-                    
-                    {/* Info Cards */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0">
-                        <Calendar size={24} />
-                        </div>
-                        <div>
-                        <h3 className="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3>
-                        <p className="font-bold text-lg">{meetupInfo.date}</p>
-                        <p className="text-indigo-600 font-medium">{meetupInfo.time}</p>
-                        </div>
-                    </div>
-                    
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="bg-emerald-100 p-3 rounded-full text-emerald-600 shrink-0">
-                        <MapPin size={24} />
-                        </div>
-                        <div className="flex-1">
-                        <h3 className="font-semibold text-slate-500 text-sm uppercase">Location</h3>
-                        <p className="font-bold text-lg">{meetupInfo.locationName}</p>
-                        <p className="text-slate-500 text-sm mb-2">{meetupInfo.locationAddress}</p>
-                        <a 
-                            href={meetupInfo.locationLink || "#"}
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100 transition-colors"
-                        >
-                            <ExternalLink size={12} /> 네이버 지도 보기
-                        </a>
-                        </div>
-                    </div>
-                    </div>
-
-                    {/* Leader Profile Section */}
-                    {meetupInfo.leaderName && (
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50">
-                        <Award size={20} className="text-indigo-600" />
-                        <h2 className="font-bold text-lg text-indigo-900">Meet Your Host</h2>
-                        </div>
-                        
-                        <div className="p-6">
-                        <div className="flex flex-col md:flex-row gap-6 items-start">
-                            {/* Basic Info (Always Visible) */}
-                            <div className="shrink-0 flex flex-col items-center justify-center w-full md:w-48 bg-slate-50 rounded-xl p-4 border border-slate-100 transition-all">
-                                <div className="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl overflow-hidden border-4 border-white shadow-md mb-3">
-                                <img 
-                                    src={meetupInfo.leaderImage || "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett"} 
-                                    alt="Leader" 
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.target.onerror = null; 
-                                        e.target.src="https://api.dicebear.com/9.x/avataaars/svg?seed=Fallback";
-                                    }}
-                                />
+                    {modalConfig && (
+                        <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-in fade-in">
+                            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className={`p-3 rounded-full ${modalConfig.isDestructive ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}><AlertTriangle size={24} /></div>
+                                    <h3 className="text-lg font-bold text-slate-900">{modalConfig.title}</h3>
                                 </div>
-                                <div className="text-center w-full">
-                                <p className="font-bold text-xl text-slate-800 break-words">{meetupInfo.leaderName}</p>
-                                <p className="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">
-                                    English Meetup Leader
-                                </p>
-                                
-                                {/* Toggle Button - HIDDEN on Desktop */}
-                                <button 
-                                    onClick={() => setIsLeaderExpanded(!isLeaderExpanded)}
-                                    className="w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 bg-white border border-slate-200 rounded-lg hover:bg-indigo-50 transition-colors md:hidden"
-                                >
-                                    {isLeaderExpanded ? '접기' : '소개 보기'}
-                                    {isLeaderExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
-                                </button>
+                                <p className="text-slate-600 mb-6">{modalConfig.message}</p>
+                                <div className="flex gap-3">
+                                    <button onClick={closeModal} className="flex-1 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200">취소</button>
+                                    <button onClick={modalConfig.onConfirm} className={`flex-1 py-2.5 text-white font-bold rounded-lg ${modalConfig.isDestructive ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'}`}>{modalConfig.confirmText}</button>
                                 </div>
                             </div>
+                        </div>
+                    )}
 
-                            {/* Detailed Info (Collapsible on Mobile, Always Visible on Desktop) */}
-                            <div className={`flex-1 flex flex-col justify-center space-y-5 ${isLeaderExpanded ? 'block animate-in fade-in slide-in-from-top-2 duration-300' : 'hidden'} md:flex md:visible md:animate-none`}>
-                                <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap pt-2 md:pt-0">
-                                    {meetupInfo.leaderBio}
-                                </div>
-
-                                {meetupInfo.leaderTags && (
-                                <div>
-                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                    <Activity size={12}/> Background & Experience
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                    {meetupInfo.leaderTags.split(',').map((tag, idx) => (
-                                        <span key={idx} className="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm flex items-center gap-1.5 transition-transform hover:-translate-y-0.5">
-                                        {idx === 0 ? <Award size={12} className="text-amber-500"/> : <CheckCircle size={12} className="text-indigo-400"/>}
-                                        {tag.trim()}
-                                        </span>
+                    {showPasswordModal && (
+                        <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-in fade-in">
+                            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden p-6">
+                                <div className="flex items-center gap-3 mb-4"><div className="p-3 rounded-full bg-slate-100 text-slate-600"><Lock size={24} /></div><h3 className="text-lg font-bold text-slate-900">신청 취소 확인</h3></div>
+                                <p className="text-slate-600 mb-4 text-sm">신청 시 설정한 비밀번호 4자리를 입력해주세요.</p>
+                                <div className="relative flex gap-3 justify-center mb-6">
+                                    {[0, 1, 2, 3].map((i) => (
+                                        <div key={i} className={`w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xl font-bold ${isPwFocused && cancelPasswordInput.length === i ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200'}`}>
+                                            {cancelPasswordInput.length > i ? cancelPasswordInput[i] : ''}
+                                        </div>
                                     ))}
-                                    </div>
+                                    <input ref={cancelPwInputRef} type="tel" maxLength={4} value={cancelPasswordInput} onChange={(e) => setCancelPasswordInput(e.target.value.replace(/[^0-9]/g, ''))} onFocus={() => setIsPwFocused(true)} onBlur={() => setIsPwFocused(false)} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" autoFocus inputMode="numeric" pattern="[0-9]*" />
                                 </div>
-                                )}
+                                <div className="flex gap-3"><button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-lg">닫기</button><button onClick={verifyCancelPassword} className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-lg">취소하기</button></div>
                             </div>
                         </div>
-                        </div>
-                    </div>
                     )}
 
-                    {/* Topic Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100">
-                        <MessageCircle size={20} className="text-indigo-600" />
-                        <h2 className="font-bold text-lg text-indigo-900">This Week's Topic</h2>
-                        <button 
-                            onClick={handleCopyTopic}
-                            className="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-50 transition-colors"
-                        >
-                        <Copy size={12} /> 토픽 복사
-                        </button>
-                    </div>
-                    
-                    <div className="p-5">
-                        {/* Discussion Questions Box */}
-                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-8">
-                        <h4 className="font-bold text-indigo-600 text-sm mb-2">Today's Debate Topic</h4>
-                        <p className="text-slate-700 text-sm italic whitespace-pre-wrap">
-                            "{meetupInfo.session2Question}"
-                        </p>
+                    {/* Header */}
+                    <header className="bg-indigo-600 text-white p-6 shadow-lg">
+                        <div className="max-w-3xl mx-auto flex justify-between items-start">
+                            <div>
+                                <h1 className="text-3xl font-bold mb-2">{meetupInfo.clubName}</h1>
+                                <p className="opacity-90 font-medium text-lg mb-2 flex items-center gap-2">
+                                    {dDay && <span className={`text-xs font-extrabold px-2 py-1 rounded shadow-sm ${dDay === 'End' ? 'bg-slate-200 text-slate-500' : 'bg-white text-red-600'}`}>{dDay}</span>}
+                                    {meetupInfo.meetupTitle}
+                                </p>
+                                <p className="text-indigo-100 text-sm leading-relaxed max-w-xl">{meetupInfo.meetupDesc}</p>
+                            </div>
+                            {isAdmin && <button onClick={openEditModal} className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm"><Settings size={20} /></button>}
+                        </div>
+                    </header>
+
+                    <main className="max-w-3xl mx-auto p-4 space-y-6 -mt-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
+                                <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0"><Calendar size={24} /></div>
+                                <div><h3 className="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3><p className="font-bold text-lg">{meetupInfo.date}</p><p className="text-indigo-600 font-medium">{meetupInfo.time}</p></div>
+                            </div>
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
+                                <div className="bg-emerald-100 p-3 rounded-full text-emerald-600 shrink-0"><MapPin size={24} /></div>
+                                <div className="flex-1"><h3 className="font-semibold text-slate-500 text-sm uppercase">Location</h3><p className="font-bold text-lg">{meetupInfo.locationName}</p><p className="text-slate-500 text-sm mb-2">{meetupInfo.locationAddress}</p><a href={meetupInfo.locationLink || "#"} target="_blank" className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100"><ExternalLink size={12} /> 네이버 지도 보기</a></div>
+                            </div>
                         </div>
 
-                        <button 
-                        onClick={() => setShowCurriculum(!showCurriculum)}
-                        className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 hover:bg-indigo-100 transition-colors mb-4"
-                        >
-                        <span className="flex items-center gap-2">
-                            <BookOpen size={18} /> 자세한 진행 방식 확인하기
-                        </span>
-                        {showCurriculum ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                        </button>
-
-                        {showCurriculum && (
-                        <div className="animate-in slide-in-from-top-2 fade-in duration-300">
-                            {/* Part 1 */}
-                            <div className="mb-8 relative">
-                                <h3 className="font-bold text-xl text-indigo-800 mb-1">{meetupInfo.part1Title}</h3>
-                                <p className="text-sm text-indigo-400 font-medium mb-4">{meetupInfo.part1Duration}</p>
-
-                                <div className="space-y-6">
-                                {/* Item 1 */}
-                                {meetupInfo.p1Title1 && (
-                                    <div className="group">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time1}</span>
-                                        <h4 className="font-bold text-slate-700">{meetupInfo.p1Title1}</h4>
-                                    </div>
-                                    <p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc1}</p>
-                                    </div>
-                                )}
-                                {/* Item 2 */}
-                                {meetupInfo.p1Title2 && (
-                                    <div className="group">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time2}</span>
-                                        <h4 className="font-bold text-slate-700">{meetupInfo.p1Title2}</h4>
-                                    </div>
-                                    <p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc2}</p>
-                                    </div>
-                                )}
-                                {/* Item 3 */}
-                                {meetupInfo.p1Title3 && (
-                                    <div className="group">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time3}</span>
-                                        <h4 className="font-bold text-slate-700">{meetupInfo.p1Title3}</h4>
-                                    </div>
-                                    <p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc3}</p>
-                                    </div>
-                                )}
-                                </div>
-                            </div>
-
-                            {/* Intermission */}
-                            <div className="mb-8">
-                                <div className="bg-amber-50 rounded-lg p-4 border border-amber-100 flex items-start gap-3">
-                                    <div className="bg-amber-100 p-2 rounded-full text-amber-600 shrink-0 mt-0.5">
-                                    <ArrowRightLeft size={18} />
-                                    </div>
-                                    <div>
-                                    <h4 className="font-bold text-amber-800 text-sm mb-1">{meetupInfo.breakTitle}</h4>
-                                    <p className="text-xs text-amber-700 leading-relaxed">{meetupInfo.breakDesc}</p>
+                        {meetupInfo.leaderName && (
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                                <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50"><Award size={20} className="text-indigo-600" /><h2 className="font-bold text-lg text-indigo-900">Meet Your Host</h2></div>
+                                <div className="p-6">
+                                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                                        <div className="shrink-0 flex flex-col items-center justify-center w-full md:w-48 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                            <div className="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl overflow-hidden border-4 border-white shadow-md mb-3">
+                                                <img src={meetupInfo.leaderImage || "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett"} className="w-full h-full object-cover" onError={(e) => e.target.src="https://api.dicebear.com/9.x/avataaars/svg?seed=Fallback"} />
+                                            </div>
+                                            <div className="text-center w-full">
+                                                <p className="font-bold text-xl text-slate-800 break-words">{meetupInfo.leaderName}</p>
+                                                <p className="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">English Meetup Leader</p>
+                                                <button onClick={() => setIsLeaderExpanded(!isLeaderExpanded)} className="w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg md:hidden">{isLeaderExpanded ? '접기' : '소개 보기'} {isLeaderExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}</button>
+                                            </div>
+                                        </div>
+                                        <div className={`flex-1 flex flex-col justify-center space-y-5 ${isLeaderExpanded ? 'block' : 'hidden'} md:flex`}>
+                                            <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{meetupInfo.leaderBio}</div>
+                                            {meetupInfo.leaderTags && <div><h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><Activity size={12}/> Background & Experience</h3><div className="flex flex-wrap gap-2">{meetupInfo.leaderTags.split(',').map((tag, idx) => <span key={idx} className="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm flex items-center gap-1.5">{idx === 0 ? <Award size={12} className="text-amber-500"/> : <CheckCircle size={12} className="text-indigo-400"/>}{tag.trim()}</span>)}</div></div>}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            {/* Part 2 */}
-                            <div className="relative pb-2">
-                                <h3 className="font-bold text-xl text-indigo-800 mb-1">{meetupInfo.part2Title}</h3>
-                                <p className="text-sm text-indigo-400 font-medium mb-4">{meetupInfo.part2Duration}</p>
-
-                                <div className="space-y-6">
-                                {/* Item 1 */}
-                                {meetupInfo.p2Title1 && (
-                                    <div className="group">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p2Time1}</span>
-                                        <h4 className="font-bold text-slate-700">{meetupInfo.p2Title1}</h4>
-                                    </div>
-                                    <p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p2Desc1}</p>
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100">
+                                <MessageCircle size={20} className="text-indigo-600" /><h2 className="font-bold text-lg text-indigo-900">This Week's Topic</h2>
+                                <button onClick={handleCopyTopic} className="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1"><Copy size={12} /> 토픽 복사</button>
+                            </div>
+                            <div className="p-5">
+                                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-8"><h4 className="font-bold text-indigo-600 text-sm mb-2">Today's Debate Topic</h4><p className="text-slate-700 text-sm italic whitespace-pre-wrap">"{meetupInfo.session2Question}"</p></div>
+                                <button onClick={() => setShowCurriculum(!showCurriculum)} className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 mb-4"><span className="flex items-center gap-2"><BookOpen size={18} /> 자세한 진행 방식 확인하기</span>{showCurriculum ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</button>
+                                {showCurriculum && (
+                                    <div className="animate-in slide-in-from-top-2 fade-in duration-300">
+                                        <div className="mb-8 relative"><h3 className="font-bold text-xl text-indigo-800 mb-1">{meetupInfo.part1Title}</h3><p className="text-sm text-indigo-400 font-medium mb-4">{meetupInfo.part1Duration}</p><div className="space-y-6">
+                                            {meetupInfo.p1Title1 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time1}</span><h4 className="font-bold text-slate-700">{meetupInfo.p1Title1}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc1}</p></div>}
+                                            {meetupInfo.p1Title2 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time2}</span><h4 className="font-bold text-slate-700">{meetupInfo.p1Title2}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc2}</p></div>}
+                                            {meetupInfo.p1Title3 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p1Time3}</span><h4 className="font-bold text-slate-700">{meetupInfo.p1Title3}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p1Desc3}</p></div>}
+                                        </div></div>
+                                        <div className="mb-8"><div className="bg-amber-50 rounded-lg p-4 border border-amber-100 flex items-start gap-3"><div className="bg-amber-100 p-2 rounded-full text-amber-600 shrink-0 mt-0.5"><ArrowRightLeft size={18} /></div><div><h4 className="font-bold text-amber-800 text-sm mb-1">{meetupInfo.breakTitle}</h4><p className="text-xs text-amber-700 leading-relaxed">{meetupInfo.breakDesc}</p></div></div></div>
+                                        <div className="relative pb-2"><h3 className="font-bold text-xl text-indigo-800 mb-1">{meetupInfo.part2Title}</h3><p className="text-sm text-indigo-400 font-medium mb-4">{meetupInfo.part2Duration}</p><div className="space-y-6">
+                                            {meetupInfo.p2Title1 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p2Time1}</span><h4 className="font-bold text-slate-700">{meetupInfo.p2Title1}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p2Desc1}</p></div>}
+                                            {meetupInfo.p2Title2 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p2Time2}</span><h4 className="font-bold text-slate-700">{meetupInfo.p2Title2}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p2Desc2}</p></div>}
+                                            {meetupInfo.p2Title3 && <div className="group"><div className="flex items-center gap-2 mb-1"><span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p2Time3}</span><h4 className="font-bold text-slate-700">{meetupInfo.p2Title3}</h4></div><p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p2Desc3}</p></div>}
+                                        </div></div>
+                                        <div className="mt-8 pt-6 border-t border-slate-100"><h4 className="font-bold text-slate-800 flex items-center gap-2 mb-3"><Lightbulb size={18} className="text-yellow-500 fill-yellow-500" /> {meetupInfo.rulesTitle}</h4><ul className="space-y-2 text-sm text-slate-600"><li className="flex gap-2 items-start"><span className="text-indigo-500 font-bold mt-0.5">•</span><span>{meetupInfo.rule1}</span></li><li className="flex gap-2 items-start"><span className="text-indigo-500 font-bold mt-0.5">•</span><span>{meetupInfo.rule2}</span></li><li className="flex gap-2 items-start"><span className="text-indigo-500 font-bold mt-0.5">•</span><span>{meetupInfo.rule3}</span></li></ul></div>
                                     </div>
                                 )}
-                                {/* Item 2 */}
-                                {meetupInfo.p2Title2 && (
-                                    <div className="group">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">{meetupInfo.p2Time2}</span>
-                                        <h4 className="font-bold text-slate-700">{meetupInfo.p2Title2}</h4>
-                                    </div>
-                                    <p className="text-sm text-slate-600 leading-relaxed pl-1">{meetupInfo.p2Desc2}</p>
-                                    </div>
-                                )}
-                                {/* Item 3 */}
-                                {meetupInfo.
+                            </div>
+                        </div>
+
+                        <div className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${isFull ? 'border-orange-500' : 'border-indigo-500'}`}>
+                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Banknote className={isFull ? "text-orange-500" : "text-indigo-500"} /> {isFull ? '대기 신청 (Join Waitlist)' : '참가 신청 (Join Us)'}</h2>
+                            <div className={`mb-4 p-4 rounded text-sm space-y-2 ${isFull ? 'bg-orange-50 text-orange-900' : 'bg-indigo-50 text-indigo-900'}`}>
+                                {isFull ? <><p className="font-bold flex items-center gap-1 text-orange-600 bg-white/50 p-2 rounded mb-2"><Clock size={16} /> 정원 마감. 대기 신청.</p><p className="mt-2 font-bold text-orange-700">※ 참가 확정 시 예상 참가비: {meetupInfo.fee}원</p></> : 
+                                <><div className="font-bold text-lg flex flex-wrap items-center gap-2"><span>💡 참가비:</span>{meetupInfo.originalFee && <span className="line-through text-slate-400 text-sm">{meetupInfo.originalFee}원</span>}<span className="text-red-600">{meetupInfo.fee}원</span></div><div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2"><span>{meetupInfo.bankName} {meetupInfo.bankAccount} ({meetupInfo.accountHolder})</span><button onClick={handleCopyAccount} className="inline-flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 text-xs font-bold">{copied ? '복사됨!' : '계좌 복사'}</button></div><hr className="border-indigo-100 my-2" /><p className="text-slate-600 text-xs">{meetupInfo.drinkPolicy}</p></>}
+                            </div>
+                            <form onSubmit={handleApply} className="space-y-6">
+                                <div><label className="block text-sm font-bold text-slate-700 mb-1.5"><User size={16} className="inline mr-1"/> 이름</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 border rounded-lg" placeholder="ex) 홍길동" /></div>
+                                {isFull && <div><label className="block text-sm font-bold text-slate-700 mb-1.5"><Phone size={16} className="inline mr-1"/> 연락처</label><input type="tel" value={contact} onChange={handleContactChange} className="w-full p-3 border rounded-lg" placeholder="010-0000-0000" /></div>}
+                                <div><label className="block text-sm font-bold text-slate-700 mb-1.5"><Smile size={16} className="inline mr-1"/> 닉네임</label><input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full p-3 border rounded-lg" placeholder="ex) Gil" /></div>
+                                <div><label className="block text-sm font-bold text-slate-700 mb-2"><Users size={16} className="inline mr-1"/> 성별</label><div className="flex gap-3"><label className={`flex-1 border rounded-lg p-3 flex justify-center cursor-pointer ${gender === 'male' ? 'bg-indigo-50 border-indigo-500' : ''}`}><input type="radio" name="gender" value="male" checked={gender === 'male'} onChange={(e) => setGender(e.target.value)} className="hidden"/>👨 남성</label><label className={`flex-1 border rounded-lg p-3 flex justify-center cursor-pointer ${gender === 'female' ? 'bg-indigo-50 border-indigo-500' : ''}`}><input type="radio" name="gender" value="female" checked={gender === 'female'} onChange={(e) => setGender(e.target.value)} className="hidden"/>👩 여성</label></div></div>
+                                <div><label className="block text-sm font-bold text-slate-700 mb-2"><Activity size={16} className="inline mr-1"/> 영어 실력</label><div className="grid gap-2">{['low-mid', 'mid', 'mid-high', 'high'].map(lv => <label key={lv} className={`border rounded-lg p-3 flex items-center gap-3 cursor-pointer ${englishLevel === lv ? 'bg-slate-100 border-slate-500' : ''}`}><input type="radio" name="englishLevel" value={lv} checked={englishLevel === lv} onChange={(e) => setEnglishLevel(e.target.value)} /><span>{lv}</span></label>)}</div></div>
+                                <div className="mt-4"><label className="block text-sm font-bold text-slate-700 mb-1.5"><Lock size={16} className="inline mr-1"/> 비밀번호 (4자리)</label><div className="relative flex gap-3 justify-center mb-1">{[0, 1, 2, 3].map(i => <div key={i} className="w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xl font-bold">{password[i] || ''}</div>)}<input type="tel" maxLength={4} value={password} onChange={handlePasswordChange} className="absolute inset-0 opacity-0 cursor-pointer" /></div></div>
+                                <div className="flex flex-col gap-1">{!isFull && <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer"><input type="checkbox" checked={transferred} onChange={(e) => setTransferred(e.target.checked)} className="w-5 h-5 rounded" /><span>참가비 송금 완료</span></label>}<label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer"><input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-5 h-5 rounded" /><span>정보 기억하기</span></label></div>
+                                {errorMsg && <p className="text-red-500 text-sm font-bold text-center">{errorMsg}</p>}
+                                <button type="submit" disabled={loading} className={`w-full text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 ${isFull ? 'bg-orange-500 hover:bg-orange-600' : 'bg-indigo-600 hover:bg-indigo-700'}`}>{loading ? '처리중...' : <><Send size={18} /> {isFull ? '대기 신청' : '참가 신청'}</>}</button>
+                            </form>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between flex-wrap gap-2"><h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600" />참가자 명단 ({effectiveCount}/{currentMaxCapacity})</h2><button onClick={() => setIsCancelMode(!isCancelMode)} className={`text-xs px-2 py-1 rounded font-bold border ${isCancelMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-500'}`}>{isCancelMode ? '취소 모드 끄기' : '내 신청 취소하기'}</button></div>
+                            <p className="text-xs text-slate-500 mb-3 bg-slate-100 p-2 rounded">참가 승인은 <b>선착순</b>입니다.</p>
+                            {attendees.length === 0 ? <div className="text-center py-10 bg-white rounded-xl border border-dashed border-slate-300 text-slate-400">신청자가 없습니다.</div> : <div className="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">{attendees.map(attendee => <div key={attendee.id} className="p-4 flex items-center justify-between"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0">{attendee.nickname ? attendee.nickname.charAt(0) : attendee.name.charAt(0)}</div><div><p className="font-bold text-slate-800">{attendee.nickname || attendee.name}</p><p className="text-xs text-slate-500">{attendee.status === 'approved' ? '확정됨' : '대기중'}</p></div></div>{(isAdmin || isCancelMode) ? <button onClick={() => handleDeleteRequest(attendee.id)} className="text-red-400 hover:text-red-600"><Trash2 size={20}/></button> : attendee.status === 'approved' ? <span className="text-emerald-600 font-bold text-sm">확정</span> : <span className="text-orange-600 font-bold text-sm">대기</span>}</div>)}</div>}
+                        </div>
+                    </main>
+
+                    <footer className="max-w-3xl mx-auto mt-12 px-4 flex justify-between items-center text-slate-400 text-sm">
+                        <p>© 2026 {meetupInfo.clubName}</p>
+                        <button onClick={toggleAdmin} className="hover:text-slate-600 flex items-center gap-1">{!isAdmin ? <><Shield size={14}/> 관리자</> : <><LogOut size={14}/> 로그아웃</>}</button>
+                    </footer>
+
+                    {showAdminLogin && <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4"><div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm"><h3 className="font-bold text-lg mb-4 text-center">관리자 로그인</h3><input type="password" value={adminPinInput} onChange={(e) => setAdminPinInput(e.target.value)} className="w-full p-3 border rounded-lg mb-4" /><div className="flex gap-2"><button onClick={() => setShowAdminLogin(false)} className="flex-1 py-2 bg-slate-100 rounded-lg">취소</button><button onClick={verifyPin} className="flex-1 py-2 bg-indigo-600 text-white rounded-lg">확인</button></div></div></div>}
+                    
+                    {/* Edit Info Modal */}
+                    {isEditingInfo && (
+                        <div className="fixed inset-0 bg-black/60 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+                            <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+                                <div className="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-lg flex items-center gap-2"><Settings size={20}/> 정보 수정</h3><button onClick={() => setIsEditingInfo(false)}><XCircle size={24}/></button></div>
+                                <div className="overflow-y-auto p-4 space-y-4">
+                                    <EditSectionHeader title="1. 기본 정보" sectionKey="basic" />
+                                    {expandedSections.basic && <div className="space-y-3"><input className="w-full border p-2 rounded" placeholder="날짜" value={editForm.date} onChange={e => setEditForm({...editForm, date: e.target.value})} /><input className="w-full border p-2 rounded" placeholder="시간" value={editForm.time} onChange={e => setEditForm({...editForm, time: e.target.value})} /></div>}
+                                    <EditSectionHeader title="2. 커리큘럼" sectionKey="curriculum" />
+                                    {expandedSections.curriculum && <div className="space-y-3"><input className="w-full border p-2 rounded" placeholder="Part 1 Title" value={editForm.part1Title} onChange={e => setEditForm({...editForm, part1Title: e.target.value})} /></div>}
+                                    {/* Add other sections as needed following the same pattern */}
+                                </div>
+                                <div className="p-4 border-t bg-slate-50 flex gap-2"><button onClick={() => setIsEditingInfo(false)} className="flex-1 py-3 bg-white border rounded-lg">취소</button><button onClick={saveInfo} className="flex-1 py-3 bg-indigo-600 text-white rounded-lg">저장</button></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<EnglishMeetupRSVP />);
+    </script>
+</body>
+</html>
