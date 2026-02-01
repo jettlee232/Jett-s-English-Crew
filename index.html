@@ -12,15 +12,29 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
+        h1, h2, h3, .en-font { font-family: 'Poppins', 'Noto Sans KR', sans-serif; }
+        
+        /* Animations */
         .animate-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* Hide scrollbar for clean modal */
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Utilities */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Inputs */
+        input:focus, textarea:focus, select:focus { 
+            outline: none; 
+            border-color: #4f46e5; 
+            box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.5); 
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 pb-20 relative min-h-screen">
@@ -31,8 +45,8 @@
     <!-- Firebase Logic & App Script -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         // --- Firebase Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
@@ -44,59 +58,77 @@
             auth = getAuth(app);
             db = getFirestore(app);
         } catch (e) {
-            console.error("Firebase Init Error (Check Config):", e);
+            console.error("Firebase Init Error:", e);
         }
+
+        // --- Constants ---
+        const ADMIN_PIN = 'wpxm123'; // 관리자 비밀번호
+        const ATTENDEES_COLLECTION = 'meetup_attendees_v2';
+        const CONFIG_COLLECTION = 'meetup_config_v2';
+        const CONFIG_DOC_ID = 'settings';
 
         // --- Global State ---
         const state = {
             user: null,
             attendees: [],
+            // Default Config (Initial Fallback)
             meetupInfo: {
                 clubName: "Jett's English Crew",
-                meetupTitle: "성북 중상급 영어회화 & 토론",
-                meetupDesc: "일상 회화를 자유롭게 구사하는 것을 넘어서 더 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
-                date: "2026년 2월 1일 (일)",
-                time: "오전 10:00 - 12:00",
+                meetupTitle: "Weekend English Discussion",
+                meetupDesc: "일상 회화를 넘어 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
+                date: "2026년 2월 8일 (일)",
+                time: "10:00 AM - 12:00 PM",
                 locationName: "탐앤탐스 성신여대점",
-                locationAddress: "서울 성북구 동소문로22길 31",
-                locationLink: "https://map.naver.com/v5/search/탐앤탐스%20성신여대점",
-                part1Title: "Part 1. Warm-up & Session 1",
-                part1Duration: "50 min",
-                p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화 (Ice-breaking)",
-                p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 심층 토론",
-                p1Time3: "", p1Title3: "", p1Desc3: "",
-                breakTitle: "Break (10 min)",
-                breakDesc: "Seat Change: 파트너 교체",
-                part2Title: "Part 2. Session 2 & Wrap-up",
-                part2Duration: "50 min",
-                p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
-                p2Time2: "30'", p2Title2: "Reading & Discussion 2", p2Desc2: "두 번째 지문 독해 및 의견 교환",
-                p2Time3: "10'", p2Title3: "Closing", p2Desc3: "소감 공유 및 마무리",
-                topicTitle: "Travel & Adventure",
-                session2Topic: "Travel Styles",
-                session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
+                locationAddress: "서울 성북구 동소문로22길 31 2층",
+                locationLink: "https://map.naver.com",
+                
+                // Curriculum
+                part1Title: "Part 1. Ice Breaking",
+                part1Duration: "40 min",
+                p1Desc: "Small Talk & Article Reading",
+                
+                breakDesc: "Seat Change (10 min)",
+                
+                part2Title: "Part 2. Deep Discussion",
+                part2Duration: "60 min",
+                p2Desc: "Main Topic Discussion with new partners",
+                
+                // Topic
+                topicTitle: "Technology & Future",
+                session2Question: "Will AI replace human creativity in the future? Why or why not?",
+                
+                // Operational
                 maxCapacity: 8,
-                fee: "1,000",
-                originalFee: "3,000",
-                drinkPolicy: "☕ 개인 음료는 별도로 주문해주세요 (1인 1메뉴)",
+                fee: "10,000",
+                originalFee: "15,000",
                 bankName: "카카오뱅크",
                 bankAccount: "3333-26-2044919",
                 accountHolder: "홍길동",
+                
+                // Leader
                 leaderName: "Jett",
+                leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 연습생입니다. 호주 워킹홀리데이와 TESOL 과정을 거치며 배운 소통의 즐거움을 공유하고 싶어요.\n\n'완벽함'보다는 '나의 생각을 전달하는 용기'를 중요하게 생각합니다. 3년 넘게 모임을 이끌어온 경험으로 여러분이 편안하게 입을 뗄 수 있도록 도와드릴게요! 🌏✨",
+                leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+, TOEFL/IELTS 경험",
                 leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett&backgroundColor=c0aede",
-                leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다.",
-                leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주",
-                etiquetteTitle: "클럽 규칙",
-                etiquette1Title: "👂 서로를 존중하고 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
-                etiquette2Title: "⏳ 발언권은 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
-                etiquette3Title: "🚫 순수한 학습 모임입니다", etiquette3Desc: "종교 활동, 영업, 이성 교제 목적의 참여는 엄격히 금지합니다.",
-                openChatLink: "#",
-                faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 어렵습니다.",
-                faq2Q: "영어를 잘 못해도 되나요?", faq2A: "물론입니다! 중상급 지향이지만 즐겁게 소통하려는 마음만 있다면 충분합니다.",
-                faq3Q: "준비물이 있나요?", faq3A: "개인 필기구 정도만 챙겨주세요."
+                
+                // Messages
+                drinkPolicy: "☕ 1인 1음료 주문 필수 (개별 결제)",
+                noticeMsg: "모임 시작 10분 전까지 도착해주세요!",
+
+                // Etiquette
+                etiquetteTitle: "클럽 에티켓",
+                etiquette1Title: "👂 경청과 존중", etiquette1Desc: "타인이 발언할 때는 핸드폰 사용을 자제하고 귀 기울여주세요. 무례한 질문은 삼가 부탁드립니다.",
+                etiquette2Title: "⏳ 공평한 발언권", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요. (한 턴에 2분 내외)",
+                etiquette3Title: "🚫 순수한 목적 유지", etiquette3Desc: "종교, 영업, 이성 교제 위주의 활동은 지양하며 강퇴 사유가 될 수 있습니다.",
+                
+                // FAQ
+                faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 조금 어렵습니다. 근처 공영주차장을 이용하시거나 대중교통을 이용해 주시면 감사하겠습니다!",
+                faq2Q: "영어가 서툴러도 참여할 수 있나요?", faq2A: "그럼요! 완벽한 문법보다는 소통하려는 마음이 더 중요합니다. 리더가 곁에서 친절하게 도와드리니 걱정 마세요.",
+                faq3Q: "준비해야 할 것이 있을까요?", faq3A: "필요한 학습 자료는 제가 모두 준비해 드립니다. 가벼운 마음과 개인 필기구 정도만 챙겨오시면 충분합니다!"
             },
             form: {
-                name: '', nickname: '', contact: '', password: '', gender: 'female', englishLevel: 'mid', transferred: false, rememberMe: false
+                name: '', nickname: '', contact: '', password: '', 
+                englishLevel: 'mid', transferred: false, rememberMe: false
             },
             ui: {
                 isAdmin: false,
@@ -105,662 +137,715 @@
                 loading: false,
                 errorMsg: '',
                 toast: null,
-                activeFaq: null,
-                activeEtiquette: null,
-                showCurriculum: false,
+                
+                // UI States
+                showCurriculum: false, // Default hidden
                 isLeaderExpanded: false,
-                modalConfig: null,
                 isCancelMode: false,
+                activeFaq: null,
+                
+                // Modals
+                modalConfig: null, // { title, message, onConfirm, isDestructive }
                 showPasswordModal: false,
-                cancelPasswordInput: '',
                 targetDeleteId: null,
+                cancelPasswordInput: '',
+                
+                // Editor
                 isEditingInfo: false,
-                editForm: {},
-                expandedSections: { header: true }
+                activeSettingTab: 'basic', // basic, topic, leader, bank
+                editForm: {} 
             },
             dDay: ''
         };
 
-        // Make state globally available for UI interactions
+        // Make state globally available
         window.state = state;
 
-        const ADMIN_PIN = 'wpxm123';
-        const ATTENDEES_COLLECTION = 'english_meetup_attendees';
-        const CONFIG_COLLECTION = 'english_meetup_config';
-        const CONFIG_DOC_ID = 'meetup_info';
-
-        // --- Helper Functions ---
-        window.render = function() {
-            const app = document.getElementById('app');
-            app.innerHTML = App();
-            lucide.createIcons();
-            
-            const fileInput = document.getElementById('leaderImageInput');
-            if(fileInput) {
-                fileInput.addEventListener('change', handleImageUpload);
-            }
-        };
-
-        window.updateState = function(path, value) {
+        // --- Utilities ---
+        window.updateState = (path, value) => {
             const keys = path.split('.');
             let obj = state;
-            for (let i = 0; i < keys.length - 1; i++) {
-                if (!obj[keys[i]]) obj[keys[i]] = {};
-                obj = obj[keys[i]];
-            }
+            for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
             obj[keys[keys.length - 1]] = value;
             window.render();
         };
 
-        window.showToast = function(message, type = 'success') {
-            window.updateState('ui.toast', { message, type });
-            setTimeout(() => window.updateState('ui.toast', null), 3000);
+        window.showToast = (message, type = 'success') => {
+            state.ui.toast = { message, type };
+            window.render();
+            setTimeout(() => { state.ui.toast = null; window.render(); }, 3000);
         };
 
-        window.copyToClipboard = function(text, msg) {
+        window.copyText = (text) => {
             const el = document.createElement('textarea');
             el.value = text;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            window.showToast(msg || '복사되었습니다.', 'success');
+            window.showToast('복사되었습니다.');
         };
 
-        function calculateDDay(dateStr) {
-            if (!dateStr) return '';
+        const calculateDDay = (dateStr) => {
             try {
-                const yearMatch = dateStr.match(/(\d{4})년/);
-                const monthMatch = dateStr.match(/(\d{1,2})월/);
-                const dayMatch = dateStr.match(/(\d{1,2})일/);
-                if (yearMatch && monthMatch && dayMatch) {
-                    const target = new Date(yearMatch[1], monthMatch[1] - 1, dayMatch[1]);
-                    const today = new Date();
-                    target.setHours(0,0,0,0); today.setHours(0,0,0,0);
-                    const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-                    if (diff === 0) return "D-Day";
-                    if (diff > 0) return `D-${diff}`;
-                    return "End";
-                }
-            } catch (e) { return ''; }
-            return '';
-        }
+                const cleanDate = dateStr.replace(/[^0-9]/g, " ");
+                const parts = cleanDate.trim().split(/\s+/);
+                if(parts.length < 3) return '';
+                
+                const target = new Date(parts[0], parts[1]-1, parts[2]);
+                const today = new Date();
+                target.setHours(0,0,0,0); today.setHours(0,0,0,0);
+                
+                const diff = (target - today) / (1000 * 60 * 60 * 24);
+                if (diff < 0) return "End";
+                if (diff === 0) return "Today";
+                return `D-${Math.ceil(diff)}`;
+            } catch { return ''; }
+        };
 
-        // --- Business Logic ---
-        window.handleLogin = () => {
+        // --- Action Handlers ---
+        window.handleAdminLogin = () => {
             if (state.ui.adminPinInput === ADMIN_PIN) {
                 state.ui.isAdmin = true;
                 state.ui.showAdminLogin = false;
-                state.ui.adminPinInput = '';
-                window.showToast('관리자님 환영합니다.');
+                window.showToast('관리자 모드로 전환되었습니다.');
             } else {
-                window.showToast('비밀번호가 틀렸습니다.', 'error');
+                window.showToast('비밀번호가 일치하지 않습니다.', 'error');
             }
-            window.render();
         };
 
         window.handleApply = async (e) => {
             e.preventDefault();
-            const { name, contact, password, transferred } = state.form;
+            const { name, contact, password, transferred, englishLevel } = state.form;
+            
+            // Validation
+            if (!name.trim()) return window.showToast('입금자명(실명)을 입력해주세요.', 'error');
+            if (password.length < 4) return window.showToast('비밀번호 4자리를 설정해주세요.', 'error');
+            
             const currentCount = state.attendees.filter(a => a.status === 'approved' || (a.status === 'pending' && a.paid)).length;
             const maxCap = parseInt(state.meetupInfo.maxCapacity);
             const isWaitlist = currentCount >= maxCap;
 
-            if (!name.trim()) return window.updateState('ui.errorMsg', '이름(예금주)을 입력해주세요.');
-            if (!isWaitlist && !transferred) return window.updateState('ui.errorMsg', '참가비를 송금한 후 체크해주세요.');
-            if (isWaitlist && !contact.trim()) return window.updateState('ui.errorMsg', '대기 신청 시 연락처 입력은 필수입니다.');
-            if (!password || password.length < 4) return window.updateState('ui.errorMsg', '비밀번호 4자리를 입력해주세요.');
+            if (!isWaitlist && !transferred) return window.showToast('회비 입금 후 체크해주세요.', 'error');
+            if (isWaitlist && !contact) return window.showToast('대기 연락을 위해 연락처가 필요합니다.', 'error');
 
-            window.updateState('ui.loading', true);
+            state.ui.loading = true;
+            window.render();
+
             try {
-                if(!state.user) throw new Error("User not authenticated");
+                if (!state.user) {
+                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                }
                 
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), {
                     ...state.form,
-                    status: 'pending',
-                    isWaitlistApply: isWaitlist,
-                    paid: !isWaitlist,
+                    contact: contact || '비공개',
+                    status: isWaitlist ? 'waiting' : 'pending', // pending(입금확인중), approved(확정), waiting(대기)
+                    paid: !isWaitlist, // 대기는 입금 안함
+                    isWaitlist,
                     createdAt: serverTimestamp(),
-                    userId: state.user.uid
+                    userId: auth.currentUser?.uid
                 });
 
+                // LocalStorage Logic
                 if (state.form.rememberMe) {
-                    localStorage.setItem('meetup_user_info', JSON.stringify(state.form));
-                } else {
-                    localStorage.removeItem('meetup_user_info');
+                    localStorage.setItem('meetup_user', JSON.stringify({
+                        name: state.form.name,
+                        nickname: state.form.nickname,
+                        contact: state.form.contact,
+                        password: state.form.password,
+                        englishLevel: state.form.englishLevel
+                    }));
                 }
 
-                state.form = { name: '', nickname: '', contact: '', password: '', gender: 'female', englishLevel: 'mid', transferred: false, rememberMe: state.form.rememberMe };
-                state.ui.errorMsg = '';
-                window.showToast(isWaitlist ? '대기자로 신청되었습니다.' : '신청이 완료되었습니다.');
+                // Reset sensitive fields
+                state.form.transferred = false;
+                window.showToast(isWaitlist ? '대기자로 등록되었습니다.' : '신청 완료! 입금 확인 중입니다.');
             } catch (err) {
                 console.error(err);
                 window.showToast('오류가 발생했습니다.', 'error');
             }
+            
             state.ui.loading = false;
             window.render();
         };
 
-        window.executeApprove = async (id) => {
-            if(!state.user) return;
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), { status: 'approved', paid: true });
-            state.ui.modalConfig = null;
-            window.showToast('승인 완료');
-            window.render();
+        // Admin Actions
+        window.togglePaidStatus = async (id, currentStatus) => {
+            if (!state.user || !state.ui.isAdmin) return;
+            const newStatus = !currentStatus;
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), { 
+                paid: newStatus,
+                status: newStatus ? 'approved' : 'pending'
+            });
+            window.showToast(`입금 상태가 변경되었습니다.`);
         };
 
-        window.handleApproveClick = (id) => {
-            const count = state.attendees.filter(a => a.status === 'approved').length;
-            const max = parseInt(state.meetupInfo.maxCapacity);
-            if (count >= max) {
-                state.ui.modalConfig = {
-                    title: '정원 초과 승인', message: `현재 정원(${max}명)이 찼습니다. 승인하시겠습니까?`,
-                    confirmText: '추가 승인', isDestructive: false,
-                    onConfirm: `executeApprove('${id}')`
-                };
-                window.render();
-            } else {
-                window.executeApprove(id);
-            }
-        };
-
-        window.executeDelete = async (id) => {
-            if(!state.user) return;
+        window.deleteAttendee = async (id) => {
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id));
             state.ui.modalConfig = null;
             state.ui.showPasswordModal = false;
-            state.ui.isCancelMode = false;
             window.showToast('삭제되었습니다.');
-            window.render();
         };
 
-        window.handleDeleteRequest = (id) => {
-            if (state.ui.isAdmin) {
-                state.ui.modalConfig = {
-                    title: '삭제 확인', message: '정말 삭제하시겠습니까?',
-                    confirmText: '삭제하기', isDestructive: true,
-                    onConfirm: `executeDelete('${id}')`
-                };
-                window.render();
-            } else {
-                state.ui.targetDeleteId = id;
-                state.ui.cancelPasswordInput = '';
-                state.ui.showPasswordModal = true;
-                window.render();
-            }
-        };
-
-        window.verifyCancelPassword = () => {
+        window.checkDeletePassword = () => {
             const target = state.attendees.find(a => a.id === state.ui.targetDeleteId);
             if (target && target.password === state.ui.cancelPasswordInput) {
-                window.executeDelete(state.ui.targetDeleteId);
+                window.deleteAttendee(state.ui.targetDeleteId);
             } else {
-                window.showToast('비밀번호 불일치', 'error');
-                state.ui.cancelPasswordInput = '';
-                window.render();
+                window.showToast('비밀번호가 틀렸습니다.', 'error');
             }
         };
 
-        window.executeResetAttendees = async () => {
-             if(!state.user) return;
-             const batch = writeBatch(db);
-             state.attendees.forEach(att => {
-                 const ref = doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, att.id);
-                 batch.delete(ref);
-             });
-             await batch.commit();
-             state.ui.modalConfig = null;
-             window.showToast('명단이 초기화되었습니다.');
-             window.render();
+        window.openSettings = () => {
+            state.ui.editForm = JSON.parse(JSON.stringify(state.meetupInfo)); // Deep copy
+            state.ui.isEditingInfo = true;
+            window.render();
         };
 
-        window.handleResetClick = () => {
-            state.ui.modalConfig = {
-                title: '명단 초기화', message: '모든 참가자 데이터를 삭제하시겠습니까? (복구 불가)',
-                confirmText: '초기화', isDestructive: true,
-                onConfirm: 'executeResetAttendees()'
-            };
+        window.saveSettings = async () => {
+            if (!state.user) return;
+            state.ui.loading = true;
             window.render();
+            
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), state.ui.editForm);
+                state.ui.isEditingInfo = false;
+                window.showToast('설정이 저장되었습니다.');
+            } catch (e) {
+                window.showToast('저장 실패', 'error');
+            }
+            
+            state.ui.loading = false;
+            window.render();
+        };
+
+        window.handleImageFile = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Check size (simple check, limit to ~500KB to be safe for firestore doc)
+                    if (e.target.result.length > 800000) {
+                        alert("이미지가 너무 큽니다. (500KB 이하 권장)");
+                        return;
+                    }
+                    state.ui.editForm.leaderImage = e.target.result;
+                    window.render();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         };
 
         window.downloadCSV = () => {
-             if (state.attendees.length === 0) return window.showToast('데이터가 없습니다.', 'error');
              const BOM = '\uFEFF';
-             const headers = ['이름','닉네임','연락처','성별','레벨','상태','입금','신청시간'];
+             const headers = ['이름','닉네임','연락처','레벨','상태','입금여부','신청일시'];
              const rows = state.attendees.map(a => [
-                 a.name, a.nickname, a.contact, a.gender, a.englishLevel, a.status, a.paid?'O':'X', 
-                 a.createdAt ? new Date(a.createdAt.seconds*1000).toLocaleString() : ''
-             ].map(v => `"${String(v||'').replace(/"/g, '""')}"`).join(','));
+                 a.name, a.nickname, a.contact, a.englishLevel, a.status, a.paid?'O':'X', 
+                 a.createdAt ? new Date(a.createdAt.seconds*1000).toLocaleDateString() : ''
+             ].join(','));
              
              const blob = new Blob([BOM + headers.join(',') + '\n' + rows.join('\n')], {type: 'text/csv;charset=utf-8;'});
              const url = URL.createObjectURL(blob);
              const link = document.createElement('a');
              link.href = url;
-             link.download = `meetup_${new Date().toISOString().slice(0,10)}.csv`;
+             link.download = `meetup_list_${new Date().toISOString().slice(0,10)}.csv`;
              link.click();
         };
 
-        window.handleImageUpload = (e) => {
-             const file = e.target.files[0];
-             if(!file) return;
-             if(file.size > 500*1024) return window.showToast('500KB 이하만 가능합니다.', 'error');
-             const reader = new FileReader();
-             reader.onloadend = () => {
-                 state.ui.editForm.leaderImage = reader.result;
-                 window.render();
-             };
-             reader.readAsDataURL(file);
-        };
-
-        window.saveInfo = async () => {
-            if(!state.user) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), state.ui.editForm);
-            state.ui.isEditingInfo = false;
-            window.showToast('저장되었습니다.');
-            window.render();
-        };
-
-        window.handleContactChange = (e) => {
-            let val = e.target.value.replace(/[^0-9]/g, '');
-            if(val.length > 11) val = val.slice(0,11);
-            state.form.contact = val;
-            window.render();
-            const input = document.querySelector('input[name="contact"]');
-            if (input) input.focus();
-        };
-
-        // --- Component Renderers ---
-        const Icons = {
-            Calendar: `<i data-lucide="calendar" class="w-6 h-6"></i>`,
-            MapPin: `<i data-lucide="map-pin" class="w-6 h-6"></i>`,
-            Award: `<i data-lucide="award" class="w-5 h-5"></i>`,
-            Settings: `<i data-lucide="settings" class="w-5 h-5"></i>`,
-            Copy: `<i data-lucide="copy" class="w-3 h-3"></i>`,
-            Check: `<i data-lucide="check-circle" class="w-4 h-4"></i>`,
-            User: `<i data-lucide="user" class="w-4 h-4"></i>`,
-            Smile: `<i data-lucide="smile" class="w-4 h-4"></i>`,
-            Phone: `<i data-lucide="phone" class="w-4 h-4"></i>`,
-            Lock: `<i data-lucide="lock" class="w-4 h-4"></i>`,
-            Send: `<i data-lucide="send" class="w-4 h-4"></i>`,
-            Down: `<i data-lucide="chevron-down" class="w-4 h-4"></i>`,
-            Up: `<i data-lucide="chevron-up" class="w-4 h-4"></i>`
-        };
-
+        // --- Render Function ---
         function App() {
-            const { meetupInfo, ui, dDay, attendees } = state;
-            const currentCount = attendees.filter(a => a.status === 'approved' || (a.status === 'pending' && a.paid)).length;
+            const { meetupInfo, ui, attendees, form } = state;
+            const validAttendees = attendees.filter(a => a.paid || a.status === 'approved');
+            const currentCount = validAttendees.length;
             const maxCap = parseInt(meetupInfo.maxCapacity);
             const isFull = currentCount >= maxCap;
 
+            // Helper for Tabs
+            const TabButton = (id, label, icon) => `
+                <button onclick="state.ui.activeSettingTab='${id}'; window.render()" 
+                    class="flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1
+                    ${ui.activeSettingTab === id ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600'}">
+                    <i data-lucide="${icon}" class="w-4 h-4"></i> ${label}
+                </button>
+            `;
+
+            // Helper for Input Fields in Editor
+            const EditInput = (label, key, type="text", placeholder="") => `
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">${label}</label>
+                    ${type === 'textarea' 
+                        ? `<textarea oninput="state.ui.editForm['${key}']=this.value" class="w-full p-2 border rounded text-sm h-20 bg-slate-50 focus:bg-white">${ui.editForm[key] || ''}</textarea>`
+                        : `<input type="${type}" value="${ui.editForm[key] || ''}" oninput="state.ui.editForm['${key}']=this.value" placeholder="${placeholder}" class="w-full p-2 border rounded text-sm bg-slate-50 focus:bg-white">`
+                    }
+                </div>
+            `;
+
             return `
+                <!-- TOAST -->
                 ${ui.toast ? `
-                    <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in w-full max-w-sm px-4">
-                        <div class="shadow-lg rounded-lg p-4 flex items-center gap-3 text-white font-medium ${ui.toast.type === 'error' ? 'bg-red-500' : 'bg-indigo-500'}">
+                    <div class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[100] animate-in w-full max-w-sm px-4">
+                        <div class="shadow-xl rounded-lg p-3 flex items-center justify-center gap-2 text-white text-sm font-bold ${ui.toast.type === 'error' ? 'bg-rose-500' : 'bg-indigo-600'}">
+                            <i data-lucide="${ui.toast.type === 'error'?'alert-circle':'check-circle'}" class="w-4 h-4"></i>
                             ${ui.toast.message}
                         </div>
                     </div>
                 ` : ''}
 
-                <header class="bg-indigo-600 text-white p-6 shadow-lg">
-                    <div class="max-w-3xl mx-auto flex justify-between items-start">
-                        <div>
-                            <h1 class="text-3xl font-bold mb-2">${meetupInfo.clubName}</h1>
-                            <p class="opacity-90 font-medium text-lg mb-2 flex items-center gap-2">
-                                ${dDay ? `<span class="text-xs font-extrabold px-2 py-1 rounded shadow-sm ${dDay==='End'?'bg-slate-200 text-slate-500':'bg-white text-red-600'}">${dDay}</span>` : ''}
-                                ${meetupInfo.meetupTitle}
-                            </p>
-                            <p class="text-indigo-100 text-sm leading-relaxed max-w-xl">${meetupInfo.meetupDesc}</p>
+                <!-- HEADER -->
+                <header class="bg-indigo-600 text-white pt-8 pb-12 px-6 shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+                        <i data-lucide="message-circle" class="w-40 h-40"></i>
+                    </div>
+                    <div class="max-w-xl mx-auto relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="inline-block bg-indigo-500/50 backdrop-blur text-xs font-bold px-2 py-1 rounded text-indigo-100 border border-indigo-400/30 mb-2">
+                                ${meetupInfo.date}
+                            </span>
+                            ${ui.isAdmin ? `
+                                <button onclick="window.openSettings()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors backdrop-blur-sm">
+                                    <i data-lucide="settings" class="w-5 h-5 text-white"></i>
+                                </button>
+                            ` : ''}
                         </div>
-                        ${ui.isAdmin ? `<button onclick="state.ui.editForm = {...state.meetupInfo}; state.ui.isEditingInfo = true; window.render()" class="bg-white/10 p-2 rounded-lg">${Icons.Settings}</button>` : ''}
+                        <h1 class="text-3xl md:text-4xl font-black mb-2 leading-tight">${meetupInfo.clubName}</h1>
+                        <p class="text-indigo-100 font-medium text-lg flex items-center gap-2 opacity-90">
+                            ${state.dDay ? `<span class="bg-white text-indigo-600 text-xs font-bold px-1.5 py-0.5 rounded">${state.dDay}</span>` : ''}
+                            ${meetupInfo.meetupTitle}
+                        </p>
                     </div>
                 </header>
 
-                <main class="max-w-3xl mx-auto p-4 space-y-6 -mt-6">
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                            <div class="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0">${Icons.Calendar}</div>
-                            <div>
-                                <h3 class="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3>
-                                <p class="font-bold text-lg">${meetupInfo.date}</p>
-                                <p class="text-indigo-600 font-medium">${meetupInfo.time}</p>
-                            </div>
+                <!-- MAIN CONTENT -->
+                <main class="max-w-xl mx-auto px-4 -mt-8 relative z-20 space-y-6 pb-10">
+                    
+                    <!-- INFO CARDS -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-1 flex divide-x divide-slate-100">
+                        <div class="flex-1 p-3 flex flex-col items-center justify-center text-center">
+                            <i data-lucide="clock" class="text-indigo-500 w-5 h-5 mb-1"></i>
+                            <span class="text-xs text-slate-400 font-bold uppercase">Time</span>
+                            <span class="text-sm font-bold text-slate-800 break-keep">${meetupInfo.time}</span>
                         </div>
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
-                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600 shrink-0">${Icons.MapPin}</div>
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-slate-500 text-sm uppercase">Location</h3>
-                                <p class="font-bold text-lg">${meetupInfo.locationName}</p>
-                                <p class="text-slate-500 text-sm mb-2">${meetupInfo.locationAddress}</p>
-                                <a href="${meetupInfo.locationLink}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100">
-                                    네이버 지도 보기
-                                </a>
+                        <div class="flex-1 p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50" onclick="window.open('${meetupInfo.locationLink}')">
+                            <i data-lucide="map-pin" class="text-emerald-500 w-5 h-5 mb-1"></i>
+                            <span class="text-xs text-slate-400 font-bold uppercase">Location</span>
+                            <span class="text-sm font-bold text-slate-800 underline decoration-slate-200 underline-offset-2">${meetupInfo.locationName}</span>
+                        </div>
+                    </div>
+
+                    <!-- LEADER SECTION (Redesigned) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2">
+                             <i data-lucide="award" class="w-5 h-5 text-indigo-600"></i>
+                             <h2 class="font-bold text-lg text-indigo-900">Meet Your Host</h2>
+                        </div>
+                        <div class="p-6 flex flex-col md:flex-row gap-6">
+                            <!-- Profile Card -->
+                            <div class="w-full md:w-48 bg-slate-50 rounded-xl p-4 flex flex-col items-center border border-slate-100 shadow-sm shrink-0">
+                                 <div class="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-white shadow-sm mb-3">
+                                     <img src="${meetupInfo.leaderImage}" class="w-full h-full object-cover">
+                                 </div>
+                                 <div class="text-center">
+                                     <h3 class="font-bold text-xl text-slate-800 mb-1">${meetupInfo.leaderName}</h3>
+                                     <span class="inline-block bg-indigo-100 text-indigo-600 text-xs font-bold px-3 py-1 rounded-full">Host Leader</span>
+                                 </div>
+                            </div>
+                            <!-- Bio & Tags -->
+                            <div class="flex-1 space-y-4">
+                                 <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${meetupInfo.leaderBio}</p>
+                                 <div class="flex flex-wrap gap-2">
+                                     ${meetupInfo.leaderTags.split(',').map(tag => `
+                                         <span class="bg-white border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                                             ${tag.trim()}
+                                         </span>
+                                     `).join('')}
+                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- MERGED: TOPIC & CURRICULUM (Redesigned) -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50">
-                            <div class="text-indigo-600">${Icons.Award}</div>
-                            <h2 class="font-bold text-lg text-indigo-900">Meet Your Host</h2>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex flex-col md:flex-row gap-6 items-start">
-                                <div class="shrink-0 flex flex-col items-center justify-center w-full md:w-48 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                    <div class="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl overflow-hidden border-4 border-white shadow-md mb-3">
-                                        <img src="${meetupInfo.leaderImage}" class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="text-center w-full">
-                                        <p class="font-bold text-xl text-slate-800">${meetupInfo.leaderName}</p>
-                                        <p class="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">English Meetup Leader</p>
-                                        <button onclick="state.ui.isLeaderExpanded = !state.ui.isLeaderExpanded; window.render()" class="md:hidden w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg">
-                                            ${state.ui.isLeaderExpanded ? '접기' : '소개 보기'} ${state.ui.isLeaderExpanded ? Icons.Up : Icons.Down}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="flex-1 flex flex-col justify-center space-y-5 ${state.ui.isLeaderExpanded ? 'block' : 'hidden'} md:flex">
-                                    <div class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${meetupInfo.leaderBio}</div>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${meetupInfo.leaderTags.split(',').map(tag => `<span class="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm">${tag.trim()}</span>`).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100">
-                            <i data-lucide="message-circle" class="text-indigo-600 w-5 h-5"></i>
-                            <h2 class="font-bold text-lg text-indigo-900">This Week's Topic</h2>
-                            <button onclick="copyToClipboard('[${meetupInfo.topicTitle}] ${meetupInfo.session2Topic} - ${meetupInfo.session2Question}', '토픽 복사 완료')" class="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1">
-                                ${Icons.Copy} 토픽 복사
-                            </button>
+                        <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2">
+                             <i data-lucide="message-circle" class="w-5 h-5 text-indigo-600"></i>
+                             <h2 class="font-bold text-lg text-indigo-900">오늘의 주제</h2>
                         </div>
                         <div class="p-5">
-                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-8">
-                                <h4 class="font-bold text-indigo-600 text-sm mb-2">Today's Debate Topic</h4>
-                                <p class="text-slate-700 text-sm italic whitespace-pre-wrap">"${meetupInfo.session2Question}"</p>
+                            <div class="border border-slate-200 rounded-lg p-5 bg-white mb-4">
+                                <h4 class="text-indigo-600 font-bold text-sm mb-1">Today's Topic</h4>
+                                <p class="text-slate-800 font-medium italic">"${meetupInfo.session2Question}"</p>
                             </div>
-                            <button onclick="state.ui.showCurriculum = !state.ui.showCurriculum; window.render()" class="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 mb-4">
-                                <span class="flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> 자세한 진행 방식 확인하기</span>
-                                ${state.ui.showCurriculum ? Icons.Up : Icons.Down}
+                            
+                            <button onclick="state.ui.showCurriculum = !state.ui.showCurriculum; window.render()" 
+                                class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 px-4 rounded-lg flex items-center justify-between transition-colors">
+                                <span class="flex items-center gap-2 text-sm"><i data-lucide="book-open" class="w-4 h-4"></i> 진행 방식 자세히 보기</span>
+                                <i data-lucide="${ui.showCurriculum ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4"></i>
                             </button>
-                            ${state.ui.showCurriculum ? `
-                                <div class="animate-in space-y-6">
-                                    <div class="relative pl-4 border-l-2 border-indigo-200">
-                                        <h3 class="font-bold text-lg text-indigo-800">${meetupInfo.part1Title}</h3>
-                                        <p class="text-sm text-indigo-400 mb-2">${meetupInfo.part1Duration}</p>
-                                        <div class="space-y-2 text-sm text-slate-600">
-                                            ${[1,2,3].map(i => meetupInfo[`p1Title${i}`] ? `<div class="flex gap-2"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded font-bold h-fit">${meetupInfo[`p1Time${i}`]}</span><div><p class="font-bold">${meetupInfo[`p1Title${i}`]}</p><p>${meetupInfo[`p1Desc${i}`]}</p></div></div>` : '').join('')}
-                                        </div>
+                            
+                            ${ui.showCurriculum ? `
+                                <div class="mt-4 px-3 space-y-4 text-sm animate-in border-l-2 border-indigo-100 ml-2 pl-4">
+                                    <div class="pb-2">
+                                        <p class="font-bold text-indigo-700">${meetupInfo.part1Title} <span class="text-xs font-normal text-slate-500">(${meetupInfo.part1Duration})</span></p>
+                                        <p class="text-slate-600 text-xs mt-0.5">${meetupInfo.p1Desc}</p>
                                     </div>
-                                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                                        <h4 class="font-bold text-amber-800 text-sm">${meetupInfo.breakTitle}</h4>
-                                        <p class="text-xs text-amber-700">${meetupInfo.breakDesc}</p>
+                                    <div class="pb-2">
+                                        <p class="font-bold text-amber-700">Break Time</p>
+                                        <p class="text-slate-600 text-xs mt-0.5">${meetupInfo.breakDesc}</p>
                                     </div>
-                                    <div class="relative pl-4 border-l-2 border-indigo-200">
-                                        <h3 class="font-bold text-lg text-indigo-800">${meetupInfo.part2Title}</h3>
-                                        <p class="text-sm text-indigo-400 mb-2">${meetupInfo.part2Duration}</p>
-                                        <div class="space-y-2 text-sm text-slate-600">
-                                            ${[1,2,3].map(i => meetupInfo[`p2Title${i}`] ? `<div class="flex gap-2"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded font-bold h-fit">${meetupInfo[`p2Time${i}`]}</span><div><p class="font-bold">${meetupInfo[`p2Title${i}`]}</p><p>${meetupInfo[`p2Desc${i}`]}</p></div></div>` : '').join('')}
-                                        </div>
+                                    <div>
+                                        <p class="font-bold text-emerald-700">${meetupInfo.part2Title} <span class="text-xs font-normal text-slate-500">(${meetupInfo.part2Duration})</span></p>
+                                        <p class="text-slate-600 text-xs mt-0.5">${meetupInfo.p2Desc}</p>
                                     </div>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 ${isFull ? 'border-orange-500' : 'border-indigo-500'}">
-                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                            <i data-lucide="banknote" class="${isFull ? 'text-orange-500' : 'text-indigo-500'}"></i>
-                            ${isFull ? '대기 신청 (Join Waitlist)' : '참가 신청 (Join Us)'}
-                        </h2>
-                        
-                        <div class="mb-4 p-4 rounded text-sm space-y-2 ${isFull ? 'bg-orange-50 text-orange-900' : 'bg-indigo-50 text-indigo-900'}">
-                             ${isFull ? `
-                                <p class="font-bold">현재 정원이 마감되었습니다. 대기자로 신청됩니다.</p>
-                                <p>대기 신청은 무료이며, 빈 자리가 생기면 연락드립니다.</p>
-                             ` : `
-                                <div class="font-bold text-lg flex flex-wrap items-center gap-2">
-                                    <span>참가비:</span>
-                                    ${meetupInfo.originalFee ? `<span class="line-through text-slate-400 text-sm">${meetupInfo.originalFee}원</span>` : ''}
-                                    <span class="text-red-600">${meetupInfo.fee}원</span>
-                                </div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <span>${meetupInfo.bankName} ${meetupInfo.bankAccount} (${meetupInfo.accountHolder})</span>
-                                    <button onclick="copyToClipboard('${meetupInfo.bankAccount}', '계좌 복사 완료')" class="bg-white px-2 py-1 rounded border text-xs font-bold hover:bg-slate-100">계좌 복사</button>
-                                </div>
-                                <hr class="border-indigo-100 my-2" />
-                                <p class="text-xs text-slate-600">${meetupInfo.drinkPolicy}</p>
-                                <p class="text-xs text-slate-600 font-medium">🚫 불참 시 참가비는 반환되지 않습니다.</p>
-                             `}
+                    <!-- RSVP FORM -->
+                    <section class="bg-white rounded-xl shadow-lg border-t-4 ${isFull ? 'border-orange-500' : 'border-indigo-600'} overflow-hidden">
+                        <div class="p-5 pb-0">
+                            <h3 class="text-xl font-bold flex items-center gap-2 mb-1">
+                                <i data-lucide="check-square" class="${isFull ? 'text-orange-500' : 'text-indigo-600'}"></i> 
+                                ${isFull ? '대기 신청 (Waitlist)' : '참가 신청 (RSVP)'}
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-4">${meetupInfo.noticeMsg}</p>
+                            
+                            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 mb-4">
+                                ${isFull ? 
+                                    `<p class="text-orange-600 font-bold text-sm text-center">🚫 정원 마감! 대기자로 등록됩니다.</p>` : 
+                                    `<div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-bold text-slate-600">참가비</span>
+                                        <div class="text-right">
+                                            <span class="text-slate-400 line-through text-xs">${meetupInfo.originalFee}</span>
+                                            <span class="text-rose-600 font-black text-lg">${meetupInfo.fee}원</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-end bg-white p-2 rounded border border-slate-100">
+                                        <div class="text-xs text-slate-600">
+                                            <div class="font-bold">${meetupInfo.bankName}</div>
+                                            <div>${meetupInfo.bankAccount} (${meetupInfo.accountHolder})</div>
+                                        </div>
+                                        <button onclick="window.copyText('${meetupInfo.bankAccount}')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-2 py-1 rounded transition-colors">복사</button>
+                                    </div>`
+                                }
+                            </div>
                         </div>
 
-                        <form onsubmit="handleApply(event)" class="space-y-6">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">${Icons.User} 이름 (예금주)</label>
-                                <input type="text" value="${state.form.name}" oninput="state.form.name = this.value" placeholder="ex) 홍길동" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                                <p class="text-xs text-slate-500 mt-1.5 flex items-start gap-1" style="word-break: keep-all">
-                                    <i data-lucide="alert-circle" class="w-3 h-3 mt-0.5 text-indigo-500"></i> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.
-                                </p>
-                            </div>
-                             ${isFull ? `
+                        <form onsubmit="window.handleApply(event)" class="p-5 pt-2 space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">${Icons.Phone} 연락처</label>
-                                    <input type="tel" name="contact" value="${state.form.contact}" oninput="handleContactChange(event)" placeholder="010-0000-0000" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">입금자명 (실명)</label>
+                                    <input type="text" value="${form.name}" oninput="state.form.name=this.value; window.render()" placeholder="홍길동" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm">
                                 </div>
-                            ` : ''}
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">${Icons.Smile} 영어 이름 (Nickname)</label>
-                                <input type="text" value="${state.form.nickname}" oninput="state.form.nickname = this.value" placeholder="ex) Gil" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                                <p class="text-xs text-slate-500 mt-1.5 flex items-start gap-1" style="word-break: keep-all">
-                                    <i data-lucide="info" class="w-3 h-3 mt-0.5"></i> 참가 확정 명단에는 이 영어 이름으로 표시됩니다.
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4 text-indigo-600"></i> 성별</label>
-                                <div class="flex gap-3">
-                                    <label class="flex-1 border rounded-lg p-3 flex justify-center gap-2 cursor-pointer ${state.form.gender==='male'?'bg-indigo-50 border-indigo-500 text-indigo-700':''}">
-                                        <input type="radio" name="gender" value="male" class="hidden" onclick="state.form.gender='male'; window.render()" ${state.form.gender==='male'?'checked':''}> 👨 남성
-                                    </label>
-                                    <label class="flex-1 border rounded-lg p-3 flex justify-center gap-2 cursor-pointer ${state.form.gender==='female'?'bg-indigo-50 border-indigo-500 text-indigo-700':''}">
-                                        <input type="radio" name="gender" value="female" class="hidden" onclick="state.form.gender='female'; window.render()" ${state.form.gender==='female'?'checked':''}> 👩 여성
-                                    </label>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">닉네임 (영어)</label>
+                                    <input type="text" value="${form.nickname}" oninput="state.form.nickname=this.value; window.render()" placeholder="Hong" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm">
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4 text-indigo-600"></i> 영어 실력</label>
-                                <div class="grid gap-2">
-                                    ${['low-mid|중하|문장 구성이 서툴지만 소통 가능', 'mid|중|일상적인 주제로 대화 가능', 'mid-high|중상|다양한 주제로 의견 표현', 'high|상|자유로운 토론 가능'].map(opt => {
-                                        const [val, label, desc] = opt.split('|');
-                                        const isSel = state.form.englishLevel === val;
-                                        return `<label class="border rounded-lg p-3 flex items-center gap-3 cursor-pointer ${isSel?'bg-emerald-50 border-emerald-500 text-emerald-800':''}"><input type="radio" name="level" value="${val}" class="w-4 h-4" onclick="state.form.englishLevel='${val}'; window.render()" ${isSel?'checked':''}><div><span class="font-bold block">${label}</span><span class="text-xs opacity-80">${desc}</span></div></label>`;
-                                    }).join('')}
-                                </div>
-                                <p class="text-xs text-slate-500 mt-2 flex items-start gap-1" style="word-break: keep-all"><i data-lucide="info" class="w-3 h-3 mt-0.5"></i> 성별과 영어 실력은 팀 빌딩(조 편성) 시 활용됩니다.</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">${Icons.Lock} 비밀번호 (4자리 숫자)</label>
-                                <div class="flex gap-3">
-                                    ${[0,1,2,3].map(i => `<div class="w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xl font-bold ${state.form.password.length===i ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'bg-white'}">${state.form.password[i] || ''}</div>`).join('')}
-                                </div>
-                                <input type="tel" maxlength="4" value="${state.form.password}" oninput="this.value=this.value.replace(/[^0-9]/g,''); state.form.password=this.value; window.render()" class="mt-2 w-full p-2 border rounded" placeholder="숫자 입력">
-                                <p class="text-xs text-slate-500 mt-1 text-center">신청 취소 시 본인 확인용</p>
                             </div>
                             
-                            <div class="flex flex-col gap-1">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">영어 레벨 (Self-check)</label>
+                                <select onchange="state.form.englishLevel=this.value; window.render()" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm">
+                                    <option value="mid" ${form.englishLevel==='mid'?'selected':''}>중급 (일상 대화 가능)</option>
+                                    <option value="low" ${form.englishLevel==='low'?'selected':''}>초중급 (듣기는 가능, 말하기 연습 필요)</option>
+                                    <option value="high" ${form.englishLevel==='high'?'selected':''}>상급 (자유로운 토론 가능)</option>
+                                </select>
+                            </div>
+
+                            ${isFull ? `
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">연락처 (필수)</label>
+                                    <input type="tel" value="${form.contact}" oninput="state.form.contact=this.value; window.render()" placeholder="010-0000-0000" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm">
+                                    <p class="text-[10px] text-orange-500 mt-1">* 공석 발생 시 연락드릴 번호입니다.</p>
+                                </div>
+                            ` : ''}
+
+                            <div class="flex items-center gap-2">
+                                <label class="block text-xs font-bold text-slate-500 flex-1">신청/취소 비밀번호 (4자리)</label>
+                                <input type="tel" maxlength="4" value="${form.password}" oninput="state.form.password=this.value.replace(/[^0-9]/g,''); window.render()" placeholder="****" class="w-20 p-2.5 bg-slate-50 border rounded-lg text-center font-bold tracking-widest text-sm">
+                            </div>
+
+                            <div class="pt-2 space-y-2">
                                 ${!isFull ? `
-                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                    <input type="checkbox" ${state.form.transferred ? 'checked' : ''} onclick="state.form.transferred=this.checked; window.render()" class="w-5 h-5 text-indigo-600 rounded">
-                                    <span class="text-slate-700 font-medium">참가비 송금을 완료했습니다.</span>
-                                </label>` : ''}
-                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                    <input type="checkbox" ${state.form.rememberMe ? 'checked' : ''} onclick="state.form.rememberMe=this.checked; window.render()" class="w-5 h-5 text-indigo-600 rounded">
-                                    <span class="text-slate-700 font-medium">다음 방문 시 자동 입력합니다. (선택)</span>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 hover:bg-slate-50 rounded -ml-2">
+                                        <input type="checkbox" ${form.transferred?'checked':''} onchange="state.form.transferred=this.checked; window.render()" class="accent-indigo-600 w-4 h-4">
+                                        <span class="text-sm font-medium text-slate-700">참가비를 입금했습니다.</span>
+                                    </label>
+                                ` : ''}
+                                <label class="flex items-center gap-2 cursor-pointer p-2 hover:bg-slate-50 rounded -ml-2">
+                                    <input type="checkbox" ${form.rememberMe?'checked':''} onchange="state.form.rememberMe=this.checked; window.render()" class="accent-slate-500 w-4 h-4">
+                                    <span class="text-xs text-slate-500">다음에도 내 정보 기억하기</span>
                                 </label>
                             </div>
 
-                            ${state.ui.errorMsg ? `<p class="text-red-500 text-sm font-bold text-center animate-pulse">${state.ui.errorMsg}</p>` : ''}
-                            
-                            <button type="submit" class="w-full text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-md ${isFull ? 'bg-orange-500 hover:bg-orange-600' : 'bg-indigo-600 hover:bg-indigo-700'}">
-                                ${state.ui.loading ? '처리중...' : (isFull ? '대기자로 신청하기' : '참가 신청하기')}
+                            <button type="submit" disabled="${ui.loading}" class="w-full py-3.5 rounded-xl text-white font-bold shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isFull ? 'bg-orange-500 hover:bg-orange-600' : 'bg-indigo-600 hover:bg-indigo-700'}">
+                                ${ui.loading ? '처리 중...' : (isFull ? '대기 신청하기 (Waitlist)' : '참가 신청하기 (Submit)')}
                             </button>
                         </form>
-                    </div>
+                    </section>
 
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-bold flex gap-2 items-center"><i data-lucide="users" class="text-emerald-600"></i> 참가자 명단 (${currentCount}/${maxCap})</h2>
-                            <button onclick="state.ui.isCancelMode = !state.ui.isCancelMode; window.render()" class="text-xs px-2 py-1 rounded font-bold border ${state.ui.isCancelMode ? 'bg-slate-800 text-white' : 'bg-white'}">
-                                ${state.ui.isCancelMode ? '취소 모드 끄기' : '내 신청 취소하기'}
-                            </button>
+                    <!-- ATTENDEE LIST -->
+                    <section>
+                        <div class="flex justify-between items-center px-2 mb-3">
+                            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4"></i> 
+                                신청 현황 <span class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs">${currentCount} / ${maxCap}</span>
+                            </h3>
+                            ${!ui.isAdmin ? `
+                                <button onclick="state.ui.isCancelMode = !state.ui.isCancelMode; window.render()" class="text-xs font-bold px-2 py-1 rounded border ${ui.isCancelMode ? 'bg-slate-700 text-white' : 'bg-white text-slate-500'}">
+                                    ${ui.isCancelMode ? '완료' : '내 신청 취소'}
+                                </button>
+                            ` : ''}
                         </div>
-                        <p class="text-xs text-slate-500 bg-slate-100 p-2 rounded border" style="word-break: keep-all">
-                            <i data-lucide="info" class="w-3 h-3 inline"></i> 참가 승인은 성별 및 실력과 무관하게 선착순으로 진행됩니다.
-                        </p>
                         
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
-                            ${attendees.length === 0 ? '<div class="p-10 text-center text-slate-400">아직 신청자가 없습니다.</div>' : attendees.map(att => `
-                                <div class="p-4 flex items-center justify-between">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100 mb-6">
+                            ${attendees.length === 0 ? `<div class="p-8 text-center text-slate-400 text-sm">아직 신청자가 없습니다.<br>첫 번째 멤버가 되어주세요!</div>` : ''}
+                            
+                            ${attendees.map(user => {
+                                const isMe = state.user?.uid === user.userId;
+                                const isWaiting = user.isWaitlist;
+                                return `
+                                <div class="p-4 flex items-center justify-between group ${isWaiting ? 'bg-slate-50' : ''}">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">${(att.nickname || att.name).charAt(0)}</div>
+                                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm border-2 border-white
+                                            ${isWaiting ? 'bg-slate-200 text-slate-500' : 'bg-indigo-100 text-indigo-600'}">
+                                            ${(user.nickname || user.name).charAt(0).toUpperCase()}
+                                        </div>
                                         <div>
-                                            <p class="font-bold text-slate-800 flex items-center gap-1">
-                                                ${att.nickname || att.name}
-                                                ${state.user?.uid === att.userId ? '<span class="text-[10px] bg-indigo-100 text-indigo-700 px-1 rounded">ME</span>' : ''}
-                                                ${state.ui.isAdmin ? `<span class="text-xs font-normal text-slate-500">(${att.name})</span>` : ''}
+                                            <p class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                                                ${user.nickname || user.name}
+                                                ${isMe ? '<span class="text-[9px] border border-indigo-200 text-indigo-500 px-1 rounded">ME</span>' : ''}
+                                                ${isWaiting ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-1 rounded">대기</span>' : ''}
                                             </p>
-                                            <p class="text-xs text-slate-500">
-                                                ${state.ui.isAdmin ? `${att.gender==='male'?'남':'여'} | ${att.englishLevel} | ${att.contact || ''}` : 
-                                                  att.status === 'approved' ? '<span class="text-emerald-600 font-bold">확정</span>' : 
-                                                  att.isWaitlistApply ? '<span class="text-orange-600 font-bold">대기</span>' : '<span class="text-amber-600">승인 대기중</span>'}
+                                            <p class="text-[10px] text-slate-400 flex items-center gap-1">
+                                                ${user.paid 
+                                                    ? '<span class="text-emerald-500 font-bold flex items-center"><i data-lucide="check" class="w-3 h-3"></i> 확정됨</span>' 
+                                                    : (isWaiting ? '취소 발생 시 연락' : '<span class="text-amber-500">입금 확인 중</span>')}
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex gap-1">
-                                        ${(state.ui.isAdmin || state.ui.isCancelMode) ? 
-                                            `<button onclick="handleDeleteRequest('${att.id}')" class="text-red-500 p-1"><i data-lucide="trash-2" class="w-5 h-5"></i></button>` : ''}
-                                        ${state.ui.isAdmin && att.status !== 'approved' ? 
-                                            `<button onclick="handleApproveClick('${att.id}')" class="text-emerald-500 p-1"><i data-lucide="check-circle" class="w-5 h-5"></i></button>` : ''}
+                                    
+                                    <div class="flex items-center gap-2">
+                                        ${ui.isAdmin ? `
+                                            <button onclick="window.togglePaidStatus('${user.id}', ${user.paid})" class="p-2 rounded hover:bg-slate-100 text-xs font-bold ${user.paid ? 'text-emerald-600' : 'text-slate-400'}">
+                                                ${user.paid ? '입금O' : '입금X'}
+                                            </button>
+                                            <button onclick="state.ui.modalConfig={title:'삭제 확인',message:'${user.name}님을 삭제하시겠습니까?',onConfirm:()=>window.deleteAttendee('${user.id}'),isDestructive:true}; window.render()" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        ` : ''}
+                                        
+                                        ${(!ui.isAdmin && ui.isCancelMode && isMe) ? `
+                                            <button onclick="state.ui.targetDeleteId='${user.id}'; state.ui.cancelPasswordInput=''; state.ui.showPasswordModal=true; window.render()" class="bg-rose-50 text-rose-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-rose-100">
+                                                삭제
+                                            </button>
+                                        ` : ''}
                                     </div>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
-                        ${state.ui.isAdmin ? `
-                            <div class="flex flex-col gap-2 mt-4">
-                                <button onclick="state.ui.editForm = {...state.meetupInfo}; state.ui.isEditingInfo = true; window.render()" class="w-full py-2 bg-white border border-amber-300 text-amber-700 font-bold rounded-lg flex items-center justify-center gap-2">
-                                    ${Icons.Settings} 전체 설정 및 정보 수정
-                                </button>
-                                <button onclick="downloadCSV()" class="w-full py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold rounded-lg flex items-center justify-center gap-2">
-                                    <i data-lucide="download" class="w-4 h-4"></i> 엑셀(CSV)로 명단 저장
-                                </button>
-                                <button onclick="handleResetClick()" class="w-full py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg flex items-center justify-center gap-2">
-                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> 참가자 명단 초기화
-                                </button>
+                    </section>
+                    
+                    <!-- ETIQUETTE & FAQ (Redesigned) -->
+                    <section class="space-y-6">
+                        <!-- Etiquette -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-indigo-600"></i>
+                                <h3 class="font-bold text-lg text-indigo-900">클럽 에티켓</h3>
                             </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                        <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2 font-bold text-lg text-indigo-900">
-                            <i data-lucide="help-circle" class="w-5 h-5"></i> FAQ
-                        </div>
-                        <div class="divide-y">
-                            ${[1,2,3].map(i => meetupInfo[`faq${i}Q`] ? `
-                                <div>
-                                    <button onclick="state.ui.activeFaq = state.ui.activeFaq === ${i} ? null : ${i}; window.render()" class="w-full p-4 text-left flex justify-between font-bold text-slate-700 hover:bg-slate-50">
-                                        <span><span class="text-indigo-500">Q.</span> ${meetupInfo[`faq${i}Q`]}</span>
-                                        <span class="${state.ui.activeFaq === i ? 'rotate-180' : ''}">▼</span>
-                                    </button>
-                                    ${state.ui.activeFaq === i ? `<div class="p-4 pt-0 text-sm text-slate-600 bg-slate-50"><span class="font-bold text-emerald-600">A.</span> ${meetupInfo[`faq${i}A`]}</div>` : ''}
+                            <div class="divide-y divide-slate-100">
+                                <div class="p-5">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">👂 경청과 존중</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed">${meetupInfo.etiquette1Desc}</p>
                                 </div>
-                            ` : '').join('')}
+                                <div class="p-5">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">⏳ 공평한 발언권</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed">${meetupInfo.etiquette2Desc}</p>
+                                </div>
+                                <div class="p-5">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">🚫 순수한 목적 유지</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed">${meetupInfo.etiquette3Desc}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center">
-                        <h3 class="font-bold text-indigo-900 mb-2">궁금한 점이 더 있으신가요?</h3>
-                        <a href="${meetupInfo.openChatLink}" target="_blank" class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg shadow-sm">
-                            <i data-lucide="message-square" class="w-5 h-5"></i> 카카오톡 오픈채팅방
-                        </a>
-                    </div>
+                        <!-- FAQ -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-indigo-600"></i>
+                                <h3 class="font-bold text-lg text-indigo-900">자주 묻는 질문</h3>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                ${[1,2,3].map(i => `
+                                    <div>
+                                        <button onclick="state.ui.activeFaq = state.ui.activeFaq === ${i} ? null : ${i}; window.render()" class="w-full p-4 text-left flex justify-between font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span class="text-sm font-bold text-slate-800"><span class="text-indigo-600 mr-2 font-black">Q.</span>${meetupInfo[`faq${i}Q`]}</span>
+                                            <i data-lucide="${ui.activeFaq === i ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400"></i>
+                                        </button>
+                                        ${ui.activeFaq === i ? `
+                                            <div class="p-4 pt-0 text-sm text-slate-600 leading-relaxed bg-slate-50/50 animate-in pl-8">
+                                                <span class="font-bold text-indigo-600 mr-2 font-black">A.</span>${meetupInfo[`faq${i}A`]}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </section>
+
                 </main>
 
-                <footer class="max-w-3xl mx-auto mt-12 px-4 flex justify-between items-center text-slate-400 text-sm pb-8">
-                    <p>© 2026 ${meetupInfo.clubName}</p>
-                    <button onclick="state.ui.isAdmin ? (state.ui.isAdmin=false, window.showToast('로그아웃')) : state.ui.showAdminLogin=true; window.render()">
-                        ${state.ui.isAdmin ? '관리자 로그아웃' : '관리자 로그인'}
-                    </button>
+                <!-- FOOTER -->
+                <footer class="text-center text-xs text-slate-300 pb-10">
+                    <p class="mb-2">© 2026 ${meetupInfo.clubName}</p>
+                    ${!ui.isAdmin ? `<button onclick="state.ui.showAdminLogin=true; window.render()" class="hover:text-slate-500">Admin Login</button>` : `<button onclick="location.reload()" class="text-indigo-400">Exit Admin</button>`}
                 </footer>
 
+                <!-- ================= MODALS ================= -->
+
+                <!-- 1. ADMIN LOGIN -->
                 ${ui.showAdminLogin ? `
-                    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4">
-                        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-                            <h3 class="font-bold text-lg mb-4 text-center">관리자 로그인</h3>
-                            <input type="password" oninput="state.ui.adminPinInput=this.value" class="w-full p-3 border rounded-lg mb-4 text-center tracking-widest" placeholder="비밀번호" autofocus>
+                    <div class="fixed inset-0 bg-black/60 z-[90] flex items-center justify-center p-4 animate-in">
+                        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xs text-center">
+                            <h3 class="font-bold text-lg mb-4">관리자 로그인</h3>
+                            <input type="password" oninput="state.ui.adminPinInput=this.value" class="w-full p-3 border rounded-lg text-center tracking-widest text-xl mb-4" placeholder="PIN" autofocus>
                             <div class="flex gap-2">
-                                <button onclick="state.ui.showAdminLogin=false; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg">취소</button>
-                                <button onclick="handleLogin()" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg">확인</button>
+                                <button onclick="state.ui.showAdminLogin=false; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg font-bold">취소</button>
+                                <button onclick="window.handleAdminLogin()" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-bold">확인</button>
                             </div>
                         </div>
                     </div>
                 ` : ''}
 
+                <!-- 2. USER DELETE PASSWORD -->
                 ${ui.showPasswordModal ? `
-                    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4">
-                        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-                            <h3 class="font-bold text-lg mb-4">신청 취소 확인</h3>
-                            <p class="text-sm text-slate-600 mb-4">신청 시 입력한 비밀번호 4자리를 입력하세요.</p>
-                            <input type="tel" maxlength="4" oninput="state.ui.cancelPasswordInput=this.value" class="w-full p-3 border rounded-lg mb-4 text-center text-xl" autofocus>
+                    <div class="fixed inset-0 bg-black/60 z-[90] flex items-center justify-center p-4 animate-in">
+                        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xs">
+                            <h3 class="font-bold text-lg mb-2">신청 취소</h3>
+                            <p class="text-xs text-slate-500 mb-4">신청 시 입력한 비밀번호 4자리를 입력하세요.</p>
+                            <input type="tel" maxlength="4" oninput="state.ui.cancelPasswordInput=this.value" class="w-full p-3 border rounded-lg text-center tracking-widest text-xl mb-4" autofocus placeholder="****">
                             <div class="flex gap-2">
-                                <button onclick="state.ui.showPasswordModal=false; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg">닫기</button>
-                                <button onclick="verifyCancelPassword()" class="flex-1 py-2 bg-red-500 text-white rounded-lg">취소하기</button>
-                            </div>
-                        </div>
-                    </div>
-                ` : ''}
-                
-                ${ui.modalConfig ? `
-                    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[90] p-4">
-                        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-                            <h3 class="font-bold text-lg mb-2">${ui.modalConfig.title}</h3>
-                            <p class="text-slate-600 mb-6">${ui.modalConfig.message}</p>
-                            <div class="flex gap-2">
-                                <button onclick="state.ui.modalConfig=null; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg">취소</button>
-                                <button onclick="${ui.modalConfig.onConfirm}" class="flex-1 py-2 text-white rounded-lg ${ui.modalConfig.isDestructive?'bg-red-500':'bg-indigo-600'}">${ui.modalConfig.confirmText}</button>
+                                <button onclick="state.ui.showPasswordModal=false; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg font-bold">닫기</button>
+                                <button onclick="window.checkDeletePassword()" class="flex-1 py-2 bg-rose-500 text-white rounded-lg font-bold">삭제</button>
                             </div>
                         </div>
                     </div>
                 ` : ''}
 
+                <!-- 3. CONFIRMATION MODAL -->
+                ${ui.modalConfig ? `
+                    <div class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 animate-in">
+                        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+                            <h3 class="font-bold text-lg mb-2">${ui.modalConfig.title}</h3>
+                            <p class="text-sm text-slate-600 mb-6">${ui.modalConfig.message}</p>
+                            <div class="flex gap-2">
+                                <button onclick="state.ui.modalConfig=null; window.render()" class="flex-1 py-2 bg-slate-100 rounded-lg font-bold">취소</button>
+                                <button onclick="state.ui.modalConfig.onConfirm()" class="flex-1 py-2 text-white rounded-lg font-bold ${ui.modalConfig.isDestructive?'bg-rose-500':'bg-indigo-600'}">확인</button>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- 4. FULL SETTINGS EDITOR (ADMIN) -->
                 ${ui.isEditingInfo ? `
-                    <div class="fixed inset-0 bg-black/60 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-                        <div class="bg-white rounded-t-xl sm:rounded-xl w-full max-w-lg flex flex-col max-h-[90vh]">
-                            <div class="p-4 border-b flex justify-between items-center">
-                                <h3 class="font-bold">설정 수정</h3>
-                                <button onclick="state.ui.isEditingInfo=false; window.render()"><i data-lucide="x-circle"></i></button>
-                            </div>
-                            <div class="overflow-y-auto p-4 space-y-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500">날짜</label>
-                                    <input type="text" value="${ui.editForm.date}" oninput="state.ui.editForm.date=this.value" class="w-full border p-2 rounded">
+                    <div class="fixed inset-0 bg-slate-100 z-[80] flex flex-col animate-slide-up">
+                        <div class="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
+                            <h3 class="font-bold text-lg">모임 설정 수정</h3>
+                            <button onclick="state.ui.isEditingInfo=false; window.render()" class="p-2 bg-slate-100 rounded-full hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        </div>
+                        
+                        <div class="flex bg-white border-b sticky top-0 z-10">
+                            ${TabButton('basic', '기본', 'calendar')}
+                            ${TabButton('topic', '주제', 'message-circle')}
+                            ${TabButton('leader', '리더', 'user')}
+                            ${TabButton('bank', '운영', 'credit-card')}
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-5 pb-24">
+                            ${ui.activeSettingTab === 'basic' ? `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                                    <h4 class="font-bold text-indigo-600 mb-3 text-sm border-b pb-2">기본 정보</h4>
+                                    ${EditInput('모임 이름 (Club Name)', 'clubName')}
+                                    ${EditInput('모임 타이틀', 'meetupTitle')}
+                                    ${EditInput('날짜 (예: 2026년 2월 8일)', 'date')}
+                                    ${EditInput('시간', 'time')}
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500">시간</label>
-                                    <input type="text" value="${ui.editForm.time}" oninput="state.ui.editForm.time=this.value" class="w-full border p-2 rounded">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <h4 class="font-bold text-emerald-600 mb-3 text-sm border-b pb-2">장소 정보</h4>
+                                    ${EditInput('장소명', 'locationName')}
+                                    ${EditInput('주소', 'locationAddress')}
+                                    ${EditInput('지도 링크 (URL)', 'locationLink')}
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500">토론 질문</label>
-                                    <textarea oninput="state.ui.editForm.session2Question=this.value" class="w-full border p-2 rounded h-20">${ui.editForm.session2Question}</textarea>
+                            ` : ''}
+
+                            ${ui.activeSettingTab === 'topic' ? `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                                    <h4 class="font-bold text-indigo-600 mb-3 text-sm border-b pb-2">메인 토론 주제</h4>
+                                    ${EditInput('주제 타이틀 (예: Travel)', 'topicTitle')}
+                                    ${EditInput('토론 질문 (전체 문장)', 'session2Question', 'textarea')}
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500">리더 이미지 (파일)</label>
-                                    <input type="file" id="leaderImageInput" accept="image/*" class="w-full text-xs">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <h4 class="font-bold text-slate-600 mb-3 text-sm border-b pb-2">커리큘럼 상세</h4>
+                                    ${EditInput('Part 1 제목', 'part1Title')}
+                                    ${EditInput('Part 1 설명', 'p1Desc')}
+                                    ${EditInput('Part 2 제목', 'part2Title')}
+                                    ${EditInput('Part 2 설명', 'p2Desc')}
                                 </div>
-                            </div>
-                            <div class="p-4 border-t flex gap-2">
-                                <button onclick="state.ui.isEditingInfo=false; window.render()" class="flex-1 py-3 border rounded-lg">취소</button>
-                                <button onclick="saveInfo()" class="flex-1 py-3 bg-indigo-600 text-white rounded-lg">저장</button>
-                            </div>
+                            ` : ''}
+
+                            ${ui.activeSettingTab === 'leader' ? `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <h4 class="font-bold text-indigo-600 mb-3 text-sm border-b pb-2">호스트 정보</h4>
+                                    ${EditInput('리더 이름', 'leaderName')}
+                                    ${EditInput('리더 소개', 'leaderBio', 'textarea')}
+                                    ${EditInput('리더 태그 (콤마로 구분)', 'leaderTags')} <!-- Added Leader Tags Input -->
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">리더 이미지</label>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-12 h-12 rounded-full bg-slate-100 overflow-hidden border">
+                                                <img src="${ui.editForm.leaderImage}" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1">
+                                                <input type="text" value="${ui.editForm.leaderImage}" oninput="state.ui.editForm.leaderImage=this.value; window.render()" class="w-full p-2 border rounded text-xs mb-1" placeholder="이미지 URL 입력">
+                                                <input type="file" onchange="window.handleImageFile(this)" class="text-xs text-slate-500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${ui.activeSettingTab === 'bank' ? `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                                    <h4 class="font-bold text-indigo-600 mb-3 text-sm border-b pb-2">계좌 및 회비</h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        ${EditInput('은행명', 'bankName')}
+                                        ${EditInput('예금주', 'accountHolder')}
+                                    </div>
+                                    ${EditInput('계좌번호', 'bankAccount')}
+                                    <div class="grid grid-cols-2 gap-3">
+                                        ${EditInput('할인 회비', 'fee')}
+                                        ${EditInput('정가(취소선)', 'originalFee')}
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                                    <h4 class="font-bold text-indigo-600 mb-3 text-sm border-b pb-2">기타 설정</h4>
+                                    ${EditInput('최대 정원 (숫자)', 'maxCapacity', 'number')}
+                                    ${EditInput('음료 정책 안내', 'drinkPolicy')}
+                                    ${EditInput('상단 공지 메시지', 'noticeMsg')}
+                                </div>
+                                <button onclick="window.downloadCSV()" class="w-full py-3 border-2 border-emerald-500 text-emerald-600 font-bold rounded-lg flex items-center justify-center gap-2">
+                                    <i data-lucide="download"></i> 참가자 명단 엑셀 다운로드
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="p-4 bg-white border-t flex gap-3">
+                            <button onclick="state.ui.isEditingInfo=false; window.render()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">취소</button>
+                            <button onclick="window.saveSettings()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">저장하기</button>
                         </div>
                     </div>
                 ` : ''}
@@ -768,50 +853,65 @@
         }
 
         // --- Init ---
-        let unsubscribeConfig = null;
-        let unsubscribeAttendees = null;
+        let listenersInitialized = false;
 
-        const initListeners = () => {
-             if (unsubscribeConfig) return; 
+        const startListeners = () => {
+            if (listenersInitialized) return;
+            listenersInitialized = true;
 
-             unsubscribeConfig = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), (snap) => {
+            // Meetup Info Listener
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), (snap) => {
                 if (snap.exists()) {
                     state.meetupInfo = { ...state.meetupInfo, ...snap.data() };
                     state.dDay = calculateDDay(state.meetupInfo.date);
                     window.render();
                 }
-            }, (error) => {
-                console.error("Config Listener Error:", error);
-            });
+            }, (error) => console.error("Config Listener Error:", error));
 
-            unsubscribeAttendees = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), (snap) => {
+            // Attendees Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION), (snap) => {
                 const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Sort: Approved first, then by time
                 state.attendees = data.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
                 window.render();
-            }, (error) => {
-                console.error("Attendees Listener Error:", error);
+            }, (error) => console.error("Attendees Listener Error:", error));
+        };
+
+        const init = async () => {
+            // Load LocalStorage
+            const saved = localStorage.getItem('meetup_user');
+            if (saved) state.form = { ...state.form, ...JSON.parse(saved), rememberMe: true };
+
+            window.render = () => {
+                const appEl = document.getElementById('app');
+                if (appEl) appEl.innerHTML = App();
+                if (window.lucide) lucide.createIcons();
+            };
+
+            // Setup Auth State Listener First
+            onAuthStateChanged(auth, (user) => {
+                state.user = user;
+                window.render();
+                
+                // Only start data listeners if user is authenticated
+                if (user) {
+                    startListeners();
+                }
             });
-        };
 
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            // Trigger Auth
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Auth Init Error:", e);
             }
         };
-        
-        onAuthStateChanged(auth, (u) => {
-            state.user = u;
-            if (u) {
-                initListeners();
-            }
-            window.render();
-        });
 
-        initAuth();
-        window.render();
-
+        init();
     </script>
 </body>
 </html>
