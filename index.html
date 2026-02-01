@@ -7,9 +7,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    
     <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
 
     <script type="importmap">
@@ -41,17 +38,14 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-        // 전역 객체 사용
-        const { useState, useEffect, useRef } = React;
-        const { createRoot } = ReactDOM;
-
-        // 모듈 Import
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
         import { initializeApp } from 'firebase/app';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-        import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity, User, MessageSquare } from 'lucide-react';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
+        import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity, User, MessageSquare, Download, RefreshCw, AlertTriangle } from 'lucide-react';
 
-        // Firebase 초기화
+        // Firebase Init
         const firebaseConfigRaw = window.__firebase_config;
         let firebaseConfig = {};
         try { firebaseConfig = JSON.parse(firebaseConfigRaw); } catch (e) {}
@@ -74,48 +68,39 @@
           const [user, setUser] = useState(null);
           const [attendees, setAttendees] = useState([]);
           
-          // --- 데이터 상태 (초기값 복구) ---
           const [meetupInfo, setMeetupInfo] = useState({
-            // Header
             clubName: "Jett's English Crew",
             meetupTitle: "성북 중상급 영어회화 & 토론",
             meetupDesc: "일상 회화를 자유롭게 구사하는 것을 넘어서 더 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
-            // Basic Info
             date: "2026년 2월 1일 (일)", time: "오전 10:00 - 12:00",
             locationName: "탐앤탐스 성신여대점", locationAddress: "서울 성북구 동소문로22길 31",
             locationLink: "https://map.naver.com/v5/search/탐앤탐스%20성신여대점",
-            // Curriculum
             part1Title: "Part 1. Warm-up & Session 1", part1Duration: "50 min",
-            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화 (Ice-breaking)",
+            p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "Ice-breaking",
             p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 심층 토론",
             breakTitle: "Break (10 min)", breakDesc: "Seat Change: 파트너 교체",
             part2Title: "Part 2. Session 2 & Wrap-up", part2Duration: "50 min",
             p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
             p2Time2: "30'", p2Title2: "Reading & Discussion 2", p2Desc2: "두 번째 지문 독해 및 의견 교환",
             p2Time3: "10'", p2Title3: "Closing", p2Desc3: "소감 공유 및 마무리",
-            // Topic
-            topicTitle: "Travel & Adventure", session2Topic: "Travel Styles", 
-            session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
-            // Settings
+            topicTitle: "Travel & Adventure", session2Topic: "Travel Styles", session2Question: "Do you prefer planning every detail of a trip or being spontaneous? What are the pros and cons?",
             maxCapacity: 8, fee: "1,000", originalFee: "3,000", 
             drinkPolicy: "☕ 개인 음료는 별도로 주문해주세요 (1인 1메뉴)", 
             bankName: "카카오뱅크", bankAccount: "3333-26-2044919", accountHolder: "홍길동",
-            // Leader
-            leaderName: "Jett", leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett&backgroundColor=c0aede", 
-            leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다. '완벽함'보다는 '소통의 즐거움'을 중요하게 생각합니다.",
-            leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+",
-            // Rules & FAQ
+            leaderName: "Jett", leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett", 
+            leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 영어 학습자입니다.",
+            leaderTags: "TESOL 수료, 호주 워킹홀리데이",
             etiquetteTitle: "클럽 규칙", 
-            etiquette1Title: "👂 서로를 존중하고 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
-            etiquette2Title: "⏳ 발언권은 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
-            etiquette3Title: "🚫 순수한 학습 모임입니다", etiquette3Desc: "종교 활동, 영업, 이성 교제 목적의 참여는 엄격히 금지합니다.",
+            etiquette1Title: "👂 경청해요", etiquette1Desc: "타인의 발언 중에는 핸드폰 사용을 자제하고 귀 기울여주세요.",
+            etiquette2Title: "⏳ 공평하게", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요.",
+            etiquette3Title: "🚫 순수 학습", etiquette3Desc: "영업, 이성 교제 목적의 참여는 금지합니다.",
             openChatLink: "https://open.kakao.com/o/sExample", 
-            faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 어렵습니다. 인근 공영주차장을 이용하시거나 대중교통 이용을 권장드립니다.",
-            faq2Q: "영어를 잘 못해도 되나요?", faq2A: "물론입니다! 중상급 지향이지만, 틀리는 것을 두려워하지 않고 즐겁게 소통하려는 마음만 있다면 충분합니다.",
-            faq3Q: "준비물이 있나요?", faq3A: "가벼운 마음으로 오시면 됩니다. 필요한 학습 자료는 리더가 준비해 드립니다.",
+            faq1Q: "주차 가능한가요?", faq1A: "불가합니다.",
+            faq2Q: "영어를 잘 못해도 되나요?", faq2A: "즐겁게 소통하려는 마음만 있다면 충분합니다.",
+            faq3Q: "준비물이 있나요?", faq3A: "가벼운 마음으로 오시면 됩니다.",
           });
 
-          // 폼 상태
+          // Form States
           const [name, setName] = useState('');
           const [nickname, setNickname] = useState('');
           const [contact, setContact] = useState('');
@@ -125,7 +110,7 @@
           const [transferred, setTransferred] = useState(false);
           const [rememberMe, setRememberMe] = useState(false);
           
-          // UI 상태
+          // UI States
           const [isAdmin, setIsAdmin] = useState(false);
           const [showAdminLogin, setShowAdminLogin] = useState(false);
           const [adminPinInput, setAdminPinInput] = useState('');
@@ -134,15 +119,16 @@
           const [copied, setCopied] = useState(false);
           const [dDay, setDDay] = useState('');
           
-          // 접기/펴기 상태
+          // Toggle States
           const [showCurriculum, setShowCurriculum] = useState(false);
           const [isLeaderExpanded, setIsLeaderExpanded] = useState(false);
           const [activeFaq, setActiveFaq] = useState(null);
           const [activeEtiquette, setActiveEtiquette] = useState(null);
 
-          // 모달 상태
+          // Modal & Logic States
           const [isEditingInfo, setIsEditingInfo] = useState(false);
           const [editForm, setEditForm] = useState({});
+          const [expandedSections, setExpandedSections] = useState({header:true});
           const [isCancelMode, setIsCancelMode] = useState(false);
           const [showPasswordModal, setShowPasswordModal] = useState(false);
           const [cancelPasswordInput, setCancelPasswordInput] = useState('');
@@ -194,30 +180,38 @@
             } catch(e) {}
           }, [meetupInfo.date]);
 
-          // --- Handlers ---
+          // --- Helper Functions ---
           const showToast = (msg, type='success') => { setToast({message: msg, type}); setTimeout(() => setToast(null), 3000); };
           const handleCopyAccount = () => {
             navigator.clipboard.writeText(meetupInfo.bankAccount);
-            setCopied(true); setTimeout(() => setCopied(false), 2000); showToast('계좌번호가 복사되었습니다.');
+            setCopied(true); setTimeout(() => setCopied(false), 2000); showToast('계좌번호 복사됨');
           };
           const handleCopyTopic = () => {
              const txt = `[${meetupInfo.topicTitle}]\n\n${meetupInfo.session2Topic}\n"${meetupInfo.session2Question}"`;
-             navigator.clipboard.writeText(txt); showToast("토픽이 복사되었습니다.");
+             navigator.clipboard.writeText(txt); showToast("토픽 복사됨");
+          };
+          const handleImageUpload = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 500 * 1024) return showToast("이미지 500KB 이하만 가능", "error");
+            const reader = new FileReader();
+            reader.onloadend = () => setEditForm(prev => ({ ...prev, leaderImage: reader.result }));
+            reader.readAsDataURL(file);
           };
 
+          // --- Logic ---
           const approvedList = attendees.filter(a => a.status === 'approved');
-          const pendingList = attendees.filter(a => a.status === 'pending');
-          const effectiveCount = approvedList.length + pendingList.filter(a => a.paid).length;
+          const effectiveCount = approvedList.length + attendees.filter(a => a.status === 'pending' && a.paid).length;
           const currentMaxCapacity = parseInt(meetupInfo.maxCapacity) || 8;
           const isFull = effectiveCount >= currentMaxCapacity;
 
           const handleApply = async (e) => {
             e.preventDefault();
             if (!auth) return showToast("DB 연결 실패", 'error');
-            if (!name.trim()) return setErrorMsg('이름을 입력해주세요.');
-            if (!isFull && !transferred) return setErrorMsg('참가비 송금 후 체크해주세요.');
-            if (isFull && !contact.trim()) return setErrorMsg('대기 신청 시 연락처는 필수입니다.');
-            if (!password || password.length < 4) return setErrorMsg('비밀번호 4자리를 입력해주세요.');
+            if (!name.trim()) return setErrorMsg('이름 필수');
+            if (!isFull && !transferred) return setErrorMsg('송금 체크 필수');
+            if (isFull && !contact.trim()) return setErrorMsg('연락처 필수');
+            if (!password || password.length < 4) return setErrorMsg('비밀번호 4자리 필수');
 
             setLoading(true);
             try {
@@ -228,9 +222,8 @@
                 });
                 if(rememberMe) localStorage.setItem('meetup_user_info', JSON.stringify({name, nickname, contact, password, gender, englishLevel}));
                 else localStorage.removeItem('meetup_user_info');
-                
                 setName(''); setNickname(''); setContact(''); setPassword(''); setErrorMsg('');
-                showToast(isFull ? '대기 신청 완료!' : '신청 완료!');
+                showToast(isFull ? '대기 신청 완료' : '신청 완료');
             } catch(e) { console.error(e); showToast('오류 발생', 'error'); }
             setLoading(false);
           };
@@ -239,7 +232,7 @@
               if(isAdmin) {
                   setModalConfig({title: '삭제', message: '정말 삭제하시겠습니까?', onConfirm: async() => {
                       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id));
-                      setModalConfig(null); showToast('삭제되었습니다.');
+                      setModalConfig(null); showToast('삭제됨');
                   }});
               } else {
                   setTargetDeleteId(id); setShowPasswordModal(true); 
@@ -250,24 +243,52 @@
              const target = attendees.find(a => a.id === targetDeleteId);
              if(target && target.password === cancelPasswordInput) {
                  await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, targetDeleteId));
-                 showToast('신청이 취소되었습니다.'); setShowPasswordModal(false); setCancelPasswordInput('');
+                 showToast('취소 완료'); setShowPasswordModal(false); setCancelPasswordInput('');
              } else {
-                 showToast('비밀번호가 일치하지 않습니다.', 'error');
+                 showToast('비밀번호 불일치', 'error');
              }
           };
 
           const handleApprove = async (id) => {
-              if(approvedList.length >= currentMaxCapacity) {
-                  if(!confirm('정원 초과입니다. 승인하시겠습니까?')) return;
-              }
+              if(approvedList.length >= currentMaxCapacity) if(!confirm('정원 초과입니다. 승인하시겠습니까?')) return;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, id), {status: 'approved', paid: true});
               showToast('승인 완료');
           };
 
+          const saveInfo = async () => {
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), editForm);
+            setIsEditingInfo(false); showToast('저장 완료');
+          };
+
+          const openEditModal = () => { setEditForm({...meetupInfo}); setIsEditingInfo(true); };
+          const toggleEditSection = (key) => setExpandedSections(prev => ({...prev, [key]: !prev[key]}));
+
+          const downloadCSV = () => {
+             if(attendees.length===0) return showToast('데이터 없음','error');
+             const headers = ['이름','닉네임','연락처','성별','레벨','상태','입금여부','신청시간'];
+             const rows = attendees.map(a => [a.name, a.nickname, a.contact, a.gender, a.englishLevel, a.status, a.paid?'Y':'N', new Date(a.createdAt?.seconds*1000).toLocaleString()]);
+             const csv = '\uFEFF' + [headers, ...rows].map(e => e.join(',')).join('\n');
+             const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+             link.download = `attendees_${new Date().toISOString().slice(0,10)}.csv`; link.click();
+          };
+
+          const handleReset = () => {
+             setModalConfig({title:'초기화', message:'모든 참가자 데이터를 삭제하시겠습니까?', isDestructive:true, onConfirm: async() => {
+                 const batch = writeBatch(db);
+                 attendees.forEach(a => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', ATTENDEES_COLLECTION, a.id)));
+                 await batch.commit(); setModalConfig(null); showToast('초기화 완료');
+             }});
+          };
+
+          const EditSectionHeader = ({title, sectionKey}) => (
+             <button onClick={()=>toggleEditSection(sectionKey)} className="w-full flex justify-between p-3 bg-slate-50 border-b font-bold text-slate-700">
+                <span>{title}</span> {expandedSections[sectionKey]?<ChevronUp size={18}/>:<ChevronDown size={18}/>}
+             </button>
+          );
+
           // --- Render ---
           return (
             <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 relative">
-              {/* Header */}
               <header className="bg-indigo-600 text-white p-6 shadow-lg">
                 <div className="max-w-3xl mx-auto flex justify-between items-start">
                     <div>
@@ -278,379 +299,115 @@
                         </p>
                         <p className="text-indigo-100 text-sm mt-2 leading-relaxed">{meetupInfo.meetupDesc}</p>
                     </div>
-                    {isAdmin && <button onClick={()=>setIsEditingInfo(true)} className="bg-white/10 p-2 rounded hover:bg-white/20"><Settings size={20}/></button>}
+                    {isAdmin && <button onClick={openEditModal} className="bg-white/10 p-2 rounded hover:bg-white/20"><Settings size={20}/></button>}
                 </div>
               </header>
 
               <main className="max-w-3xl mx-auto p-4 space-y-6 -mt-6">
-                
-                {/* Info Cards */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
                     <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 shrink-0"><Calendar size={24} /></div>
-                    <div>
-                      <h3 className="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3>
-                      <p className="font-bold text-lg">{meetupInfo.date}</p>
-                      <p className="text-indigo-600 font-medium">{meetupInfo.time}</p>
-                    </div>
+                    <div><h3 className="font-semibold text-slate-500 text-sm uppercase">Date & Time</h3><p className="font-bold text-lg">{meetupInfo.date}</p><p className="text-indigo-600 font-medium">{meetupInfo.time}</p></div>
                   </div>
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4">
                     <div className="bg-emerald-100 p-3 rounded-full text-emerald-600 shrink-0"><MapPin size={24} /></div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-slate-500 text-sm uppercase">Location</h3>
-                      <p className="font-bold text-lg">{meetupInfo.locationName}</p>
-                      <p className="text-slate-500 text-sm mb-2">{meetupInfo.locationAddress}</p>
-                      <a href={meetupInfo.locationLink} target="_blank" className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100"><ExternalLink size={12}/> 지도 보기</a>
-                    </div>
+                    <div className="flex-1"><h3 className="font-semibold text-slate-500 text-sm uppercase">Location</h3><p className="font-bold text-lg">{meetupInfo.locationName}</p><p className="text-slate-500 text-sm mb-2">{meetupInfo.locationAddress}</p><a href={meetupInfo.locationLink} target="_blank" className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100"><ExternalLink size={12}/> 지도 보기</a></div>
                   </div>
                 </div>
 
-                {/* --- Leader Section (복구됨) --- */}
                 {meetupInfo.leaderName && (
                   <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50">
-                      <Award size={20} className="text-indigo-600" />
-                      <h2 className="font-bold text-lg text-indigo-900">Meet Your Host</h2>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex flex-col md:flex-row gap-6 items-start">
+                    <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex items-center gap-2 border-b border-indigo-50"><Award size={20} className="text-indigo-600"/><h2 className="font-bold text-lg text-indigo-900">Host</h2></div>
+                    <div className="p-6 flex flex-col md:flex-row gap-6 items-start">
                          <div className="shrink-0 flex flex-col items-center justify-center w-full md:w-48 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                            <div className="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl overflow-hidden border-4 border-white shadow-md mb-3">
-                              <img src={meetupInfo.leaderImage} alt="Leader" className="w-full h-full object-cover"/>
-                            </div>
-                            <div className="text-center w-full">
-                              <p className="font-bold text-xl text-slate-800">{meetupInfo.leaderName}</p>
-                              <p className="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">Leader</p>
-                              <button onClick={() => setIsLeaderExpanded(!isLeaderExpanded)} className="w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg md:hidden">
-                                  {isLeaderExpanded ? '접기' : '소개 보기'} {isLeaderExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
-                              </button>
-                            </div>
+                            <img src={meetupInfo.leaderImage} className="w-24 h-24 md:w-full md:h-auto md:aspect-square rounded-full md:rounded-xl border-4 border-white shadow-md mb-3 object-cover" onError={(e)=>e.target.src="https://api.dicebear.com/9.x/avataaars/svg?seed=Fallback"}/>
+                            <div className="text-center w-full"><p className="font-bold text-xl text-slate-800">{meetupInfo.leaderName}</p><p className="text-xs text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-1 mb-3">Leader</p><button onClick={() => setIsLeaderExpanded(!isLeaderExpanded)} className="w-full py-2 flex items-center justify-center gap-1 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg md:hidden">{isLeaderExpanded ? '접기' : '소개 보기'} {isLeaderExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}</button></div>
                          </div>
-                         <div className={`flex-1 flex flex-col justify-center space-y-5 ${isLeaderExpanded ? 'block' : 'hidden'} md:flex`}>
-                             <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{meetupInfo.leaderBio}</div>
-                             {meetupInfo.leaderTags && (
-                              <div>
-                                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Activity size={12}/> Background</h3>
-                                <div className="flex flex-wrap gap-2">
-                                  {meetupInfo.leaderTags.split(',').map((tag, idx) => (
-                                    <span key={idx} className="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm flex items-center gap-1.5">
-                                      <CheckCircle size={12} className="text-indigo-400"/> {tag.trim()}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                         </div>
-                      </div>
+                         <div className={`flex-1 flex flex-col justify-center space-y-5 ${isLeaderExpanded ? 'block' : 'hidden'} md:flex`}><div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{meetupInfo.leaderBio}</div>{meetupInfo.leaderTags && (<div><h3 className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Activity size={12}/> Background</h3><div className="flex flex-wrap gap-2">{meetupInfo.leaderTags.split(',').map((tag, idx) => (<span key={idx} className="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 shadow-sm flex items-center gap-1.5"><CheckCircle size={12} className="text-indigo-400"/> {tag.trim()}</span>))}</div></div>)}</div>
                     </div>
                   </div>
                 )}
 
-                {/* --- Topic Section (복구됨) --- */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                  <div className="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100">
-                    <MessageCircle size={20} className="text-indigo-600" />
-                    <h2 className="font-bold text-lg text-indigo-900">This Week's Topic</h2>
-                    <button onClick={handleCopyTopic} className="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-50"><Copy size={12}/> 토픽 복사</button>
-                  </div>
+                  <div className="bg-indigo-50 p-4 flex items-center gap-2 border-b border-indigo-100"><MessageCircle size={20} className="text-indigo-600"/><h2 className="font-bold text-lg text-indigo-900">Topic</h2><button onClick={handleCopyTopic} className="ml-auto text-xs bg-white text-indigo-600 border border-indigo-200 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-50"><Copy size={12}/> 복사</button></div>
                   <div className="p-5">
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
-                      <h4 className="font-bold text-indigo-600 text-sm mb-2">Today's Discussion</h4>
-                      <p className="text-slate-700 text-sm italic whitespace-pre-wrap">"{meetupInfo.session2Question}"</p>
-                    </div>
-                    <button onClick={() => setShowCurriculum(!showCurriculum)} className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 mb-4">
-                      <span className="flex items-center gap-2"><BookOpen size={18}/> 상세 커리큘럼 확인하기</span>
-                      {showCurriculum ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
-                    </button>
-                    {showCurriculum && (
-                      <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-6">
-                        <div>
-                            <h3 className="font-bold text-indigo-800">{meetupInfo.part1Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part1Duration}</span></h3>
-                            <div className="mt-2 space-y-2">
-                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time1}</span> <span>{meetupInfo.p1Title1} - {meetupInfo.p1Desc1}</span></div>
-                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time2}</span> <span>{meetupInfo.p1Title2} - {meetupInfo.p1Desc2}</span></div>
-                            </div>
-                        </div>
-                        <div className="bg-amber-50 p-3 rounded text-amber-800 text-sm font-bold flex gap-2"><ArrowRightLeft size={16}/> {meetupInfo.breakTitle}: {meetupInfo.breakDesc}</div>
-                        <div>
-                            <h3 className="font-bold text-indigo-800">{meetupInfo.part2Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part2Duration}</span></h3>
-                            <div className="mt-2 space-y-2">
-                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time1}</span> <span>{meetupInfo.p2Title1} - {meetupInfo.p2Desc1}</span></div>
-                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time2}</span> <span>{meetupInfo.p2Title2} - {meetupInfo.p2Desc2}</span></div>
-                                <div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time3}</span> <span>{meetupInfo.p2Title3} - {meetupInfo.p2Desc3}</span></div>
-                            </div>
-                        </div>
-                      </div>
-                    )}
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6"><h4 className="font-bold text-indigo-600 text-sm mb-2">Today's Discussion</h4><p className="text-slate-700 text-sm italic whitespace-pre-wrap">"{meetupInfo.session2Question}"</p></div>
+                    <button onClick={() => setShowCurriculum(!showCurriculum)} className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100 mb-4"><span className="flex items-center gap-2"><BookOpen size={18}/> 상세 커리큘럼</span>{showCurriculum ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}</button>
+                    {showCurriculum && (<div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-6"><div><h3 className="font-bold text-indigo-800">{meetupInfo.part1Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part1Duration}</span></h3><div className="mt-2 space-y-2"><div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time1}</span> <span>{meetupInfo.p1Title1} - {meetupInfo.p1Desc1}</span></div><div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p1Time2}</span> <span>{meetupInfo.p1Title2} - {meetupInfo.p1Desc2}</span></div></div></div><div className="bg-amber-50 p-3 rounded text-amber-800 text-sm font-bold flex gap-2"><ArrowRightLeft size={16}/> {meetupInfo.breakTitle}: {meetupInfo.breakDesc}</div><div><h3 className="font-bold text-indigo-800">{meetupInfo.part2Title} <span className="text-xs font-normal text-indigo-400">{meetupInfo.part2Duration}</span></h3><div className="mt-2 space-y-2"><div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time1}</span> <span>{meetupInfo.p2Title1} - {meetupInfo.p2Desc1}</span></div><div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time2}</span> <span>{meetupInfo.p2Title2} - {meetupInfo.p2Desc2}</span></div><div className="text-sm flex gap-2"><span className="font-bold w-10 text-indigo-600">{meetupInfo.p2Time3}</span> <span>{meetupInfo.p2Title3} - {meetupInfo.p2Desc3}</span></div></div></div></div>)}
                   </div>
                 </div>
 
-                {/* Apply Form */}
                 <div className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${isFull ? 'border-orange-500' : 'border-indigo-500'}`}>
-                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                     <Banknote className={isFull?"text-orange-500":"text-indigo-500"} /> 
-                     {isFull ? '대기 신청 (Join Waitlist)' : '참가 신청 (Join Us)'}
-                   </h2>
-
+                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Banknote className={isFull?"text-orange-500":"text-indigo-500"}/>{isFull ? '대기 신청 (Join Waitlist)' : '참가 신청 (Join Us)'}</h2>
                    <div className={`mb-6 p-4 rounded text-sm ${isFull?'bg-orange-50 text-orange-900':'bg-indigo-50 text-indigo-900'}`}>
-                      {isFull ? (
-                          <>
-                            <p className="font-bold mb-2">🕒 현재 정원 마감되었습니다.</p>
-                            <p>대기 신청은 무료이며, 빈 자리가 생기면 연락드립니다.</p>
-                          </>
-                      ) : (
-                          <>
-                            <div className="font-bold text-lg flex items-center gap-2">
-                                <span>💡 참가비:</span>
-                                <span className="text-red-600">{meetupInfo.fee}원</span>
-                                {meetupInfo.originalFee && <span className="line-through text-slate-400 text-sm">{meetupInfo.originalFee}원</span>}
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-2 items-center">
-                                <span>{meetupInfo.bankName} {meetupInfo.bankAccount} ({meetupInfo.accountHolder})</span>
-                                <button onClick={handleCopyAccount} className="bg-white border px-2 py-1 rounded text-xs font-bold hover:bg-slate-50 flex items-center gap-1">
-                                    {copied ? <CheckCircle size={12}/> : <Copy size={12}/>} 복사
-                                </button>
-                            </div>
-                            <p className="mt-2 text-xs opacity-70 flex items-center gap-1">☕ {meetupInfo.drinkPolicy}</p>
-                          </>
-                      )}
+                      {isFull ? (<><p className="font-bold mb-2">🕒 현재 정원 마감되었습니다.</p><p>대기 신청은 무료이며, 빈 자리가 생기면 연락드립니다.</p></>) : (<><div className="font-bold text-lg flex items-center gap-2"><span>💡 참가비:</span><span className="text-red-600">{meetupInfo.fee}원</span>{meetupInfo.originalFee && <span className="line-through text-slate-400 text-sm">{meetupInfo.originalFee}원</span>}</div><div className="flex flex-wrap gap-2 mt-2 items-center"><span>{meetupInfo.bankName} {meetupInfo.bankAccount} ({meetupInfo.accountHolder})</span><button onClick={handleCopyAccount} className="bg-white border px-2 py-1 rounded text-xs font-bold hover:bg-slate-50 flex items-center gap-1">{copied ? <CheckCircle size={12}/> : <Copy size={12}/>} 복사</button></div><p className="mt-2 text-xs opacity-70 flex items-center gap-1">☕ {meetupInfo.drinkPolicy}</p></>)}
                    </div>
-
                    <form onSubmit={handleApply} className="space-y-6">
-                      {/* 이름 */}
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><User size={16} className="text-indigo-600"/> 이름 (예금주)</label>
-                        <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="ex) 홍길동" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
-                        {/* 디자인 복구: 안내 문구 */}
-                        <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
-                          <AlertCircle size={12} className="shrink-0 mt-0.5 text-indigo-500"/> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.
-                        </p>
-                      </div>
-
-                      {/* 연락처 (대기 신청 시) */}
-                      {isFull && (
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Phone size={16} className="text-indigo-600"/> 연락처</label>
-                            <input type="tel" value={contact} onChange={e=>setContact(e.target.value)} placeholder="010-0000-0000" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
-                            <p className="text-xs text-orange-600 mt-1.5 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 빈 자리가 생기면 연락드립니다.</p>
-                        </div>
-                      )}
-
-                      {/* 닉네임 */}
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Smile size={16} className="text-indigo-600"/> 영어 이름 (Nickname)</label>
-                        <input type="text" value={nickname} onChange={e=>setNickname(e.target.value)} placeholder="ex) Gil" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
-                        {/* 디자인 복구: 안내 문구 */}
-                        <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
-                          <Info size={12} className="shrink-0 mt-0.5 text-slate-400"/> 참가 확정 명단에는 이 영어 이름으로 표시됩니다.
-                        </p>
-                      </div>
-
-                      {/* 성별 */}
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Users size={16} className="text-indigo-600"/> 성별</label>
-                        <div className="flex gap-3">
-                           {['male', 'female'].map(g => (
-                               <label key={g} className={`flex-1 border rounded-lg p-3 flex justify-center items-center gap-2 cursor-pointer transition-all ${gender===g ? 'bg-indigo-50 border-indigo-500 text-indigo-700 ring-1 ring-indigo-500' : 'hover:bg-slate-50'}`}>
-                                  <input type="radio" name="gender" value={g} checked={gender===g} onChange={e=>setGender(e.target.value)} className="hidden"/>
-                                  {g==='male'?'👨 남성':'👩 여성'}
-                               </label>
-                           ))}
-                        </div>
-                      </div>
-
-                      {/* 영어 레벨 (디자인 복구: 상세 박스형) */}
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Activity size={16} className="text-indigo-600"/> 영어 회화 실력</label>
-                        <div className="grid gap-2">
-                           {[
-                             {val: 'low-mid', title: '중하 (Lower Intermediate)', desc: '문장 구성이 서툴지만 의사소통 가능', color: 'slate'},
-                             {val: 'mid', title: '중 (Intermediate)', desc: '일상적인 주제로 대화 가능', color: 'emerald'},
-                             {val: 'mid-high', title: '중상 (Upper Intermediate)', desc: '다양한 주제로 의견 표현 가능', color: 'blue'},
-                             {val: 'high', title: '상 (Advanced)', desc: '막힘없이 자유로운 토론 가능', color: 'purple'}
-                           ].map(lvl => (
-                               <label key={lvl.val} className={`border rounded-lg p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-slate-50 ${englishLevel === lvl.val ? `bg-${lvl.color}-50 border-${lvl.color}-500 ring-1 ring-${lvl.color}-500` : ''}`}>
-                                  <input type="radio" name="englishLevel" value={lvl.val} checked={englishLevel === lvl.val} onChange={e => setEnglishLevel(e.target.value)} className={`w-4 h-4 accent-${lvl.color}-600 shrink-0`}/>
-                                  <div className="text-sm">
-                                    <span className={`font-bold block text-${lvl.color}-900`}>{lvl.title}</span>
-                                    <span className={`text-xs text-${lvl.color}-700 opacity-80`}>{lvl.desc}</span>
-                                  </div>
-                               </label>
-                           ))}
-                        </div>
-                        <p className="text-xs text-slate-500 mt-2 flex gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 조 편성에 활용됩니다.</p>
-                      </div>
-
-                      {/* 비밀번호 */}
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Lock size={16} className="text-indigo-600"/> 비밀번호 (4자리)</label>
-                        <div className="flex gap-2 justify-center relative">
-                            {[0,1,2,3].map(i => (
-                                <div key={i} className={`w-12 h-12 border rounded-lg flex items-center justify-center text-xl font-bold bg-white transition-all ${password.length===i ? 'border-indigo-500 ring-2 ring-indigo-100':''}`}>
-                                    {password[i] || ''}
-                                </div>
-                            ))}
-                            <input type="tel" maxLength={4} value={password} onChange={e=>setPassword(e.target.value.replace(/[^0-9]/g,''))} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/>
-                        </div>
-                        <p className="text-xs text-center text-slate-500 mt-2">신청 취소 시 본인 확인을 위해 사용됩니다.</p>
-                      </div>
-
-                      {/* 하단 버튼 및 체크박스 */}
-                      <div className="space-y-4">
-                          {!isFull && (
-                            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                <input type="checkbox" checked={transferred} onChange={e=>setTransferred(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded"/>
-                                <span className="text-slate-700 font-medium">참가비 송금을 완료했습니다.</span>
-                            </label>
-                          )}
-                          <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                <input type="checkbox" checked={rememberMe} onChange={e=>setRememberMe(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded"/>
-                                <span className="text-slate-700 font-medium">다음 방문 시 자동 입력 (선택)</span>
-                          </label>
-
-                          {errorMsg && <p className="text-red-500 font-bold text-center animate-pulse">{errorMsg}</p>}
-
-                          <button type="submit" disabled={loading} className={`w-full py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 ${isFull?'bg-orange-500 hover:bg-orange-600':'bg-indigo-600 hover:bg-indigo-700'}`}>
-                             {loading ? '처리중...' : (
-                                 <>{isFull ? '대기자로 신청하기' : '참가 신청하기'} <ArrowRightLeft size={18} className="rotate-90"/></>
-                             )}
-                          </button>
-                      </div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><User size={16} className="text-indigo-600"/> 이름 (예금주)</label><input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="ex) 홍길동" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/><p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1"><AlertCircle size={12} className="shrink-0 mt-0.5 text-indigo-500"/> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.</p></div>
+                      {isFull && (<div><label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Phone size={16} className="text-indigo-600"/> 연락처</label><input type="tel" value={contact} onChange={e=>setContact(e.target.value)} placeholder="010-0000-0000" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/><p className="text-xs text-orange-600 mt-1.5 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 빈 자리가 생기면 연락드립니다.</p></div>)}
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Smile size={16} className="text-indigo-600"/> 영어 이름 (Nickname)</label><input type="text" value={nickname} onChange={e=>setNickname(e.target.value)} placeholder="ex) Gil" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/><p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5 text-slate-400"/> 참가 확정 명단에는 이 영어 이름으로 표시됩니다.</p></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Users size={16} className="text-indigo-600"/> 성별</label><div className="flex gap-3">{['male', 'female'].map(g => (<label key={g} className={`flex-1 border rounded-lg p-3 flex justify-center items-center gap-2 cursor-pointer transition-all ${gender===g ? 'bg-indigo-50 border-indigo-500 text-indigo-700 ring-1 ring-indigo-500' : 'hover:bg-slate-50'}`}><input type="radio" name="gender" value={g} checked={gender===g} onChange={e=>setGender(e.target.value)} className="hidden"/>{g==='male'?'👨 남성':'👩 여성'}</label>))}</div></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Activity size={16} className="text-indigo-600"/> 영어 회화 실력</label><div className="grid gap-2">{[{val: 'low-mid', title: '중하 (Lower Intermediate)', desc: '문장 구성이 서툴지만 의사소통 가능', color: 'slate'},{val: 'mid', title: '중 (Intermediate)', desc: '일상적인 주제로 대화 가능', color: 'emerald'},{val: 'mid-high', title: '중상 (Upper Intermediate)', desc: '다양한 주제로 의견 표현 가능', color: 'blue'},{val: 'high', title: '상 (Advanced)', desc: '막힘없이 자유로운 토론 가능', color: 'purple'}].map(lvl => (<label key={lvl.val} className={`border rounded-lg p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-slate-50 ${englishLevel === lvl.val ? `bg-${lvl.color}-50 border-${lvl.color}-500 ring-1 ring-${lvl.color}-500` : ''}`}><input type="radio" name="englishLevel" value={lvl.val} checked={englishLevel === lvl.val} onChange={e => setEnglishLevel(e.target.value)} className={`w-4 h-4 accent-${lvl.color}-600 shrink-0`}/><div className="text-sm"><span className={`font-bold block text-${lvl.color}-900`}>{lvl.title}</span><span className={`text-xs text-${lvl.color}-700 opacity-80`}>{lvl.desc}</span></div></label>))}</div><p className="text-xs text-slate-500 mt-2 flex gap-1"><Info size={12} className="shrink-0 mt-0.5"/> 조 편성에 활용됩니다.</p></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Lock size={16} className="text-indigo-600"/> 비밀번호 (4자리)</label><div className="flex gap-2 justify-center relative">{[0,1,2,3].map(i => (<div key={i} className={`w-12 h-12 border rounded-lg flex items-center justify-center text-xl font-bold bg-white transition-all ${password.length===i ? 'border-indigo-500 ring-2 ring-indigo-100':''}`}>{password[i] || ''}</div>))}<input type="tel" maxLength={4} value={password} onChange={e=>setPassword(e.target.value.replace(/[^0-9]/g,''))} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/></div><p className="text-xs text-center text-slate-500 mt-2">신청 취소 시 본인 확인을 위해 사용됩니다.</p></div>
+                      <div className="space-y-4">{!isFull && (<label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50"><input type="checkbox" checked={transferred} onChange={e=>setTransferred(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded"/><span className="text-slate-700 font-medium">참가비 송금을 완료했습니다.</span></label>)}<label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50"><input type="checkbox" checked={rememberMe} onChange={e=>setRememberMe(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded"/><span className="text-slate-700 font-medium">다음 방문 시 자동 입력 (선택)</span></label>{errorMsg && <p className="text-red-500 font-bold text-center animate-pulse">{errorMsg}</p>}<button type="submit" disabled={loading} className={`w-full py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 ${isFull?'bg-orange-500 hover:bg-orange-600':'bg-indigo-600 hover:bg-indigo-700'}`}>{loading ? '처리중...' : (<>{isFull ? '대기자로 신청하기' : '참가 신청하기'} <ArrowRightLeft size={18} className="rotate-90"/></>)}</button></div>
                    </form>
                 </div>
 
-                {/* Attendees List */}
                 <div className="bg-white rounded-xl shadow-sm border p-4">
-                   <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                       <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600"/> 참가자 명단 ({effectiveCount}/{currentMaxCapacity})</h2>
-                       <button onClick={()=>setIsCancelMode(!isCancelMode)} className={`text-xs border px-2 py-1 rounded transition-colors ${isCancelMode?'bg-slate-800 text-white':'text-slate-500 hover:bg-slate-50'}`}>{isCancelMode?'취소모드 끄기':'내 신청 취소'}</button>
-                   </div>
-                   
+                   <div className="flex justify-between items-center mb-4 flex-wrap gap-2"><h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-emerald-600"/> 참가자 명단 ({effectiveCount}/{currentMaxCapacity})</h2><button onClick={()=>setIsCancelMode(!isCancelMode)} className={`text-xs border px-2 py-1 rounded transition-colors ${isCancelMode?'bg-slate-800 text-white':'text-slate-500 hover:bg-slate-50'}`}>{isCancelMode?'취소모드 끄기':'내 신청 취소'}</button></div>
                    <p className="text-xs text-slate-500 mb-3 flex gap-1"><Info size={14} className="shrink-0 mt-0.5"/> 참가 승인은 선착순으로 진행됩니다.</p>
-
                    <div className="divide-y">
-                     {attendees.map(att => (
-                        <div key={att.id} className="py-3 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-700 shrink-0">
-                                    {(att.nickname || att.name)[0]}
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-1">
-                                        <p className="font-bold">{att.nickname || att.name}</p>
-                                        {user && user.uid === att.userId && <span className="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded">ME</span>}
-                                        {isAdmin && <span className="text-xs text-slate-400">({att.name})</span>}
-                                    </div>
-                                    <div className="flex items-center gap-1 mt-0.5">
-                                        {att.status === 'approved' ? (
-                                            <span className="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 rounded flex items-center gap-0.5"><CheckCircle size={10}/> 확정</span>
-                                        ) : att.isWaitlistApply ? (
-                                            <span className="text-orange-600 text-xs font-bold bg-orange-50 px-1.5 rounded flex items-center gap-0.5"><Hourglass size={10}/> 대기</span>
-                                        ) : (
-                                            <span className="text-amber-600 text-xs font-bold bg-amber-50 px-1.5 rounded flex items-center gap-0.5"><Clock size={10}/> 승인대기</span>
-                                        )}
-                                        {isAdmin && (
-                                            <span className="text-[10px] text-slate-400 border px-1 rounded">{att.englishLevel} / {att.gender==='male'?'M':'F'}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                                {(isAdmin || isCancelMode) && (
-                                    <button onClick={()=>handleDeleteRequest(att.id)} className="text-red-400 p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 size={18}/></button>
-                                )}
-                                {isAdmin && att.status !== 'approved' && (
-                                    <button onClick={()=>handleApprove(att.id)} className="text-emerald-500 p-1.5 hover:bg-emerald-50 rounded transition-colors"><CheckCircle size={18}/></button>
-                                )}
-                            </div>
-                        </div>
-                     ))}
+                     {attendees.map(att => (<div key={att.id} className="py-3 flex justify-between items-center"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-700 shrink-0">{(att.nickname || att.name)[0]}</div><div><div className="flex items-center gap-1"><p className="font-bold">{att.nickname || att.name}</p>{user && user.uid === att.userId && <span className="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded">ME</span>}{isAdmin && <span className="text-xs text-slate-400">({att.name})</span>}</div><div className="flex items-center gap-1 mt-0.5">{att.status === 'approved' ? (<span className="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 rounded flex items-center gap-0.5"><CheckCircle size={10}/> 확정</span>) : att.isWaitlistApply ? (<span className="text-orange-600 text-xs font-bold bg-orange-50 px-1.5 rounded flex items-center gap-0.5"><Hourglass size={10}/> 대기</span>) : (<span className="text-amber-600 text-xs font-bold bg-amber-50 px-1.5 rounded flex items-center gap-0.5"><Clock size={10}/> 승인대기</span>)}{isAdmin && (<span className="text-[10px] text-slate-400 border px-1 rounded">{att.englishLevel} / {att.gender==='male'?'M':'F'}</span>)}</div></div></div><div className="flex gap-2">{(isAdmin || isCancelMode) && (<button onClick={()=>handleDeleteRequest(att.id)} className="text-red-400 p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 size={18}/></button>)}{isAdmin && att.status !== 'approved' && (<button onClick={()=>handleApprove(att.id)} className="text-emerald-500 p-1.5 hover:bg-emerald-50 rounded transition-colors"><CheckCircle size={18}/></button>)}</div></div>))}
                      {attendees.length === 0 && <div className="text-center py-8 bg-slate-50 border border-dashed rounded-lg text-slate-400">아직 신청자가 없습니다.</div>}
                    </div>
+                   {isAdmin && (
+                       <div className="mt-6 pt-6 border-t flex flex-col gap-2">
+                           <button onClick={downloadCSV} className="w-full py-2 bg-emerald-50 text-emerald-700 font-bold rounded flex justify-center gap-2 border border-emerald-200"><Download size={16}/> 명단 엑셀 다운로드</button>
+                           <button onClick={handleReset} className="w-full py-2 bg-red-50 text-red-600 font-bold rounded flex justify-center gap-2 border border-red-200"><RefreshCw size={16}/> 명단 초기화 (새 모임 시작)</button>
+                       </div>
+                   )}
                 </div>
 
-                {/* Rules & FAQ (복구됨) */}
-                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><ThumbsUp size={20}/> Club Etiquette</div>
-                    {[1,2,3].map(i => (
-                        <div key={i} className="border-b last:border-0">
-                            <button onClick={()=>setActiveEtiquette(activeEtiquette===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between">
-                                <span>{meetupInfo[`etiquette${i}Title`]}</span>
-                                <ChevronDown size={16} className={`transition-transform ${activeEtiquette===i?'rotate-180':''}`}/>
-                            </button>
-                            {activeEtiquette===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">{meetupInfo[`etiquette${i}Desc`]}</div>}
-                        </div>
-                    ))}
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><HelpCircle size={20}/> FAQ</div>
-                    {[1,2,3].map(i => (
-                        <div key={i} className="border-b last:border-0">
-                            <button onClick={()=>setActiveFaq(activeFaq===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between">
-                                <span>Q. {meetupInfo[`faq${i}Q`]}</span>
-                                <ChevronDown size={16} className={`transition-transform ${activeFaq===i?'rotate-180':''}`}/>
-                            </button>
-                            {activeFaq===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">A. {meetupInfo[`faq${i}A`]}</div>}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Footer Contact */}
-                <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center">
-                  <h3 className="font-bold text-indigo-900 mb-2">궁금한 점이 더 있으신가요?</h3>
-                  <a href={meetupInfo.openChatLink} target="_blank" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg shadow-sm transition-all active:scale-95">
-                    <MessageSquare size={18} /> 카카오톡 오픈채팅방 바로가기
-                  </a>
-                </div>
-
+                <div className="bg-white rounded-xl shadow-sm border overflow-hidden"><div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><ThumbsUp size={20}/> Club Etiquette</div>{[1,2,3].map(i => (<div key={i} className="border-b last:border-0"><button onClick={()=>setActiveEtiquette(activeEtiquette===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between"><span>{meetupInfo[`etiquette${i}Title`]}</span><ChevronDown size={16} className={`transition-transform ${activeEtiquette===i?'rotate-180':''}`}/></button>{activeEtiquette===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">{meetupInfo[`etiquette${i}Desc`]}</div>}</div>))}</div>
+                <div className="bg-white rounded-xl shadow-sm border overflow-hidden"><div className="bg-indigo-50 p-4 border-b text-indigo-900 font-bold flex gap-2"><HelpCircle size={20}/> FAQ</div>{[1,2,3].map(i => (<div key={i} className="border-b last:border-0"><button onClick={()=>setActiveFaq(activeFaq===i?null:i)} className="w-full p-4 text-left font-bold flex justify-between"><span>Q. {meetupInfo[`faq${i}Q`]}</span><ChevronDown size={16} className={`transition-transform ${activeFaq===i?'rotate-180':''}`}/></button>{activeFaq===i && <div className="p-4 pt-0 text-sm text-slate-600 bg-slate-50">A. {meetupInfo[`faq${i}A`]}</div>}</div>))}</div>
+                <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center"><h3 className="font-bold text-indigo-900 mb-2">궁금한 점이 더 있으신가요?</h3><a href={meetupInfo.openChatLink} target="_blank" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg shadow-sm transition-all active:scale-95"><MessageSquare size={18} /> 카카오톡 오픈채팅방 바로가기</a></div>
               </main>
 
-              {toast && (
-                  <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-5 duration-300 w-full max-w-xs px-4">
-                      <div className={`shadow-xl rounded-lg p-3 flex items-center gap-3 text-white font-medium ${toast.type==='error'?'bg-red-500':'bg-emerald-600'}`}>
-                          {toast.type==='error' ? <AlertCircle size={20}/> : <CheckCircle size={20}/>}
-                          {toast.message}
-                      </div>
-                  </div>
-              )}
-
-              {showPasswordModal && (
-                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4 animate-in fade-in">
-                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
-                          <h3 className="font-bold mb-4 text-center text-lg">비밀번호 확인</h3>
-                          <input type="password" value={cancelPasswordInput} onChange={e=>setCancelPasswordInput(e.target.value)} className="w-full border p-3 mb-4 rounded-lg text-center tracking-widest text-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="4자리" autoFocus maxLength={4}/>
-                          <div className="flex gap-2">
-                              <button onClick={()=>setShowPasswordModal(false)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold text-slate-600 hover:bg-slate-200">닫기</button>
-                              <button onClick={verifyCancelPassword} className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 shadow-md">확인</button>
-                          </div>
-                      </div>
-                  </div>
-              )}
+              {toast && (<div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-5 duration-300 w-full max-w-xs px-4"><div className={`shadow-xl rounded-lg p-3 flex items-center gap-3 text-white font-medium ${toast.type==='error'?'bg-red-500':'bg-emerald-600'}`}>{toast.type==='error' ? <AlertCircle size={20}/> : <CheckCircle size={20}/>}{toast.message}</div></div>)}
+              {showPasswordModal && (<div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4 animate-in fade-in"><div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl"><h3 className="font-bold mb-4 text-center text-lg">비밀번호 확인</h3><input type="password" value={cancelPasswordInput} onChange={e=>setCancelPasswordInput(e.target.value)} className="w-full border p-3 mb-4 rounded-lg text-center tracking-widest text-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="4자리" autoFocus maxLength={4}/><div className="flex gap-2"><button onClick={()=>setShowPasswordModal(false)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold text-slate-600 hover:bg-slate-200">닫기</button><button onClick={verifyCancelPassword} className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 shadow-md">확인</button></div></div></div>)}
+              {modalConfig && (<div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4"><div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl"><h3 className="font-bold mb-2 text-lg">{modalConfig.title}</h3><p className="text-slate-600 mb-6">{modalConfig.message}</p><div className="flex gap-2"><button onClick={()=>setModalConfig(null)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold">취소</button><button onClick={modalConfig.onConfirm} className={`flex-1 text-white py-3 rounded-lg font-bold ${modalConfig.isDestructive ? 'bg-red-500' : 'bg-indigo-600'}`}>확인</button></div></div></div>)}
+              {showAdminLogin && (<div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[90] p-4"><div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl"><h3 className="font-bold mb-4 text-center">관리자 로그인</h3><input type="password" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} className="border p-3 rounded-lg mb-4 w-full text-center tracking-widest text-lg outline-none focus:ring-2 ring-indigo-500" placeholder="PIN" autoFocus/><button onClick={()=>{if(adminPinInput===ADMIN_PIN){setIsAdmin(true); setShowAdminLogin(false); setAdminPinInput(''); showToast('관리자 로그인 성공');}else{showToast('비밀번호가 틀렸습니다','error');}}} className="bg-indigo-600 text-white w-full py-3 rounded-lg font-bold shadow-md">로그인</button><button onClick={()=>setShowAdminLogin(false)} className="mt-3 text-sm text-slate-400 w-full hover:text-slate-600">닫기</button></div></div>)}
               
-              {modalConfig && (
-                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4">
-                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
-                          <h3 className="font-bold mb-2 text-lg">{modalConfig.title}</h3>
-                          <p className="text-slate-600 mb-6">{modalConfig.message}</p>
-                          <div className="flex gap-2">
-                              <button onClick={()=>setModalConfig(null)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold">취소</button>
-                              <button onClick={modalConfig.onConfirm} className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-bold">확인</button>
-                          </div>
-                      </div>
+              {/* --- Admin Edit Modal (복구됨) --- */}
+              {isEditingInfo && (
+                <div className="fixed inset-0 bg-black/60 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+                  <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-lg flex items-center gap-2"><Settings size={20}/> 설정 수정</h3><button onClick={()=>setIsEditingInfo(false)}><XCircle size={24} className="text-slate-400"/></button></div>
+                    <div className="overflow-y-auto">
+                       {['header','basic','curriculum','topic','leader'].map(sec => (
+                           <div key={sec} className="border-b">
+                               <EditSectionHeader title={sec.toUpperCase()} sectionKey={sec}/>
+                               {expandedSections[sec] && <div className="p-4 space-y-3">
+                                   {Object.keys(meetupInfo).filter(k => {
+                                       if(sec==='header') return ['clubName','meetupTitle','meetupDesc'].includes(k);
+                                       if(sec==='basic') return ['date','time','locationName','locationAddress','locationLink','maxCapacity','fee','originalFee','bankName','bankAccount','accountHolder'].includes(k);
+                                       if(sec==='curriculum') return k.startsWith('part') || k.startsWith('p1') || k.startsWith('p2') || k.startsWith('break');
+                                       if(sec==='topic') return k.includes('topic') || k.includes('Question');
+                                       if(sec==='leader') return k.includes('leader') || k.includes('faq') || k.includes('etiquette') || k.includes('openChat');
+                                       return false;
+                                   }).map(k => (
+                                       <div key={k}><label className="text-xs font-bold text-slate-500 mb-1 block">{k}</label>
+                                       {k.includes('Desc') || k.includes('Bio') || k.includes('Question') ? <textarea className="w-full border p-2 rounded" value={editForm[k]||''} onChange={e=>setEditForm({...editForm, [k]:e.target.value})}/> : <input type="text" className="w-full border p-2 rounded" value={editForm[k]||''} onChange={e=>setEditForm({...editForm, [k]:e.target.value})}/>}
+                                       </div>
+                                   ))}
+                                   {sec==='leader' && <div><label className="text-xs font-bold text-slate-500 mb-1 block">이미지 업로드</label><input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-xs"/></div>}
+                               </div>}
+                           </div>
+                       ))}
+                    </div>
+                    <div className="p-4 border-t bg-slate-50 flex gap-2"><button onClick={()=>setIsEditingInfo(false)} className="flex-1 py-3 bg-white border rounded font-bold">취소</button><button onClick={saveInfo} className="flex-1 py-3 bg-indigo-600 text-white rounded font-bold">저장</button></div>
                   </div>
-              )}
-
-              {showAdminLogin && (
-                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[90] p-4">
-                      <div className="bg-white p-6 rounded-xl w-full max-w-xs shadow-2xl">
-                          <h3 className="font-bold mb-4 text-center">관리자 로그인</h3>
-                          <input type="password" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} className="border p-3 rounded-lg mb-4 w-full text-center tracking-widest text-lg outline-none focus:ring-2 ring-indigo-500" placeholder="PIN" autoFocus/>
-                          <button onClick={()=>{if(adminPinInput===ADMIN_PIN){setIsAdmin(true); setShowAdminLogin(false); setAdminPinInput(''); showToast('관리자 로그인 성공');}else{showToast('비밀번호가 틀렸습니다','error');}}} className="bg-indigo-600 text-white w-full py-3 rounded-lg font-bold shadow-md">로그인</button>
-                          <button onClick={()=>setShowAdminLogin(false)} className="mt-3 text-sm text-slate-400 w-full hover:text-slate-600">닫기</button>
-                      </div>
-                  </div>
+                </div>
               )}
 
               <footer className="text-center mt-12 text-slate-400 text-xs pb-4">
