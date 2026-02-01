@@ -7,6 +7,9 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script>
@@ -26,11 +29,16 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
-        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+        // 1. 전역 객체에서 React 기능 가져오기
+        const { useState, useEffect, useRef } = React;
+        const { createRoot } = ReactDOM;
+
+        // 2. 외부 라이브러리 Import (ES Module 방식 유지)
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        
+        // 아이콘 라이브러리 (React 의존성 제외하고 가져오기)
         import { Users, MapPin, Calendar, CheckCircle, Clock, MessageCircle, Info, Smile, Banknote, Copy, ExternalLink, AlertCircle, Phone, Lock, Trash2, Hourglass, ThumbsUp, HelpCircle, Shield, LogOut, ArrowRightLeft, BookOpen, ChevronDown, ChevronUp, Upload, Settings, Save, XCircle, Award, Activity } from 'https://esm.sh/lucide-react@0.344.0?external=react';
 
         // --- Firebase Init ---
@@ -56,7 +64,7 @@
           const [user, setUser] = useState(null);
           const [attendees, setAttendees] = useState([]);
           
-          // 기본 모임 정보 (DB에서 덮어씌워짐)
+          // 기본 모임 정보
           const [meetupInfo, setMeetupInfo] = useState({
             clubName: "Jett's English Crew",
             meetupTitle: "성북 중상급 영어회화 & 토론",
@@ -247,6 +255,7 @@
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><User size={16} className="text-indigo-600"/> 이름 (예금주)</label>
                         <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="ex) 홍길동" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
+                        {/* 안내 문구 복구 */}
                         <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
                           <AlertCircle size={12} className="shrink-0 mt-0.5 text-indigo-500"/> 송금 확인 후 승인을 위해 반드시 <b>예금주 명</b>으로 작성해주세요.
                         </p>
@@ -256,6 +265,7 @@
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5"><Smile size={16} className="text-indigo-600"/> 영어 이름 (Nickname)</label>
                         <input type="text" value={nickname} onChange={e=>setNickname(e.target.value)} placeholder="ex) Gil" className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"/>
+                        {/* 안내 문구 복구 */}
                         <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
                           <Info size={12} className="shrink-0 mt-0.5 text-slate-400"/> 참가 확정 명단에는 이 영어 이름으로 표시됩니다.
                         </p>
@@ -274,7 +284,7 @@
                         </div>
                       </div>
 
-                      {/* 영어 레벨 (디자인 복구) */}
+                      {/* 영어 레벨 (상세 디자인 복구) */}
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Activity size={16} className="text-indigo-600"/> 영어 회화 실력</label>
                         <div className="grid gap-2">
