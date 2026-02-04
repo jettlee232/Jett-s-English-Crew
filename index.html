@@ -22,7 +22,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         /* Focus state helper */
-        input:focus, textarea:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 2px #c7d2fe; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 2px #c7d2fe; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 pb-20 relative min-h-screen">
@@ -37,23 +37,28 @@
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         // --- Firebase Configuration ---
-        const firebaseConfig = {
+         const firebaseConfig = {
   apiKey: "AIzaSyAL00lyWf-R4ZDUEzYtFVafyX1HMw8Ebmc",
   authDomain: "jetts-english-crew-7c2c7.firebaseapp.com",
   projectId: "jetts-english-crew-7c2c7",
   storageBucket: "jetts-english-crew-7c2c7.firebasestorage.app",
   messagingSenderId: "980305327503",
   appId: "1:980305327503:web:a2eaedf9c8235e64bd47fa"
-};
-        const appId = 'jetts-english-crew-7c2c7';
+        };
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'jetts-english-crew-7c2c7';
 
         let app, auth, db;
+        let firebaseInitError = false;
+
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            console.log("Firebase Initialized Successfully");
         } catch (e) {
-            console.error("Firebase Init Error (Check Config):", e);
+            console.error("Firebase Init Error:", e);
+            firebaseInitError = true;
         }
 
         // --- Global State ---
@@ -61,10 +66,9 @@
             user: null,
             attendees: [],
             meetupInfo: {
-                // Default Initial State
                 clubName: "Jett's English Crew",
                 meetupTitle: "성북 중상급 영어회화 & 토론",
-                meetupDesc: "매주 일요일, 다른 주제의 영어 토론을 연습하는 중상급 모임입니다.",
+                meetupDesc: "일상 회화를 자유롭게 구사하는 것을 넘어서 더 깊이 있는 영어 토론을 연습하는 중상급 모임입니다.",
                 date: "2026년 2월 1일 (일)",
                 time: "오전 10:00 - 12:00",
                 locationName: "탐앤탐스 성신여대점",
@@ -75,8 +79,8 @@
                 p1Time1: "20'", p1Title1: "Small Talk", p1Desc1: "가벼운 주제로 자유롭게 대화하며 분위기 조성",
                 p1Time2: "30'", p1Title2: "Reading & Discussion 1", p1Desc2: "심화 지문 독해 및 첫 번째 질문 토론",
                 p1Time3: "", p1Title3: "", p1Desc3: "",
-                breakTitle: "Break (10 min)",
-                breakDesc: "Seat Change: 새로운 파트너와 매칭",
+                breakTitle: "휴식 및 자리 이동 (10min)",
+                breakDesc: "",
                 part2Title: "Part 2. Session 2 & Wrap-up",
                 part2Duration: "50 min",
                 p2Time1: "10'", p2Title1: "Refresh Talk", p2Desc1: "새 파트너와 인사 및 가벼운 스몰톡",
@@ -91,28 +95,30 @@
                 drinkPolicy: "☕ 개인 음료는 별도로 주문해주세요 (1인 1메뉴)",
                 bankName: "카카오뱅크",
                 bankAccount: "3333-26-2044919",
-                accountHolder: "이*희",
+                accountHolder: "홍길동",
                 leaderName: "Jett",
                 leaderImage: "https://api.dicebear.com/9.x/avataaars/svg?seed=Jett&backgroundColor=c0aede",
-                leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 중~중상급 연습생입니다. 호주 워킹홀리데이와 TESOL 과정을 거치며 배운 소통의 즐거움을 공유하고 싶어요.\n\n'완벽함'보다는 '나의 생각을 전달하는 용기'를 중요하게 생각합니다. 3년 넘게 모임을 이끌어온 경험으로 편안한 진행 도와드릴게요! 🌏✨",
-                leaderTags: "TESOL 수료, 호주 워킹홀리데이, 필리핀 어학연수, 세계일주, 컬컴 리더 3년+, TOEFL/IELTS 경험",
+                leaderBio: "반갑습니다! 리더 Jett입니다. 👋\n저 또한 여러분과 함께 성장해가는 연습생입니다. 호주 워킹홀리데이와 TESOL 과정을 거치며 배운 소통의 즐거움을 공유하고 싶어요.\n\n'완벽함'보다는 '나의 생각을 전달하는 용기'를 중요하게 생각합니다. 3년 넘게 모임을 이끌어온 경험으로 여러분이 편안하게 입을 뗄 수 있도록 도와드릴게요! 🌏✨",
+                leaderTags: "TESOL 수료, 호주 워킹홀리데이, 세계일주, 컬컴 리더 3년+, TOEFL/IELTS 경험",
                 etiquetteTitle: "클럽 에티켓",
                 etiquette1Title: "👂 경청과 존중", etiquette1Desc: "타인이 발언할 때는 핸드폰 사용을 자제하고 귀 기울여주세요. 무례한 질문은 삼가 부탁드립니다.",
                 etiquette2Title: "⏳ 공평한 발언권", etiquette2Desc: "한 사람이 대화를 독점하지 않도록 배려해주세요. (한 턴에 2분 내외)",
                 etiquette3Title: "🚫 순수한 목적 유지", etiquette3Desc: "종교, 영업, 이성 교제 위주의 활동은 지양하며 강퇴 사유가 될 수 있습니다.",
                 openChatLink: "#",
-                faq1Q: "주차 가능한가요?", faq1A: "탐앤탐스 건물 내 주차는 조금 어렵습니다. 근처 공영주차장을 이용하시거나 대중교통을 이용해 주시면 감사하겠습니다!",
-                faq2Q: "영어가 서툴러도 참여할 수 있나요?", faq2A: "그럼요! 완벽한 문법보다는 소통하려는 마음이 더 중요합니다. 리더가 곁에서 친절하게 도와드리니 걱정 마세요.",
-                faq3Q: "준비해야 할 것이 있을까요?", faq3A: "필요한 학습 자료는 제가 모두 준비해 드립니다. 가벼운 마음과 개인 필기구 정도만 챙겨오시면 충분합니다!"
+                faq1Q: "나이와 성별을 묻는 이유는 뭔가요?", faq1A: "다양한 배경을 가진 분들이 섞여 대화할 때 영어 회화의 시너지가 가장 좋기 때문입니다. 특정 연령대나 성별에 치우치지 않도록 적절히 배분하여, 더 즐겁고 풍성한 대화 경험을 만들어 드리고 싶어요! 😊",
+                faq2Q: "주차 가능한가요?", faq2A: "탐앤탐스 건물 내 주차는 조금 어렵습니다. 근처 공영주차장을 이용하시거나 대중교통을 이용해 주시면 감사하겠습니다!",
+                faq3Q: "영어가 서툴러도 참여할 수 있나요?", faq3A: "그럼요! 완벽한 문법보다는 소통하려는 마음이 더 중요합니다. 리더가 곁에서 친절하게 도와드리니 걱정 마세요.",
+                faq4Q: "준비해야 할 것이 있을까요?", faq4A: "필요한 학습 자료는 제가 모두 준비해 드립니다. 가벼운 마음과 개인 필기구 정도만 챙겨오시면 충분합니다!"
             },
             form: {
-                name: '', nickname: '', contact: '', password: '', gender: 'female', englishLevel: 'mid', transferred: false, rememberMe: false
+                name: '', nickname: '', contact: '', password: '', gender: 'female', ageGroup: '', englishLevel: 'mid', transferred: false, rememberMe: false
             },
             ui: {
                 isAdmin: false,
                 showAdminLogin: false,
                 adminPinInput: '',
                 loading: false,
+                configError: false,
                 errorMsg: '',
                 toast: null,
                 activeFaq: null,
@@ -131,7 +137,6 @@
             dDay: ''
         };
 
-        // Make functions globally available for inline HTML events
         window.state = state;
 
         const ADMIN_PIN = 'wpxm123';
@@ -162,7 +167,6 @@
             window.render();
         };
 
-        // NEW: Function to handle input updates without full re-render (preserves focus)
         window.updateForm = function(field, value) {
             state.form[field] = value;
         };
@@ -183,7 +187,13 @@
         };
 
         window.toggleEditSection = function(section) {
-            state.ui.expandedSections[section] = !state.ui.expandedSections[section];
+            const isAlreadyOpen = state.ui.expandedSections[section];
+            Object.keys(state.ui.expandedSections).forEach(key => {
+                state.ui.expandedSections[key] = false;
+            });
+            if (!isAlreadyOpen) {
+                state.ui.expandedSections[section] = true;
+            }
             window.render();
         };
 
@@ -202,7 +212,13 @@
 
         window.handleApply = async (e) => {
             e.preventDefault();
-            const { name, contact, password, transferred } = state.form;
+            
+            if (state.ui.configError || !state.user) {
+                window.showToast('서버 연결이 되지 않았습니다. API 키 설정을 확인해주세요.', 'error');
+                return;
+            }
+
+            const { name, contact, password, transferred, ageGroup } = state.form;
             const currentCount = state.attendees.filter(a => a.status === 'approved' || (a.status === 'pending' && a.paid)).length;
             const maxCap = parseInt(state.meetupInfo.maxCapacity);
             const isFull = currentCount >= maxCap;
@@ -210,6 +226,7 @@
             if (!name.trim()) return window.updateState('ui.errorMsg', '이름(예금주)을 입력해주세요.');
             if (!isFull && !transferred) return window.updateState('ui.errorMsg', '참가비를 송금한 후 체크해주세요.');
             if (isFull && !contact.trim()) return window.updateState('ui.errorMsg', '대기 신청 시 연락처 입력은 필수입니다.');
+            if (!ageGroup) return window.updateState('ui.errorMsg', '나이대를 선택해주세요.');
             if (!password || password.length < 4) return window.updateState('ui.errorMsg', '비밀번호 4자리를 입력해주세요.');
 
             window.updateState('ui.loading', true);
@@ -233,12 +250,17 @@
                     localStorage.removeItem('meetup_user_info');
                 }
 
-                state.form = { name: '', nickname: '', contact: '', password: '', gender: 'female', englishLevel: 'mid', transferred: false, rememberMe: state.form.rememberMe };
+                state.form = { name: '', nickname: '', contact: '', password: '', gender: 'female', ageGroup: '', englishLevel: 'mid', transferred: false, rememberMe: state.form.rememberMe };
                 state.ui.errorMsg = '';
                 window.showToast(isFull ? '대기자로 접수되었습니다.' : '신청이 완료되었습니다!');
             } catch (err) {
                 console.error(err);
-                window.showToast('오류가 발생했습니다.', 'error');
+                if (err.code && err.code.includes('api-key')) {
+                    window.updateState('ui.configError', true);
+                    window.showToast('API Key가 유효하지 않습니다.', 'error');
+                } else {
+                    window.showToast('오류가 발생했습니다: ' + err.message, 'error');
+                }
             }
             state.ui.loading = false;
             window.render();
@@ -290,16 +312,42 @@
         };
 
         window.saveInfo = async () => {
-            if (!state.user) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), state.ui.editForm);
-            state.ui.isEditingInfo = false;
-            window.showToast('정보가 업데이트되었습니다.');
-            window.render();
+            if (!state.user || state.ui.configError) {
+                window.showToast('서버와 통신할 수 없습니다. 설정을 확인하세요.', 'error');
+                return;
+            }
+
+            const jsonString = JSON.stringify(state.ui.editForm);
+            const sizeInBytes = new TextEncoder().encode(jsonString).length;
+            if (sizeInBytes > 1000000) {
+                window.showToast('데이터 용량이 너무 큽니다. 이미지 크기를 줄여주세요.', 'error');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', CONFIG_COLLECTION, CONFIG_DOC_ID), state.ui.editForm);
+                state.ui.isEditingInfo = false;
+                window.showToast('정보가 업데이트되었습니다.');
+            } catch (err) {
+                console.error("Save Error:", err);
+                if (err.code && err.code.includes('api-key')) {
+                    window.updateState('ui.configError', true);
+                    window.showToast('API Key 설정이 필요합니다.', 'error');
+                } else {
+                    window.showToast(`저장 실패: ${err.message}`, 'error');
+                }
+            } finally {
+                window.render();
+            }
         };
 
         window.handleImageUpload = (e) => {
              const file = e.target.files[0];
              if(!file) return;
+             if (file.size > 1024 * 1024 * 5) {
+                 window.showToast('이미지 파일이 너무 큽니다. (5MB 이하 권장)', 'error');
+                 return;
+             }
              const reader = new FileReader();
              reader.onloadend = () => {
                  state.ui.editForm.leaderImage = reader.result;
@@ -314,10 +362,16 @@
             state.form.contact = val;
             window.render();
             const input = document.querySelector('input[name="contact"]');
-            if (input) {
-                input.value = val;
-                input.focus();
-            }
+            if (input) { input.focus(); }
+        };
+
+        window.handleAdminDateChange = (val) => {
+            if(!val) return;
+            const date = new Date(val);
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const formatted = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${days[date.getDay()]})`;
+            state.ui.editForm.date = formatted;
+            window.render();
         };
 
         window.handleApproveClick = (id) => {
@@ -360,12 +414,11 @@
         window.downloadCSV = () => {
              if (state.attendees.length === 0) return window.showToast('데이터가 없습니다.', 'error');
              const BOM = '\uFEFF';
-             const headers = ['이름','닉네임','연락처','성별','레벨','상태','입금','신청시간'];
+             const headers = ['이름','닉네임','연락처','성별','나이대','레벨','상태','입금','신청시간'];
              const rows = state.attendees.map(a => [
-                 a.name, a.nickname, a.contact, a.gender, a.englishLevel, a.status, a.paid?'O':'X', 
+                 a.name, a.nickname, a.contact, a.gender, a.ageGroup, a.englishLevel, a.status, a.paid?'O':'X', 
                  a.createdAt ? new Date(a.createdAt.seconds*1000).toLocaleString() : ''
              ].map(v => `"${String(v||'').replace(/"/g, '""')}"`).join(','));
-             
              const blob = new Blob([BOM + headers.join(',') + '\n' + rows.join('\n')], {type: 'text/csv;charset=utf-8;'});
              const url = URL.createObjectURL(blob);
              const link = document.createElement('a');
@@ -424,14 +477,17 @@
             `;
 
             return `
+                <!-- firebase 연결오류 배너 제거 -->
+
                 ${ui.toast ? `
-                    <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in w-full max-w-sm px-4">
-                        <div class="shadow-lg rounded-lg p-4 flex items-center gap-3 text-white font-medium ${ui.toast.type === 'error' ? 'bg-red-500' : 'bg-indigo-600'}">
+                    <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] animate-in w-full max-w-sm px-4">
+                        <div class="shadow-xl rounded-lg p-4 flex items-center gap-3 text-white font-medium ${ui.toast.type === 'error' ? 'bg-red-500' : 'bg-indigo-600'}">
                             ${ui.toast.message}
                         </div>
                     </div>
                 ` : ''}
 
+                <!-- Header: Reverted to Previous Design -->
                 <header class="bg-indigo-600 text-white p-6 shadow-lg">
                     <div class="max-w-3xl mx-auto flex justify-between items-start">
                         <div>
@@ -522,7 +578,7 @@
                                         </div>
                                     </div>
                                     <div class="bg-amber-50 p-3 rounded text-sm text-amber-800 font-bold border border-amber-100">
-                                        ☕ ${meetupInfo.breakTitle}: ${meetupInfo.breakDesc}
+                                        ☕ ${meetupInfo.breakTitle}${meetupInfo.breakDesc ? ': ' + meetupInfo.breakDesc : ''}
                                     </div>
                                     <div class="pl-4 border-l-2 border-indigo-200">
                                         <h3 class="font-bold text-indigo-800">${meetupInfo.part2Title} (${meetupInfo.part2Duration})</h3>
@@ -561,13 +617,19 @@
                                     <i data-lucide="user" class="w-4 h-4 text-indigo-600"></i> 입금자 성함
                                 </label>
                                 <input type="text" value="${form.name}" oninput="window.updateForm('name', this.value)" placeholder="예금주 명과 동일하게 입력" class="w-full p-3 border rounded-lg transition-all">
-                                <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> 입금 확인을 위해 반드시 실명을 입력해 주세요.</p>
+                                <p class="text-[11px] text-indigo-600 mt-1.5 flex items-start gap-1.5 leading-tight">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i> 
+                                    <span>입금 확인을 위해 <span class="font-bold">반드시 실명</span>을 입력해 주세요.</span>
+                                </p>
                             </div>
                             ${isFull ? `
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5"><i data-lucide="phone" class="w-4 h-4 text-indigo-600"></i> 연락처</label>
                                     <input type="tel" name="contact" value="${form.contact}" oninput="window.handleContactChange(event)" placeholder="010-0000-0000" class="w-full p-3 border rounded-lg">
-                                    <p class="text-[10px] text-orange-600 mt-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> 빈 자리가 생기면 이 번호로 연락드립니다.</p>
+                                    <p class="text-[11px] text-indigo-600 mt-1.5 flex items-start gap-1.5 leading-tight">
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                                        <span>빈 자리가 생기면 <span class="font-bold">이 번호로 연락</span>드립니다.</span>
+                                    </p>
                                 </div>
                             ` : ''}
                             <div>
@@ -575,7 +637,10 @@
                                     <i data-lucide="smile" class="w-4 h-4 text-indigo-600"></i> 영어 이름 (닉네임)
                                 </label>
                                 <input type="text" value="${form.nickname}" oninput="window.updateForm('nickname', this.value)" placeholder="명단에 표시될 이름" class="w-full p-3 border rounded-lg">
-                                <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> 참가 확정 명단에는 이 이름으로 표시됩니다.</p>
+                                <p class="text-[11px] text-indigo-600 mt-1.5 flex items-start gap-1.5 leading-tight">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                                    <span>참가 확정 명단에는 <span class="font-bold">이 이름으로 표시</span>됩니다.</span>
+                                </p>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1"><i data-lucide="users" class="w-4 h-4 text-indigo-600"></i> 성별 (Gender)</label>
@@ -587,6 +652,18 @@
                                         <input type="radio" name="gender" value="female" class="hidden" onclick="state.form.gender='female'; window.render()" ${form.gender==='female'?'checked':''}> 👩 여성
                                     </label>
                                 </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="calendar-days" class="w-4 h-4 text-indigo-600"></i> 나이대 (Age Group)
+                                </label>
+                                <select onchange="window.updateForm('ageGroup', this.value)" class="w-full p-3 border rounded-lg bg-white cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <option value="" disabled ${form.ageGroup === '' ? 'selected' : ''}>나이대를 선택해주세요</option>
+                                    <option value="20s" ${form.ageGroup === '20s' ? 'selected' : ''}>20대</option>
+                                    <option value="30s" ${form.ageGroup === '30s' ? 'selected' : ''}>30대</option>
+                                    <option value="40s" ${form.ageGroup === '40s' ? 'selected' : ''}>40대</option>
+                                    <option value="50s+" ${form.ageGroup === '50s+' ? 'selected' : ''}>50대 이상</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5">
@@ -604,14 +681,20 @@
                                         </label>`;
                                     }).join('')}
                                 </div>
-                                <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> 성별과 영어 실력은 팀빌딩 시 활용됩니다.</p>
+                                <p class="text-[11px] text-indigo-600 mt-2.5 flex items-start gap-1.5 leading-tight break-keep">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                                    <span>성별, 나이, 영어 실력은 <span class="font-bold">팀빌딩 시 활용</span>됩니다. (다양한 세대 및 적절한 성비로 한 팀 구성)</span>
+                                </p>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5">
                                     <i data-lucide="lock" class="w-4 h-4 text-indigo-600"></i> 취소 비밀번호 (4자리)
                                 </label>
                                 <input type="tel" maxlength="4" value="${form.password}" oninput="window.updateForm('password', this.value.replace(/[^0-9]/g,''))" placeholder="****" class="w-full p-3 border rounded-lg tracking-widest text-center text-xl shadow-inner bg-slate-50">
-                                <p class="text-[10px] text-center text-slate-400 mt-1 flex items-center justify-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> 본인이 신청 내역을 취소할 때 사용됩니다.</p>
+                                <p class="text-[11px] text-indigo-600 mt-1.5 flex items-start gap-1.5 leading-tight">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                                    <span>본인이 <span class="font-bold">신청 내역을 취소할 때 사용</span>됩니다.</span>
+                                </p>
                             </div>
                             
                             <div class="space-y-2">
@@ -690,7 +773,7 @@
                             <i data-lucide="help-circle" class="text-indigo-600"></i> 자주 묻는 질문
                         </div>
                         <div class="divide-y divide-slate-100">
-                            ${[1,2,3].map(i => `
+                            ${[1,2,3,4].map(i => `
                                 <div>
                                     <button onclick="state.ui.activeFaq = state.ui.activeFaq === ${i} ? null : ${i}; window.render()" class="w-full p-4 text-left flex justify-between font-bold text-slate-700 hover:bg-slate-50 transition-colors">
                                         <span class="text-sm"><span class="text-indigo-500 mr-1">Q.</span> ${meetupInfo[`faq${i}Q`]}</span>
@@ -777,7 +860,9 @@
                                 `)}
                                 ${EditSection('basic', '2. 기본 정보 (Date, Time, Location)', `
                                     <div class="grid grid-cols-2 gap-2">
-                                        <div><label class="block text-xs font-bold text-slate-500 mb-1">날짜</label><input type="text" value="${ui.editForm.date}" oninput="state.ui.editForm.date=this.value" class="w-full border p-2 rounded"></div>
+                                        <!-- 요청 4: 달력 날짜 선택 기능 추가 (input type="date" 사용) -->
+                                        <div><label class="block text-xs font-bold text-slate-500 mb-1">날짜 (Date Picker)</label><input type="date" value="${getISODateFromKoreanString(ui.editForm.date)}" onchange="window.handleAdminDateChange(this.value)" class="w-full border p-2 rounded">
+                                        <p class="text-[10px] text-slate-400 mt-1">현재: ${ui.editForm.date}</p></div>
                                         <div><label class="block text-xs font-bold text-slate-500 mb-1">시간</label><input type="text" value="${ui.editForm.time}" oninput="state.ui.editForm.time=this.value" class="w-full border p-2 rounded"></div>
                                     </div>
                                     <div><label class="block text-xs font-bold text-slate-500 mb-1">장소명</label><input type="text" value="${ui.editForm.locationName}" oninput="state.ui.editForm.locationName=this.value" class="w-full border p-2 rounded"></div>
@@ -847,6 +932,13 @@
         };
 
         const init = async () => {
+            if (firebaseInitError) {
+                state.ui.configError = true;
+                state.ui.errorMsg = "Firebase 초기화 실패 (설정 확인 필요)";
+                window.render();
+                return;
+            }
+
             const saved = localStorage.getItem('meetup_user_info');
             if (saved) {
                 state.form = { ...state.form, ...JSON.parse(saved), rememberMe: true };
@@ -867,6 +959,12 @@
                         }
                     } catch (e) {
                         console.error("Auth Failed:", e);
+                        // Auth 실패 시 (특히 API Key 에러) UI에 표시
+                        if (e.code && e.code.includes('api-key')) {
+                            state.ui.configError = true;
+                            state.ui.errorMsg = "API Key 오류: Firebase 설정을 확인하세요.";
+                            window.render();
+                        }
                     }
                 }
                 window.render();
