@@ -206,15 +206,15 @@
         <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2.5 pt-0.5">
             <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-book-open text-blue-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">주제</span><span class="hidden sm:inline">이번 주 주제</span></span>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">일정</span><span class="hidden sm:inline">이번 주 주제</span></span>
             </button>
             <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-puzzle-piece text-blue-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">배치도</span><span class="hidden sm:inline">테이블 배치도</span></span>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">테이블</span><span class="hidden sm:inline">테이블 배치도</span></span>
             </button>
             <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-chart-simple text-emerald-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">현황판</span><span class="hidden sm:inline">당근 현황판</span></span>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">포인트</span><span class="hidden sm:inline">당근 현황판</span></span>
             </button>
             <button id="tab-btn-4" onclick="switchTab(4)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-heart text-pink-400 text-sm"></i>
@@ -234,7 +234,7 @@
             
             <!-- 1. 스터디 일정 & 장소 섹션 -->
             <div class="space-y-1.5">
-                <h3 class="text-xs sm:text-sm font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                <h3 class="text-sm sm:text-base font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>이번 주 스터디 일정</span>
                 </h3>
@@ -242,26 +242,26 @@
                     <!-- Row 1: 스터디 일시 -->
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
-                            <span id="topicScheduleDisplay" class="font-extrabold text-xs sm:text-base text-zinc-100 flex items-center gap-1.5 truncate">
-                                <i class="fa-regular fa-clock text-blue-400 text-sm sm:text-base shrink-0"></i>8월 15일 (토) 09:50 - 11:50
+                            <span id="topicScheduleDisplay" class="font-extrabold text-sm sm:text-lg text-zinc-100 flex items-center gap-1.5 truncate">
+                                <i class="fa-regular fa-clock text-blue-400 text-base sm:text-lg shrink-0"></i>8월 15일 (토) 09:50 - 11:50
                             </span>
                         </div>
-                        <span class="bg-blue-600 text-white font-black text-xs px-2.5 py-1 rounded-lg shadow shrink-0 whitespace-nowrap flex items-center gap-1">
-                            <i class="fa-solid fa-flag text-[10px]"></i> 17회차
+                        <span class="bg-blue-600 text-white font-bold text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md shadow shrink-0 whitespace-nowrap flex items-center gap-1">
+                            <i class="fa-solid fa-flag text-[9px] sm:text-[10px]"></i> 17회차
                         </span>
                     </div>
 
                     <!-- Row 2: 스터디 장소 & 지도 보기 -->
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
-                            <span id="topicLocationDisplay" class="font-extrabold text-xs sm:text-base text-zinc-100 flex items-center gap-1.5 truncate">
-                                <i class="fa-solid fa-location-dot text-pink-400 text-sm sm:text-base shrink-0"></i>성신여대입구역 인근 카페
+                            <span id="topicLocationDisplay" class="font-extrabold text-sm sm:text-lg text-zinc-100 flex items-center gap-1.5 truncate">
+                                <i class="fa-solid fa-location-dot text-pink-400 text-base sm:text-lg shrink-0"></i>성신여대입구역 인근 카페
                             </span>
                         </div>
-                        <a id="topicLocationLink" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="bg-pink-600 hover:bg-pink-500 text-white font-extrabold px-3 py-1 rounded-lg text-xs transition flex items-center gap-1.5 shrink-0 shadow active:scale-95 whitespace-nowrap">
-                            <i class="fa-solid fa-map-location-dot text-[11px]"></i>
-                            <span>지도 보기</span>
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        <a id="topicLocationLink" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[11px] sm:text-xs transition flex items-center gap-1 shrink-0 shadow active:scale-95 whitespace-nowrap">
+                            <i class="fa-solid fa-map-location-dot text-[10px]"></i>
+                            <span>지도</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[8px] sm:text-[9px]"></i>
                         </a>
                     </div>
                 </div>
@@ -269,7 +269,7 @@
 
             <!-- 2. 스터디 주제 & 미디어 섹션 -->
             <div class="space-y-1.5">
-                <h3 class="text-xs sm:text-sm font-black text-pink-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                <h3 class="text-sm sm:text-base font-black text-pink-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                     <i class="fa-solid fa-film"></i>
                     <span>이번 주 스터디 주제</span>
                 </h3>
@@ -315,7 +315,7 @@
 
             <!-- 3. 참가비 & 취소/환불 안내 섹션 (공지 탭에서 이동하여 시너지 극대화!) -->
             <div class="space-y-1.5">
-                <h3 class="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                <h3 class="text-sm sm:text-base font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                     <i class="fa-solid fa-coins"></i>
                     <span>참가비 & 취소/환불 안내</span>
                 </h3>
@@ -426,7 +426,7 @@
                             <div class="font-black text-pink-400 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
                                 <i class="fa-solid fa-pen-nib"></i> 후기 작성
                             </div>
-                            <p class="text-xs sm:text-sm text-zinc-200 font-medium">후기 작성 후 현장 셀프 터치 (미터치 불가)</p>
+                            <p class="text-xs sm:text-sm text-zinc-200 font-medium">후기 작성 후 현장 셀프 터치</p>
                         </div>
                         <span class="bg-pink-950 text-pink-300 border border-pink-700/50 text-sm sm:text-base font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
                             +1 당근
