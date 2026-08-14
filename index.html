@@ -232,40 +232,40 @@
 
         <!-- TAB 1: 이번 주 주제 -->
         <section id="tab-content-1" class="tab-content space-y-3 sm:space-y-4">
-            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm sm:text-base">
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-zinc-200">
-                    <span class="bg-blue-600 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-lg flex items-center gap-1 shadow whitespace-nowrap">
-                        <i class="fa-solid fa-flag"></i> 17회차
-                    </span>
-                    <span id="topicScheduleDisplay" class="font-extrabold text-sm sm:text-base text-blue-300 whitespace-nowrap"><i class="fa-regular fa-clock text-blue-400 mr-1"></i>8월 15일 (토) 09:50 - 11:50</span>
+            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2.5 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3 text-sm sm:text-base">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-zinc-200">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="bg-blue-600 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-lg flex items-center gap-1 shadow whitespace-nowrap shrink-0">
+                            <i class="fa-solid fa-flag"></i> 17회차
+                        </span>
+                        <span id="topicScheduleDisplay" class="font-extrabold text-sm sm:text-base text-blue-300 whitespace-nowrap"><i class="fa-regular fa-clock text-blue-400 mr-1"></i>8월 15일 (토) 09:50 - 11:50</span>
+                    </div>
                     <span class="text-zinc-600 hidden sm:inline">|</span>
                     <span id="topicLocationDisplay" class="font-extrabold text-sm sm:text-base text-pink-300 flex items-center gap-1 whitespace-nowrap">
                         <i class="fa-solid fa-location-dot text-pink-400 mr-0.5"></i>성신여대입구역 인근 카페
                     </span>
                 </div>
 
-                <!-- Action Buttons (No Line Breaks) -->
-                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
-                    <a id="topicLocationLink" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap flex-1 sm:flex-none bg-pink-950 hover:bg-pink-900 text-pink-300 border border-pink-700/60 font-extrabold px-3 py-2 rounded-xl text-xs sm:text-sm transition inline-flex items-center justify-center gap-1.5 shadow active:scale-95">
+                <!-- Action Buttons (Desktop Header) -->
+                <div class="hidden sm:flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                    <a id="topicLocationLink" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap bg-pink-950 hover:bg-pink-900 text-pink-300 border border-pink-700/60 font-extrabold px-3 py-2 rounded-xl text-xs sm:text-sm transition inline-flex items-center justify-center gap-1.5 shadow active:scale-95">
                         <i class="fa-solid fa-map-location-dot text-pink-400"></i>
-                        <span class="sm:hidden">장소 확인</span>
-                        <span class="hidden sm:inline">장소 확인하기</span>
+                        <span>장소 확인하기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] sm:text-xs text-pink-400/80"></i>
                     </a>
-                    <a id="topicDocsLink" href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap flex-1 sm:flex-none bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/60 font-extrabold px-3 py-2 rounded-xl text-xs sm:text-sm transition inline-flex items-center justify-center gap-1.5 shadow active:scale-95">
+                    <a id="topicDocsLink" href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/60 font-extrabold px-3 py-2 rounded-xl text-xs sm:text-sm transition inline-flex items-center justify-center gap-1.5 shadow active:scale-95">
                         <i class="fa-solid fa-file-arrow-down text-emerald-400"></i>
-                        <span class="sm:hidden">자료 받기</span>
-                        <span class="hidden sm:inline">이번 주 자료 다운로드</span>
+                        <span>이번 주 자료 다운로드</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] sm:text-xs text-emerald-400/80"></i>
                     </a>
                 </div>
             </div>
 
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 shadow-xl space-y-3.5 sm:space-y-4 flex flex-col items-center">
-                <div class="w-full flex items-center justify-between border-b border-zinc-800 pb-2.5">
-                    <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-2 truncate">
+                <div class="w-full flex items-center justify-between border-b border-zinc-800 pb-2.5 gap-2">
+                    <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-2 leading-snug">
                         <span class="bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs sm:text-sm px-2.5 py-0.5 sm:py-1 rounded-full font-black shadow shrink-0 whitespace-nowrap">TOPIC</span>
-                        <span id="topicTitleDisplay" class="truncate">"The fastest way to board a plane, according to mathematics"</span>
+                        <span id="topicTitleDisplay" class="break-words">"The fastest way to board a plane, according to mathematics"</span>
                     </h2>
                     <span class="text-xs sm:text-sm font-bold text-zinc-400 shrink-0 hidden md:inline">TED Math Series</span>
                 </div>
@@ -283,6 +283,20 @@
                             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                         </span>
                     </div>
+                </div>
+
+                <!-- Mobile Only Action Buttons (Full-Width Stacked under YouTube Video) -->
+                <div class="sm:hidden w-full space-y-2 pt-1">
+                    <a id="topicLocationLinkMobile" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="w-full bg-pink-950 hover:bg-pink-900 text-pink-300 border border-pink-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
+                        <i class="fa-solid fa-map-location-dot text-pink-400 text-base"></i>
+                        <span>장소 확인하기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-pink-400/80"></i>
+                    </a>
+                    <a id="topicDocsLinkMobile" href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
+                        <i class="fa-solid fa-file-arrow-down text-emerald-400 text-base"></i>
+                        <span>이번 주 자료 다운로드</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-emerald-400/80"></i>
+                    </a>
                 </div>
 
                 <div class="w-full flex items-center justify-center pt-2 border-t border-zinc-800/80">
@@ -309,19 +323,18 @@
                         </p>
                     </div>
                     
-                    <button onclick="requestShuffleWithPin()" class="whitespace-nowrap self-start sm:self-auto bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 active:scale-95 transition">
+                    <button onclick="requestShuffleWithPin()" class="hidden sm:flex whitespace-nowrap self-start sm:self-auto bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow items-center gap-1.5 active:scale-95 transition">
                         <i class="fa-solid fa-shuffle text-pink-400 text-xs sm:text-sm"></i>
-                        <span class="sm:hidden">🔄 2부 셔플</span>
-                        <span class="hidden sm:inline">🔄 2부 셔플 (성별·세대 균등)</span>
+                        <span>🔄 2부 셔플 (성별·세대 균등)</span>
                     </button>
                 </div>
 
                 <!-- Seating Rules Summary Bar -->
-                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-300 bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800">
-                    <span class="bg-blue-950/80 text-blue-300 border border-blue-800/50 px-2.5 py-1 rounded-lg flex items-center gap-1.5 whitespace-nowrap">
-                        <span class="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded font-bold">1번 테이블</span> 리더 Jett + 신규 회원 전원 고정
+                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-300 bg-zinc-900/90 p-2 sm:p-2.5 rounded-xl border border-zinc-800">
+                    <span class="bg-blue-950/80 text-blue-300 border border-blue-800/50 px-2.5 py-1 rounded-lg flex items-center gap-1 whitespace-nowrap">
+                        <span class="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded font-bold">1번</span> Jett+신규 고정
                     </span>
-                    <span class="bg-pink-950/80 text-pink-300 border border-pink-800/50 px-2.5 py-1 rounded-lg flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="bg-pink-950/80 text-pink-300 border border-pink-800/50 px-2.5 py-1 rounded-lg flex items-center gap-1 whitespace-nowrap">
                         <i class="fa-solid fa-venus-mars text-pink-400"></i> 남녀/세대 균등 믹스
                     </span>
                 </div>
@@ -351,15 +364,15 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <!-- Rule 1: Speaking Time (1분 내외) -->
+                    <!-- Rule 1: Speaking Time -->
                     <div class="bg-gradient-to-br from-pink-950/40 via-zinc-900 to-zinc-900 p-3.5 sm:p-5 rounded-2xl border border-pink-500/30 space-y-1.5 shadow-lg relative overflow-hidden group hover:border-pink-500/60 transition">
                         <div class="flex items-center justify-between">
                             <span class="text-2xl sm:text-3xl">👄</span>
                             <span class="text-xs font-black bg-pink-500/20 text-pink-300 border border-pink-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 01</span>
                         </div>
-                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공정한 발언권 <span class="text-pink-400 text-xs sm:text-sm font-bold">(가장 중요)</span></h3>
+                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공정한 발언권</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            한 턴 <strong class="text-pink-400 font-extrabold">최대 1분 내외</strong> (대화 독점 자제)
+                            한 턴당 <strong class="text-pink-400 font-extrabold">1분 내외</strong>로 서로의 발언 기회를 존중합니다.
                         </p>
                     </div>
 
@@ -371,7 +384,7 @@
                         </div>
                         <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">10분 전 도착</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            시작 <strong class="text-blue-400 font-extrabold">10분 전도착</strong> (음료 주문 시간)
+                            시작 <strong class="text-blue-400 font-extrabold">10분 전 도착</strong>하여 음료 준비 및 착석을 마칩니다.
                         </p>
                     </div>
 
@@ -383,7 +396,7 @@
                         </div>
                         <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">경청과 존중</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            경청하기 (<strong class="text-amber-400 font-extrabold">발언 중 폰 자제</strong>)
+                            상대방의 이야기에 <strong class="text-amber-400 font-extrabold">경청하며 긍정적으로 반응</strong>해 줍니다.
                         </p>
                     </div>
 
@@ -395,25 +408,12 @@
                         </div>
                         <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공부 목적 유지</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            스터디 집중 (<strong class="text-emerald-400 font-extrabold">영업·사적 목적 자제</strong>)
+                            유익하고 알찬 <strong class="text-emerald-400 font-extrabold">영어 회화 스터디에 몰입</strong>합니다.
                         </p>
                     </div>
                 </div>
 
-                <!-- 구분용 신규 부제목 섹션 (줄바꿈 방지) -->
-                <div class="pt-3 border-t border-zinc-800 flex flex-row items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-1.5 whitespace-nowrap">
-                            <i class="fa-solid fa-coins text-amber-400 text-base sm:text-2xl"></i>
-                            <span>참가비 & 당근 혜택</span>
-                        </h2>
-                        <p class="text-xs sm:text-sm text-zinc-300 mt-0.5 font-medium">참가비, 취소/환불, 당근 적립 가이드</p>
-                    </div>
-                    <span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0 whitespace-nowrap">
-                        <i class="fa-solid fa-circle-info"></i> 안내
-                    </span>
-                </div>
-
+                <!-- 구분용 신규 부제목 섹션 -->
                 <!-- 2-Column Panel: Upgraded Readability Fonts -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-0.5">
                     <!-- Left: Fee & Cancellation Rules -->
@@ -1140,15 +1140,19 @@
             const schEl = document.getElementById('topicScheduleDisplay');
             const locEl = document.getElementById('topicLocationDisplay');
             const locLinkEl = document.getElementById('topicLocationLink');
+            const locLinkMobEl = document.getElementById('topicLocationLinkMobile');
             const titleEl = document.getElementById('topicTitleDisplay');
             const thumbEl = document.getElementById('topicVideoThumbnail');
             const docsEl = document.getElementById('topicDocsLink');
+            const docsMobEl = document.getElementById('topicDocsLinkMobile');
 
             if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 mr-1"></i>${topicData.schedule}`;
             if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-pink-400 mr-1"></i>${topicData.location}`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://map.naver.com";
+            if (locLinkMobEl) locLinkMobEl.href = topicData.locationUrl || "https://map.naver.com";
             if (titleEl) titleEl.innerText = topicData.title;
             if (docsEl) docsEl.href = topicData.docsUrl || "https://docs.google.com";
+            if (docsMobEl) docsMobEl.href = topicData.docsUrl || "https://docs.google.com";
 
             const ytId = extractYoutubeId(topicData.youtubeUrl);
             const finalThumbUrl = topicData.customThumbnailUrl && topicData.customThumbnailUrl.trim() !== "" 
