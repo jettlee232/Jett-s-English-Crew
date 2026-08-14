@@ -232,14 +232,14 @@
 
         <!-- TAB 1: 이번 주 주제 -->
         <section id="tab-content-1" class="tab-content space-y-3 sm:space-y-4">
-            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm sm:text-base">
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-zinc-200">
                     <span class="bg-blue-600 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-lg flex items-center gap-1 shadow whitespace-nowrap">
                         <i class="fa-solid fa-flag"></i> 17회차
                     </span>
-                    <span id="topicScheduleDisplay" class="font-extrabold whitespace-nowrap"><i class="fa-regular fa-clock text-blue-400 mr-1"></i>8월 15일 (토) 09:50 - 11:50</span>
+                    <span id="topicScheduleDisplay" class="font-extrabold text-sm sm:text-base text-blue-300 whitespace-nowrap"><i class="fa-regular fa-clock text-blue-400 mr-1"></i>8월 15일 (토) 09:50 - 11:50</span>
                     <span class="text-zinc-600 hidden sm:inline">|</span>
-                    <span id="topicLocationDisplay" class="font-extrabold flex items-center gap-1 whitespace-nowrap">
+                    <span id="topicLocationDisplay" class="font-extrabold text-sm sm:text-base text-pink-300 flex items-center gap-1 whitespace-nowrap">
                         <i class="fa-solid fa-location-dot text-pink-400 mr-0.5"></i>성신여대입구역 인근 카페
                     </span>
                 </div>
@@ -299,11 +299,14 @@
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 shadow-2xl space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-zinc-800/80 pb-3">
                     <div>
-                        <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
+                        <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-users-rectangle text-blue-400 text-lg sm:text-2xl"></i>
                             <span>오늘 스터디 스마트 테이블 배치도</span>
                         </h2>
-                        <p class="text-xs sm:text-sm text-zinc-400 mt-0.5">3명 우선 분배 & 인원에 맞춰 테이블 자동 확장 (리더+신규 고정)</p>
+                        <p class="text-xs sm:text-sm text-zinc-300 mt-1 font-semibold">
+                            <span class="sm:hidden">⚡ 3명 우선 · 자동 확장 · 리더+신규 고정</span>
+                            <span class="hidden sm:inline">3명 우선 분배 & 인원에 맞춰 테이블 자동 확장 (리더+신규 고정)</span>
+                        </p>
                     </div>
                     
                     <button onclick="requestShuffleWithPin()" class="whitespace-nowrap self-start sm:self-auto bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 active:scale-95 transition">
@@ -336,14 +339,14 @@
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
                 <div class="border-b border-zinc-800 pb-3 flex flex-row items-center justify-between gap-2">
                     <div>
-                        <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
+                        <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-heart text-pink-400 text-lg sm:text-2xl"></i>
-                            <span>성북구 영어회화 필수 에티켓 4가지</span>
+                            <span>필수 에티켓 4가지</span>
                         </h2>
-                        <p class="text-xs sm:text-sm text-zinc-400 mt-0.5">모두가 즐겁게 회화에 참여하기 위한 스터디 약속입니다.</p>
+                        <p class="text-xs sm:text-sm text-zinc-300 mt-0.5 font-medium">즐거운 회화를 위한 핵심 약속입니다.</p>
                     </div>
                     <span class="bg-pink-950/80 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0 whitespace-nowrap">
-                        <i class="fa-solid fa-circle-check"></i> 필수 지침
+                        <i class="fa-solid fa-circle-check"></i> 필수
                     </span>
                 </div>
 
@@ -354,9 +357,9 @@
                             <span class="text-2xl sm:text-3xl">👄</span>
                             <span class="text-xs font-black bg-pink-500/20 text-pink-300 border border-pink-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 01</span>
                         </div>
-                        <h3 class="font-extrabold text-sm sm:text-lg text-white whitespace-nowrap">공정한 발언권 <span class="text-pink-400 text-xs sm:text-sm font-bold">(가장 중요)</span></h3>
-                        <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
-                            한 턴에 <strong class="text-pink-400 font-bold">최대 1분 내외</strong>로 대화를 독점하지 않도록 서로 배려해주세요.
+                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공정한 발언권 <span class="text-pink-400 text-xs sm:text-sm font-bold">(가장 중요)</span></h3>
+                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
+                            한 턴 <strong class="text-pink-400 font-extrabold">최대 1분 내외</strong> (대화 독점 자제)
                         </p>
                     </div>
 
@@ -366,9 +369,9 @@
                             <span class="text-2xl sm:text-3xl">⏰</span>
                             <span class="text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 02</span>
                         </div>
-                        <h3 class="font-extrabold text-sm sm:text-lg text-white whitespace-nowrap">10분 전 도착</h3>
-                        <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
-                            음료 주문 시간을 고려해 모임 <strong class="text-blue-400 font-bold">시작 10분 전 도착</strong>을 권장합니다.
+                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">10분 전 도착</h3>
+                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
+                            시작 <strong class="text-blue-400 font-extrabold">10분 전도착</strong> (음료 주문 시간)
                         </p>
                     </div>
 
@@ -378,9 +381,9 @@
                             <span class="text-2xl sm:text-3xl">👂</span>
                             <span class="text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 03</span>
                         </div>
-                        <h3 class="font-extrabold text-sm sm:text-lg text-white whitespace-nowrap">경청과 존중</h3>
-                        <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
-                            다른 멤버가 발언할 때는 <strong class="text-amber-400 font-bold">휴대폰 사용을 자제</strong>하고 귀 기울여주세요.
+                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">경청과 존중</h3>
+                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
+                            경청하기 (<strong class="text-amber-400 font-extrabold">발언 중 폰 자제</strong>)
                         </p>
                     </div>
 
@@ -390,9 +393,9 @@
                             <span class="text-2xl sm:text-3xl">🧠</span>
                             <span class="text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 04</span>
                         </div>
-                        <h3 class="font-extrabold text-sm sm:text-lg text-white whitespace-nowrap">공부 목적 유지</h3>
-                        <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
-                            순수한 스터디 환경을 위해 <strong class="text-emerald-400 font-bold">종교, 영업, 이성 목적 활동은 지양</strong>해주세요.
+                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공부 목적 유지</h3>
+                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
+                            스터디 집중 (<strong class="text-emerald-400 font-extrabold">영업·사적 목적 자제</strong>)
                         </p>
                     </div>
                 </div>
@@ -400,15 +403,14 @@
                 <!-- 구분용 신규 부제목 섹션 (줄바꿈 방지) -->
                 <div class="pt-3 border-t border-zinc-800 flex flex-row items-center justify-between gap-2">
                     <div>
-                        <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-1.5 whitespace-nowrap">
+                        <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-1.5 whitespace-nowrap">
                             <i class="fa-solid fa-coins text-amber-400 text-base sm:text-2xl"></i>
-                            <span class="sm:hidden">참가비 & 당근 포인트 안내</span>
-                            <span class="hidden sm:inline">참가비·환불 일정 규정 및 당근 포인트 안내</span>
+                            <span>참가비 & 당근 혜택</span>
                         </h2>
-                        <p class="text-xs sm:text-sm text-zinc-400 mt-0.5">스터디 운영 참가비/환불 조건과 당근 혜택 제도입니다.</p>
+                        <p class="text-xs sm:text-sm text-zinc-300 mt-0.5 font-medium">참가비, 취소/환불, 당근 적립 가이드</p>
                     </div>
                     <span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0 whitespace-nowrap">
-                        <i class="fa-solid fa-circle-info"></i> 운영 안내
+                        <i class="fa-solid fa-circle-info"></i> 안내
                     </span>
                 </div>
 
@@ -416,99 +418,99 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-0.5">
                     <!-- Left: Fee & Cancellation Rules -->
                     <div class="bg-zinc-900 p-3.5 sm:p-5 rounded-2xl border border-zinc-800 space-y-2.5 sm:space-y-3 shadow-inner">
-                        <h3 class="font-extrabold text-sm sm:text-base text-amber-400 flex items-center gap-2 whitespace-nowrap">
+                        <h3 class="font-extrabold text-base sm:text-lg text-amber-400 flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-coins"></i>
-                            <span>참가비 & 환불/일정 규정</span>
+                            <span>참가비 & 취소/환불</span>
                         </h3>
 
-                        <div class="space-y-2 text-xs sm:text-sm text-zinc-200">
+                        <div class="space-y-2 text-sm sm:text-base text-zinc-100">
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                                 <div class="space-y-0.5">
-                                    <div class="font-bold text-amber-400 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
+                                    <div class="font-black text-amber-400 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
                                         <i class="fa-solid fa-coins"></i> 참가비 안내
                                     </div>
-                                    <p class="text-xs sm:text-sm text-zinc-300">목요일 당근모임 일괄 요청 (음료 각자 주문)</p>
+                                    <p class="text-xs sm:text-sm text-zinc-200 font-medium">목요일 당근모임 일괄 요청 (음료 각자)</p>
                                 </div>
-                                <span class="bg-amber-950 text-amber-300 border border-amber-700/50 text-xs sm:text-sm font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
+                                <span class="bg-amber-950 text-amber-300 border border-amber-700/50 text-sm sm:text-base font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
                                     3,000원
                                 </span>
                             </div>
 
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 space-y-0.5">
-                                <div class="font-bold text-zinc-200 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                    <i class="fa-solid fa-clock text-amber-400"></i> 목요일 전 일정 신청/취소
+                                <div class="font-black text-zinc-100 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
+                                    <i class="fa-solid fa-clock text-amber-400"></i> 목요일 전 취소
                                 </div>
-                                <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                                    목요일 일괄 요청 시 자정까지 송금하시거나 편하게 취소 가능합니다.
+                                <p class="text-xs sm:text-sm text-zinc-200 font-medium">
+                                    자정까지 자유 취소 & 송금
                                 </p>
                             </div>
 
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 space-y-0.5">
-                                <div class="font-bold text-zinc-200 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
+                                <div class="font-black text-zinc-100 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
                                     <i class="fa-solid fa-calendar-check text-amber-400"></i> 목요일 이후 신청
                                 </div>
-                                <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                                    신청과 동시에 송금해 주셔야 확정됩니다. (금요일 오후 8시까지 확정 가능)
+                                <p class="text-xs sm:text-sm text-zinc-200 font-medium">
+                                    신청 즉시 입금 시 확정 (금요일 20시 마감)
                                 </p>
                             </div>
 
                             <!-- Concise Notice Alert without wrapping -->
-                            <div class="text-xs sm:text-sm text-rose-400 font-bold text-center pt-2 border-t border-zinc-800/80 flex items-center justify-center gap-1 whitespace-nowrap">
-                                <span>🚨 송금 후 참가비 환불/반환 불가</span>
+                            <div class="text-xs sm:text-sm text-amber-300/90 font-extrabold text-center pt-2 border-t border-zinc-800/80 flex items-center justify-center gap-1 whitespace-nowrap">
+                                <span>💡 송금 후 참가비 환불은 어려운 점 양해 부탁드려요</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right: Carrot Point Reward System Guide -->
                     <div class="bg-zinc-900 p-3.5 sm:p-5 rounded-2xl border border-zinc-800 space-y-2.5 sm:space-y-3 shadow-inner">
-                        <h3 class="font-extrabold text-sm sm:text-base text-orange-400 flex items-center gap-2 whitespace-nowrap">
+                        <h3 class="font-extrabold text-base sm:text-lg text-orange-400 flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-carrot"></i>
-                            <span>당근 포인트 적립 제도 안내</span>
+                            <span>당근 적립 안내</span>
                         </h3>
 
-                        <div class="space-y-2 text-xs sm:text-sm text-zinc-200">
+                        <div class="space-y-2 text-sm sm:text-base text-zinc-100">
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                                 <div class="space-y-0.5">
-                                    <div class="font-bold text-blue-400 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                        <i class="fa-solid fa-stopwatch"></i> 제시간 도착 인증
+                                    <div class="font-black text-blue-400 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
+                                        <i class="fa-solid fa-stopwatch"></i> 제시간 도착
                                     </div>
-                                    <p class="text-xs sm:text-sm text-zinc-300">오전 10시 전 음료와 함께 현장 셀프 터치</p>
+                                    <p class="text-xs sm:text-sm text-zinc-200 font-medium">10시 전 음료 착석 후 셀프 터치</p>
                                 </div>
-                                <span class="bg-blue-950 text-blue-300 border border-blue-700/50 text-xs sm:text-sm font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
+                                <span class="bg-blue-950 text-blue-300 border border-blue-700/50 text-sm sm:text-base font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
                                     +1 당근
                                 </span>
                             </div>
 
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                                 <div class="space-y-0.5">
-                                    <div class="font-bold text-pink-400 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                        <i class="fa-solid fa-pen-nib"></i> 스터디 후기 작성
+                                    <div class="font-black text-pink-400 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
+                                        <i class="fa-solid fa-pen-nib"></i> 후기 작성
                                     </div>
-                                    <p class="text-xs sm:text-sm text-zinc-300">후기 작성 후 현장 셀프 터치 (현장 미터치 시 적립 불가)</p>
+                                    <p class="text-xs sm:text-sm text-zinc-200 font-medium">작성 후 현장 셀프 터치 (미터치 불가)</p>
                                 </div>
-                                <span class="bg-pink-950 text-pink-300 border border-pink-700/50 text-xs sm:text-sm font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
+                                <span class="bg-pink-950 text-pink-300 border border-pink-700/50 text-sm sm:text-base font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
                                     +1 당근
                                 </span>
                             </div>
 
                             <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                                 <div class="space-y-0.5">
-                                    <div class="font-bold text-emerald-400 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                        <i class="fa-solid fa-bullhorn"></i> 결석 사전 고지
+                                    <div class="font-black text-emerald-400 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
+                                        <i class="fa-solid fa-bullhorn"></i> 사전 고지
                                     </div>
-                                    <p class="text-xs sm:text-sm text-zinc-300">모임 하루 전(금요일 자정)까지 리더에게 연락</p>
+                                    <p class="text-xs sm:text-sm text-zinc-200 font-medium">금요일 자정 전 리더 연락</p>
                                 </div>
-                                <span class="bg-emerald-950 text-emerald-300 border border-emerald-700/50 text-xs sm:text-sm font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
+                                <span class="bg-emerald-950 text-emerald-300 border border-emerald-700/50 text-sm sm:text-base font-black px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap">
                                     +2 당근
                                 </span>
                             </div>
 
                             <div class="bg-gradient-to-r from-orange-950/80 to-zinc-950 p-2.5 sm:p-3 rounded-xl border border-orange-500/40 flex items-center justify-between gap-2">
                                 <div class="space-y-0.5">
-                                    <div class="font-extrabold text-orange-300 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                        <i class="fa-solid fa-crown text-amber-400"></i> 당근 6개 모으면?
+                                    <div class="font-black text-orange-300 text-sm sm:text-base flex items-center gap-1.5 whitespace-nowrap">
+                                        <i class="fa-solid fa-crown text-amber-400"></i> 6개 달성 시?
                                     </div>
-                                    <p class="text-xs sm:text-sm text-orange-200/90 font-medium whitespace-nowrap">3,000원 참가비 상당 혜택!</p>
+                                    <p class="text-xs sm:text-sm text-orange-200 font-semibold whitespace-nowrap">3,000원 상당 혜택!</p>
                                 </div>
                                 <span class="bg-orange-500 text-white text-xs sm:text-sm font-black px-2.5 py-1 rounded-xl shadow whitespace-nowrap">
                                     1회 무료 참가 👑
@@ -571,6 +573,12 @@
 
         <!-- TAB 5: 출석 / 적립 -->
         <section id="tab-content-5" class="tab-content space-y-4 sm:space-y-5 hidden">
+            <!-- Mobile Warning Banner (Only visible on mobile) -->
+            <div class="sm:hidden bg-amber-950/80 border border-amber-500/50 rounded-xl p-3 text-center flex items-center justify-center gap-2 text-amber-200 text-xs font-bold shadow-md">
+                <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm shrink-0"></i>
+                <span class="whitespace-nowrap">⚠️ 이 페이지는 현장 키오스크(아이패드) 전용 페이지입니다.</span>
+            </div>
+
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 lg:p-8 shadow-2xl space-y-4 sm:space-y-6">
                 <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
                     <div class="flex items-center gap-2">
@@ -681,7 +689,7 @@
 
     <!-- Leader Operations Admin Modal -->
     <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="bg-[#1E1E22] border border-[#2E2E35] w-full max-w-4xl rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+        <div class="bg-[#1E1E22] border border-[#2E2E35] w-full max-w-5xl rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <h3 class="font-bold text-base sm:text-xl text-white flex items-center gap-2 whitespace-nowrap">
                     <i class="fa-solid fa-user-gear text-blue-400"></i>
@@ -2459,7 +2467,7 @@
                         <!-- Top Mobile Row: Name & Mobile Attendance Badge -->
                         <div class="sm:col-span-2 flex items-center justify-between gap-2 w-full whitespace-nowrap">
                             <div class="flex items-center gap-1.5 truncate">
-                                <span class="font-extrabold text-base sm:text-lg text-white truncate">
+                                <span class="font-black text-lg sm:text-xl text-white truncate">
                                     ${m.name}
                                 </span>
                                 ${isKing ? `
@@ -2478,33 +2486,41 @@
                             ${getAttendanceBadge(m.totalAttended)}
                         </div>
 
-                        <!-- Carrot Slots & Carry-Over Badges Column -->
+                        <!-- Carrot Slots Column -->
                         <div class="sm:col-span-4 flex items-center justify-between sm:justify-start gap-2 w-full bg-zinc-950/50 sm:bg-transparent p-2 sm:p-0 rounded-lg border sm:border-0 border-zinc-800/50">
                             <div class="flex items-center gap-1 shrink-0">
                                 ${slotsHtml}
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                                <span class="font-extrabold text-xs sm:text-sm text-orange-400">
+                                <span class="font-extrabold text-sm sm:text-base text-orange-400">
                                     ${coins}/6
                                 </span>
                                 ${coins > 6 ? `
-                                    <span class="text-[11px] sm:text-xs font-extrabold text-orange-300 bg-orange-950/80 border border-orange-500/40 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">
+                                    <span class="hidden sm:inline-flex text-[11px] sm:text-xs font-extrabold text-orange-300 bg-orange-950/80 border border-orange-500/40 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                                         +${coins - 6}이월
                                     </span>
                                 ` : ''}
                             </div>
                         </div>
 
-                        <!-- Recent Action & Desktop King Badge -->
+                        <!-- Recent Action, Mobile Carry-over Badge & Desktop King Badge -->
                         <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-2 w-full text-xs sm:text-sm text-zinc-300 border-t sm:border-t-0 border-zinc-800/80 pt-2 sm:pt-0 whitespace-nowrap">
+                            <div class="flex items-center gap-1.5 shrink-0 sm:hidden">
+                                ${coins > 6 ? `
+                                    <span class="text-xs font-black text-orange-300 bg-orange-950/90 border border-orange-500/50 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
+                                        +${coins - 6}이월
+                                    </span>
+                                ` : ''}
+                            </div>
+
                             ${isKing ? `
                                 <span class="hidden sm:inline-flex text-xs font-black text-pink-300 bg-gradient-to-r from-blue-950/80 via-pink-950/80 to-orange-950/80 border border-pink-500/50 px-2.5 py-1 rounded-lg shrink-0">
                                     👑 무료참가!
                                 </span>
                             ` : ''}
                             <div class="text-right truncate ml-auto w-full sm:w-auto">
-                                <span class="text-zinc-500 text-xs">최근:</span>
-                                <span class="text-zinc-200 font-semibold text-xs sm:text-sm ml-1 truncate">${m.lastAction || '기록 없음'}</span>
+                                <span class="text-zinc-400 font-bold text-xs sm:text-sm">최근:</span>
+                                <span class="text-zinc-100 font-extrabold text-xs sm:text-sm ml-1 truncate">${m.lastAction || '기록 없음'}</span>
                             </div>
                         </div>
                     </div>
