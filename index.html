@@ -204,7 +204,7 @@
 
         <!-- Navigation Tabs (4 Main Tabs on Mobile, 5 Tabs on iPad/Desktop) -->
         <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2.5 pt-0.5">
-            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn tab-btn-active py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-book-open text-blue-400 text-sm"></i>
                 <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">일정</span><span class="hidden sm:inline">이번 주 주제</span></span>
             </button>
@@ -518,9 +518,6 @@
                         </h2>
                         <p class="text-xs sm:text-sm text-zinc-300 mt-0.5 font-medium">즐거운 회화를 위한 핵심 약속입니다.</p>
                     </div>
-                    <span class="bg-pink-950/80 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0 whitespace-nowrap">
-                        <i class="fa-solid fa-circle-check"></i> 필수
-                    </span>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -530,9 +527,9 @@
                             <span class="text-2xl sm:text-3xl">👄</span>
                             <span class="text-xs font-black bg-pink-500/20 text-pink-300 border border-pink-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 01</span>
                         </div>
-                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공정한 발언권</h3>
-                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            한 턴당 <strong class="text-pink-400 font-extrabold">1분 내외</strong>로 서로의 발언 기회를 존중합니다.
+                        <h3 class="font-extrabold text-lg sm:text-xl text-white whitespace-nowrap">공정한 발언권</h3>
+                        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal whitespace-nowrap truncate">
+                            한 턴당 <strong class="text-pink-400 font-bold">1분 내외</strong>로 서로의 발언 기회를 존중합니다.
                         </p>
                     </div>
 
@@ -542,9 +539,9 @@
                             <span class="text-2xl sm:text-3xl">⏰</span>
                             <span class="text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 02</span>
                         </div>
-                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">10분 전 도착</h3>
-                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            시작 <strong class="text-blue-400 font-extrabold">10분 전 도착</strong>하여 음료 준비 및 착석을 마칩니다.
+                        <h3 class="font-extrabold text-lg sm:text-xl text-white whitespace-nowrap">10분 전 도착</h3>
+                        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal whitespace-nowrap truncate">
+                            시작 <strong class="text-blue-400 font-bold">10분 전 도착</strong>하여 준비 및 착석을 마칩니다.
                         </p>
                     </div>
 
@@ -554,9 +551,9 @@
                             <span class="text-2xl sm:text-3xl">👂</span>
                             <span class="text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 03</span>
                         </div>
-                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">경청과 존중</h3>
-                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            상대방의 이야기에 경청하며 <strong class="text-amber-400 font-extrabold">휴대폰 사용을 자제</strong>해 주세요.
+                        <h3 class="font-extrabold text-lg sm:text-xl text-white whitespace-nowrap">경청과 존중</h3>
+                        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal whitespace-nowrap truncate">
+                            경청하며 <strong class="text-amber-400 font-bold">휴대폰 사용을 자제</strong>해 주세요.
                         </p>
                     </div>
 
@@ -566,9 +563,9 @@
                             <span class="text-2xl sm:text-3xl">🧠</span>
                             <span class="text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">수칙 04</span>
                         </div>
-                        <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공부 목적 유지</h3>
-                        <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            <strong class="text-emerald-400 font-extrabold">종교, 영업, 사적 연애 목적</strong>의 대화 및 접근은 자제해 주세요.
+                        <h3 class="font-extrabold text-lg sm:text-xl text-white whitespace-nowrap">공부 목적 유지</h3>
+                        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal whitespace-nowrap truncate">
+                            <strong class="text-emerald-400 font-bold">종교, 영업, 사적 연애</strong> 목적 대화는 자제해 주세요.
                         </p>
                     </div>
                 </div>
