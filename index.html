@@ -184,13 +184,13 @@
         <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
             <div class="flex items-center gap-2">
                 <h1 class="font-extrabold text-sm sm:text-xl text-white leading-snug flex items-center gap-1.5 whitespace-nowrap">
-                    <span>성북구 영어회화</span>
+                    <span>성북구 중상급 영어회화</span>
                     <span class="text-xs text-zinc-400 font-normal hidden sm:inline">| 올인원 스마트 Kiosk</span>
                 </h1>
             </div>
 
-            <!-- Top Utility Control Buttons (PIN Secured - No Line Breaks) -->
-            <div class="flex items-center gap-1.5 sm:gap-2">
+            <!-- Top Utility Control Buttons (Desktop/iPad Only - Hidden on Mobile) -->
+            <div class="hidden sm:flex items-center gap-1.5 sm:gap-2">
                 <button onclick="requestAdminAccess()" class="whitespace-nowrap text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-2.5 sm:px-3 py-1.5 rounded-xl border border-zinc-700 transition flex items-center gap-1 sm:gap-1.5 shadow">
                     <i class="fa-solid fa-user-gear text-blue-400"></i>
                     <span class="sm:hidden">리더</span>
@@ -203,8 +203,8 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs (5 Main Tabs - Single Line Mobile Labels) -->
-        <nav class="grid grid-cols-5 gap-1 sm:gap-2.5 pt-0.5">
+        <!-- Navigation Tabs (4 Main Tabs on Mobile, 5 Tabs on iPad/Desktop) -->
+        <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2.5 pt-0.5">
             <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-book-open text-blue-400 text-sm"></i>
                 <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">주제</span><span class="hidden sm:inline">이번 주 주제</span></span>
@@ -221,9 +221,9 @@
                 <i class="fa-solid fa-chart-simple text-emerald-400 text-sm"></i>
                 <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">현황판</span><span class="hidden sm:inline">당근 현황판</span></span>
             </button>
-            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition hidden sm:flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
                 <i class="fa-solid fa-carrot text-orange-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">적립</span><span class="hidden sm:inline">출석/적립</span></span>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">출석/적립</span>
             </button>
         </nav>
     </header>
@@ -234,7 +234,7 @@
         <section id="tab-content-1" class="tab-content space-y-3 sm:space-y-4">
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2.5 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3 text-sm sm:text-base">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-zinc-200">
-                    <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2">
                         <span class="bg-blue-600 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-lg flex items-center gap-1 shadow whitespace-nowrap shrink-0">
                             <i class="fa-solid fa-flag"></i> 17회차
                         </span>
@@ -285,26 +285,26 @@
                     </div>
                 </div>
 
-                <!-- Mobile Only Action Buttons (Full-Width Stacked under YouTube Video) -->
-                <div class="sm:hidden w-full space-y-2 pt-1">
-                    <a id="topicLocationLinkMobile" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="w-full bg-pink-950 hover:bg-pink-900 text-pink-300 border border-pink-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
-                        <i class="fa-solid fa-map-location-dot text-pink-400 text-base"></i>
-                        <span>장소 확인하기</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-pink-400/80"></i>
-                    </a>
-                    <a id="topicDocsLinkMobile" href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
-                        <i class="fa-solid fa-file-arrow-down text-emerald-400 text-base"></i>
-                        <span>이번 주 자료 다운로드</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-emerald-400/80"></i>
-                    </a>
-                </div>
-
                 <div class="w-full flex items-center justify-center pt-2 border-t border-zinc-800/80">
                     <div class="text-xs sm:text-sm font-semibold text-zinc-300 flex items-center gap-1.5 whitespace-nowrap">
                         <i class="fa-solid fa-comments text-amber-400 text-sm sm:text-base"></i>
                         <span>모임 참가 전 영상 1회 이상 시청 부탁드립니다!</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Mobile Only Action Buttons (Distinct Outer Section Card) -->
+            <div class="sm:hidden w-full bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 space-y-2.5 shadow-xl">
+                <a id="topicLocationLinkMobile" href="https://map.naver.com" target="_blank" rel="noopener noreferrer" class="w-full bg-pink-950 hover:bg-pink-900 text-pink-300 border border-pink-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
+                    <i class="fa-solid fa-map-location-dot text-pink-400 text-base"></i>
+                    <span>장소 확인하기</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-pink-400/80"></i>
+                </a>
+                <a id="topicDocsLinkMobile" href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/60 font-extrabold px-4 py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow active:scale-95">
+                    <i class="fa-solid fa-file-arrow-down text-emerald-400 text-base"></i>
+                    <span>이번 주 자료 다운로드</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-emerald-400/80"></i>
+                </a>
             </div>
         </section>
 
@@ -396,7 +396,7 @@
                         </div>
                         <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">경청과 존중</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            상대방의 이야기에 <strong class="text-amber-400 font-extrabold">경청하며 긍정적으로 반응</strong>해 줍니다.
+                            상대방의 이야기에 경청하며 <strong class="text-amber-400 font-extrabold">휴대폰 사용을 자제</strong>해 주세요.
                         </p>
                     </div>
 
@@ -408,7 +408,7 @@
                         </div>
                         <h3 class="font-extrabold text-base sm:text-lg text-white whitespace-nowrap">공부 목적 유지</h3>
                         <p class="text-sm sm:text-base text-zinc-100 leading-relaxed font-semibold">
-                            유익하고 알찬 <strong class="text-emerald-400 font-extrabold">영어 회화 스터디에 몰입</strong>합니다.
+                            <strong class="text-emerald-400 font-extrabold">종교, 영업, 사적 연애 목적</strong>의 대화 및 접근은 자제해 주세요.
                         </p>
                     </div>
                 </div>
