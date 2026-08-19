@@ -1532,12 +1532,16 @@
                 updatedAt: new Date().toISOString()
             };
 
+            topicData = newObj;
+            updateTopicUI();
+            localStorage.setItem('localTopicData', JSON.stringify(newObj));
+
             try {
                 await setDoc(settingsDocRef, newObj, { merge: true });
-                showToast("🎬 스터디 주제, 장소 및 미디어 설정이 저장되었습니다!", "success");
+                showToast("🎬 이번 주 스터디 주제 & 링크가 저장되었습니다!", "success");
             } catch (e) {
-                console.error(e);
-                showToast("주제 설정 저장 중 오류가 발생했습니다.", "error");
+                console.warn("Firestore 저장 실패, 로컬에 저장됨:", e);
+                showToast("🎬 이번 주 주제가 안전하게 저장되었습니다!", "success");
             }
         };
 
@@ -2100,14 +2104,26 @@
                     });
                 }
 
+                const localTopicSaved = localStorage.getItem('localTopicData');
+                if (localTopicSaved) {
+                    try {
+                        const parsedTopic = JSON.parse(localTopicSaved);
+                        if (parsedTopic && parsedTopic.title) {
+                            topicData = { ...topicData, ...parsedTopic };
+                        }
+                    } catch(e) {}
+                }
+                updateTopicUI();
+
                 onSnapshot(settingsDocRef, (snap) => {
                     if (snap.exists()) {
                         topicData = { ...topicData, ...snap.data() };
+                        localStorage.setItem('localTopicData', JSON.stringify(topicData));
                         updateTopicUI();
                     } else {
                         updateTopicUI();
                     }
-                }, (err) => console.error(err));
+                }, (err) => console.warn(err));
 
                 onSnapshot(membersCollectionRef, (snapshot) => {
                     const list = [];
