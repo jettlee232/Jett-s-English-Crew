@@ -788,11 +788,16 @@
             </div>
 
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 lg:p-8 shadow-2xl space-y-4 sm:space-y-6">
-                <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-3 flex-wrap gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-xs sm:text-sm font-bold text-orange-400 bg-orange-950/60 border border-orange-800/50 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap">
                             <i class="fa-solid fa-tablet-screen-button"></i>
                             <span>현장 셀프 키오스크</span>
+                        </span>
+                        <!-- Screen Wake Lock Status Badge (TAB 5 Only) -->
+                        <span id="wakeLockBadge" class="text-[11px] sm:text-xs font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap shadow-sm hidden">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>화면 켜짐 유지 중</span>
                         </span>
                     </div>
                     <div id="statusBadge" class="bg-zinc-800 text-zinc-300 text-xs sm:text-sm font-bold px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-zinc-700 flex items-center gap-2 whitespace-nowrap">
@@ -1437,6 +1442,48 @@
             }
         };
 
+        let screenWakeLock = null;
+
+        async function activateWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    if (screenWakeLock !== null) {
+                        await screenWakeLock.release();
+                        screenWakeLock = null;
+                    }
+                    screenWakeLock = await navigator.wakeLock.request('screen');
+                    const badge = document.getElementById('wakeLockBadge');
+                    if (badge) badge.classList.remove('hidden');
+                    
+                    screenWakeLock.addEventListener('release', () => {
+                        const badge = document.getElementById('wakeLockBadge');
+                        if (badge) badge.classList.add('hidden');
+                    });
+                } catch (err) {
+                    console.warn('Screen Wake Lock 활성화 실패 (지원하지 않거나 권한 거부):', err);
+                }
+            }
+        }
+
+        async function deactivateWakeLock() {
+            if (screenWakeLock !== null) {
+                try {
+                    await screenWakeLock.release();
+                    screenWakeLock = null;
+                } catch (err) {
+                    console.warn('Screen Wake Lock 해제 실패:', err);
+                }
+            }
+            const badge = document.getElementById('wakeLockBadge');
+            if (badge) badge.classList.add('hidden');
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && activeTab === 5) {
+                await activateWakeLock();
+            }
+        });
+
         window.switchTab = function(tabNum) {
             activeTab = tabNum;
             for (let i = 1; i <= 5; i++) {
@@ -1451,6 +1498,13 @@
                         btn.classList.remove('tab-btn-active');
                     }
                 }
+            }
+
+            // Screen Wake Lock: TAB 5(적립 키오스크) 진입 시에만 켜짐 유지, 다른 탭 이동 시 즉시 해제
+            if (tabNum === 5) {
+                activateWakeLock();
+            } else {
+                deactivateWakeLock();
             }
         };
 
