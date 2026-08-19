@@ -2642,11 +2642,18 @@
             const tables = Array.from({ length: numTables }, () => []);
 
             // ----------------------------------------------------
-            // 🔀 2부 스마트 셔플: [성별·세대 완벽 균등 믹스 + 1부 멤버 100% 분리]
+            // 🔀 2부 스마트 셔플: [리더 1번 테이블 고정 + 성별·세대 완벽 균등 믹스 + 1부 멤버 100% 분리]
             // ----------------------------------------------------
             if (isShuffle) {
-                let males = todayMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
-                let females = todayMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
+                // 1) 리더(Jett)는 2부에서도 1번 테이블 고정
+                let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
+                if (leader) {
+                    tables[0].push(leader);
+                }
+
+                const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
+                let males = restMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
+                let females = restMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
 
                 const maxFemalesPerTable = Math.ceil(females.length / numTables);
                 const maxMalesPerTable = Math.ceil(males.length / numTables);
@@ -2684,7 +2691,7 @@
                     return cost;
                 }
 
-                // 1) 여성 멤버를 각 테이블에 균등하게 먼저 배정
+                // 2) 여성 멤버를 각 테이블에 균등하게 먼저 배정
                 for (const female of females) {
                     let bestIdx = 0;
                     let minCost = Infinity;
@@ -2699,7 +2706,7 @@
                     tables[bestIdx].push(female);
                 }
 
-                // 2) 남성 멤버를 각 테이블에 균등하게 배정 (남녀 균형 완성)
+                // 3) 남성 멤버를 각 테이블에 균등하게 배정 (남녀 균형 완성)
                 for (const male of males) {
                     let bestIdx = 0;
                     let minCost = Infinity;
@@ -2714,7 +2721,7 @@
                     tables[bestIdx].push(male);
                 }
 
-                // 3) 2-Opt 최적화 (성별 비율을 유지하면서 1부 중복 및 세대 분산 극대화)
+                // 4) 2-Opt 최적화 (리더 고정 유지 & 성별 비율을 유지하면서 1부 중복 및 세대 분산 극대화)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     for (let i = 0; i < tbl.length; i++) {
@@ -2737,9 +2744,12 @@
                     for (let t1 = 0; t1 < numTables; t1++) {
                         for (let t2 = t1 + 1; t2 < numTables; t2++) {
                             for (let i = 0; i < tables[t1].length; i++) {
+                                const m1 = tables[t1][i];
+                                if (m1.isLeader || (m1.name || '').includes('Jett')) continue; // 리더 스왑 제외
+
                                 for (let j = 0; j < tables[t2].length; j++) {
-                                    const m1 = tables[t1][i];
                                     const m2 = tables[t2][j];
+                                    if (m2.isLeader || (m2.name || '').includes('Jett')) continue; // 리더 스왑 제외
                                     if (m1.gender !== m2.gender) continue; // 성별 밸런스 100% 보존
 
                                     const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
