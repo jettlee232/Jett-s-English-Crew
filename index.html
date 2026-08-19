@@ -1266,6 +1266,13 @@
         const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
         const sessionsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'table_sessions');
 
+        const INITIAL_SEED_MEMBERS = [{"name": "Jett", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 19, "isNew": false, "isToday": true, "isLeader": true, "lastAction": "리더"}, {"name": "찰스", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 11, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Jackie", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 10, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "대니얼", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 10, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "DY", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 9, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "대니", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 9, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Baylin", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 8, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Cindy", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 7, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Sunny", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 7, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Emilia", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 6, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "나지E", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 6, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Jun", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 6, "isNew": false, "isToday": true, "isLeader": false, "lastAction": "정규 회원"}, {"name": "표토르", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 4, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "눅눅", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 4, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Hanul", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 4, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "군밤", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 4, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "지은", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 4, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Lucy", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "HJ", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Jade", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "제니", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "고지", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Joe", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Vincent", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 3, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Richard", "gender": "M", "ageGroup": "60대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Hyun", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Sunnylee", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Mina", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "윤오", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "한상균", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "펠메니", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "Romy", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 2, "isNew": false, "isToday": false, "isLeader": false, "lastAction": "정규 회원"}, {"name": "으니", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Jenna", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Yoolee", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "jeondyu", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Sally", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Summer", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Su", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "클라치슈타", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Eun Young Kim", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "이안", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "킴늘보", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Channing", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "모니카", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "잔디", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "멘토링", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "현말랭", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 1, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Kathy", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "TED", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "LuckyGuy", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "누우", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Bonny", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "다람", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "ddh", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "호롤롤롤로", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "저도요", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "당근임", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "민민9", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "아보카도", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "곰신", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "EK", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Brad", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "닉네임은최소2자임당", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "서해", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Simon", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "리리리", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "mandy j", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "키티", "gender": "F", "ageGroup": "10대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Kyle (Kyle)", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "재스민", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "여름", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "곰탱이", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Harry", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Claire", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Elisha", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Sofia", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Matthew", "gender": "M", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "두치71남길음", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "이건", "gender": "M", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "츄라이추라이", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "이너피스", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "우우", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "포카리", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "재화니", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Nigel", "gender": "M", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Doo", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "길주민", "gender": "M", "ageGroup": "60대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "뽀리아빠", "gender": "M", "ageGroup": "60대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Judy", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Rurubros", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Noa", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Kat", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "으현", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "무낙", "gender": "M", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "말차그릭", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "나나", "gender": "F", "ageGroup": "40대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "WimmiW", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "해리", "gender": "M", "ageGroup": "60대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "엘리자", "gender": "F", "ageGroup": "50대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "Dali", "gender": "F", "ageGroup": "20대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}, {"name": "수호랑이", "gender": "F", "ageGroup": "30대", "coins": 0, "totalAttended": 0, "isNew": true, "isToday": false, "isLeader": false, "lastAction": "신규 참석"}];
+
+        function persistMembers(newList) {
+            membersData = newList;
+            localStorage.setItem('localMembersData', JSON.stringify(membersData));
+            renderUI();
+        }
         let membersData = [];
         let tableSessionsData = [];
         let currentSeatingTables = [];
@@ -2092,32 +2099,33 @@
         }
 
         async function seedInitialMembers() {
-            const defaults = [
-                { name: 'Jett', coins: 0, isToday: true, totalAttended: 52, gender: 'M', ageGroup: '30대', isLeader: true, lastAction: '리더' },
-                { name: 'Sarah', coins: 6, isToday: true, totalAttended: 18, gender: 'F', ageGroup: '20대', lastAction: '후기 작성 (+1당근)' },
-                { name: 'Alex', coins: 8, isToday: true, totalAttended: 34, gender: 'M', ageGroup: '40대', lastAction: '제시간 (+1당근)' },
-                { name: 'Grace', coins: 5, isToday: true, totalAttended: 12, gender: 'F', ageGroup: '50대', lastAction: '사전 알림 (+2당근)' },
-                { name: 'David', coins: 4, isToday: true, totalAttended: 8, gender: 'M', ageGroup: '20대', lastAction: '제시간 (+1당근)' },
-                { name: 'Emily', coins: 3, isToday: true, totalAttended: 15, gender: 'F', ageGroup: '30대', lastAction: '제시간 (+1당근)' },
-                { name: 'Daniel', coins: 2, isToday: true, totalAttended: 6, gender: 'M', ageGroup: '60대', lastAction: '후기 작성 (+1당근)' },
-                { name: 'Hannah', coins: 1, isToday: true, totalAttended: 3, gender: 'F', ageGroup: '20대', lastAction: '제시간 (+1당근)' },
-                { name: 'Tom', coins: 0, isToday: true, totalAttended: 1, gender: 'M', ageGroup: '30대', isNew: true, lastAction: '신규 참석' },
-                { name: 'Rachel', coins: 5, isToday: true, totalAttended: 22, gender: 'F', ageGroup: '30대', lastAction: '후기 작성 (+1당근)' },
-                { name: 'James', coins: 2, isToday: true, totalAttended: 9, gender: 'M', ageGroup: '40대', lastAction: '제시간 (+1당근)' },
-                { name: 'Olivia', coins: 4, isToday: true, totalAttended: 14, gender: 'F', ageGroup: '50대', lastAction: '사전 알림 (+2당근)' },
-                { name: '김철수', coins: 0, isToday: true, totalAttended: 1, gender: 'M', ageGroup: '30대', isNew: true, lastAction: '신규 참석' }
-            ];
+            const localSaved = localStorage.getItem('localMembersData');
+            if (localSaved) {
+                try {
+                    const parsed = JSON.parse(localSaved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        membersData = parsed;
+                        renderUI();
+                        return;
+                    }
+                } catch(e) {}
+            }
 
-            membersData = defaults.map((item, idx) => ({ id: `mem-${idx}`, ...item }));
-            renderUI();
+            membersData = INITIAL_SEED_MEMBERS.map((item, idx) => ({
+                id: `mem-${idx + 1}-${crypto.randomUUID().slice(0, 8)}`,
+                ...item,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }));
+            persistMembers(membersData);
 
             try {
-                for (const item of defaults) {
-                    const docRef = doc(membersCollectionRef, crypto.randomUUID());
-                    await setDoc(docRef, { ...item, updatedAt: new Date().toISOString() });
+                for (const item of membersData) {
+                    const docRef = doc(membersCollectionRef, item.id);
+                    setDoc(docRef, item);
                 }
             } catch (e) {
-                console.log("Offline mode or seed skip:", e);
+                console.log("Firestore offline/seed note:", e);
             }
         }
 
@@ -2371,16 +2379,22 @@
                 return;
             }
 
-            try {
-                const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, {
+            const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
+            if (idx !== -1) {
+                membersData[idx] = {
+                    ...membersData[idx],
                     name, gender, ageGroup, totalAttended, coins,
-                    isNew: totalAttended > 1 ? false : true,
+                    isNew: totalAttended <= 1,
+                    isLeader: name.includes('Jett'),
                     updatedAt: new Date().toISOString()
-                });
+                };
+                persistMembers([...membersData]);
                 showToast(`'${name}' 회원의 정보가 수정되었습니다!`, "success");
-            } catch (e) {
-                console.error(e);
+
+                try {
+                    const docRef = doc(membersCollectionRef, selectedAdminMemberId);
+                    updateDoc(docRef, membersData[idx]);
+                } catch (e) {}
             }
         };
 
@@ -2394,14 +2408,16 @@
                 msg: `'${member.name}' 님을 영구히 삭제하시겠습니까?`,
                 showOption: false,
                 onConfirm: async () => {
+                    const targetId = selectedAdminMemberId;
+                    const updatedList = membersData.filter(m => m.id !== targetId);
+                    selectedAdminMemberId = null;
+                    persistMembers(updatedList);
+                    loadAdminActionPanel();
+                    showToast(`'${member.name}' 회원이 삭제되었습니다.`, "info");
+
                     try {
-                        await deleteDoc(doc(membersCollectionRef, selectedAdminMemberId));
-                        selectedAdminMemberId = null;
-                        loadAdminActionPanel();
-                        showToast(`'${member.name}' 회원이 삭제되었습니다.`, "info");
-                    } catch (e) {
-                        console.error(e);
-                    }
+                        deleteDoc(doc(membersCollectionRef, targetId));
+                    } catch (e) {}
                 }
             });
         };
@@ -3092,26 +3108,33 @@
                 return;
             }
 
-            try {
-                const docRef = doc(membersCollectionRef, crypto.randomUUID());
-                await setDoc(docRef, {
-                    name: name,
-                    coins: 0,
-                    totalAttended: 1,
-                    gender: gender,
-                    ageGroup: ageGroup,
-                    isToday: true,
-                    isNew: true,
-                    lastAction: '신규 등록',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                });
+            const newId = crypto.randomUUID();
+            const isLeader = name.includes('Jett');
+            const newMem = {
+                id: newId,
+                name: name,
+                coins: 0,
+                totalAttended: 1,
+                gender: gender,
+                ageGroup: ageGroup,
+                isToday: true,
+                isNew: true,
+                isLeader: isLeader,
+                lastAction: '신규 등록',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
 
-                inputName.value = '';
-                showToast(`'${name}' 님이 스터디에 추가되었습니다.`, "success");
+            const updatedList = [newMem, ...membersData];
+            persistMembers(updatedList);
+            inputName.value = '';
+            showToast(`'${name}' 님이 스터디에 추가되었습니다.`, "success");
+
+            try {
+                const docRef = doc(membersCollectionRef, newId);
+                setDoc(docRef, newMem);
             } catch (e) {
-                console.error(e);
-                showToast("추가 실패", "error");
+                console.log("Saved locally:", e);
             }
         };
 
