@@ -1130,7 +1130,7 @@
                                 <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm">
                                     <div>
                                         <label class="text-xs text-zinc-500 block mb-0.5">총 참석 회차</label>
-                                        <input id="panelEditAttended" type="number" min="1" class="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
+                                        <input id="panelEditAttended" type="number" min="0" class="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
                                     </div>
                                     <div>
                                         <label class="text-xs text-zinc-500 block mb-0.5">당근 보유 수</label>
@@ -2308,10 +2308,15 @@
             }
         }
 
-        function getAttendanceBadge(totalAttended = 1) {
-            const count = totalAttended || 1;
-            if (count === 1) {
-                return `<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🌱 1회차</span>`;
+        function getAttendanceBadge(totalAttended = 0) {
+            const count = (totalAttended !== undefined && totalAttended !== null && !isNaN(totalAttended)) 
+                ? parseInt(totalAttended) 
+                : 0;
+
+            if (count <= 0) {
+                return `<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">🌱 신규</span>`;
+            } else if (count === 1) {
+                return `<span class="bg-teal-950 text-teal-300 border border-teal-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">🌱 1회차</span>`;
             } else if (count < 5) {
                 return `<span class="bg-zinc-800 text-zinc-300 border border-zinc-700 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🏃 ${count}회차</span>`;
             } else if (count < 10) {
@@ -2476,7 +2481,7 @@
             document.getElementById('panelEditName').value = member.name || '';
             document.getElementById('panelEditGender').value = member.gender || 'F';
             document.getElementById('panelEditAge').value = member.ageGroup || '30대';
-            document.getElementById('panelEditAttended').value = member.totalAttended || 1;
+            document.getElementById('panelEditAttended').value = member.totalAttended !== undefined ? member.totalAttended : 0;
             document.getElementById('panelEditCoins').value = member.coins || 0;
         }
 
@@ -2552,7 +2557,8 @@
             const name = document.getElementById('panelEditName').value.trim();
             const gender = document.getElementById('panelEditGender').value;
             const ageGroup = document.getElementById('panelEditAge').value;
-            const totalAttended = parseInt(document.getElementById('panelEditAttended').value) || 1;
+            const rawAttended = document.getElementById('panelEditAttended').value;
+            const totalAttended = rawAttended !== '' ? parseInt(rawAttended) : 0;
             const coins = parseInt(document.getElementById('panelEditCoins').value) || 0;
 
             if (!name) {
