@@ -415,31 +415,11 @@
         <!-- TAB 2: 스마트 테이블 배치도 -->
         <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
-                <div class="border-b border-zinc-800 pb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-2">
-                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-lg sm:text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
-                            <i class="fa-solid fa-puzzle-piece text-blue-400 text-lg sm:text-2xl"></i>
-                            <span>이번 주 스터디 테이블 배치도</span>
-                        </h2>
-                    </div>
-
-                    <!-- Action Buttons for Seating (Single line, compact) -->
-                    <div class="flex items-center gap-2 shrink-0 flex-nowrap">
-                        <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-base font-bold transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-rotate-left text-zinc-400 text-xs sm:text-sm"></i>
-                            <span>1부 복원</span>
-                        </button>
-                        
-                        <button onclick="requestShuffleWithPin()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-base transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-shuffle text-white text-xs sm:text-sm"></i>
-                            <span>2부 셔플</span>
-                        </button>
-
-                        <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1.5 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-base font-bold transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-floppy-disk text-emerald-400 text-xs sm:text-sm"></i>
-                            <span>이력 저장</span>
-                        </button>
-                    </div>
+                <div class="border-b border-zinc-800 pb-3 flex items-center justify-between">
+                    <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-lg sm:text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                        <i class="fa-solid fa-puzzle-piece text-blue-400 text-lg sm:text-2xl"></i>
+                        <span>이번 주 스터디 테이블 배치도</span>
+                    </h2>
                 </div>
 
                 <!-- Dynamic Seating Grid -->
@@ -447,6 +427,24 @@
                     <div class="col-span-full p-8 text-center text-xs sm:text-sm text-zinc-500 bg-zinc-900/60 rounded-xl border border-zinc-800">
                         참가자 명단을 확인하여 테이블 배치를 준비하는 중입니다...
                     </div>
+                </div>
+
+                <!-- Action Buttons for Seating (Bottom Center Aligned) -->
+                <div class="pt-3 border-t border-zinc-800/80 flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap">
+                    <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-3.5 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap active:scale-95">
+                        <i class="fa-solid fa-rotate-left text-zinc-400"></i>
+                        <span>1부 복원</span>
+                    </button>
+                    
+                    <button onclick="requestShuffleWithPin()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow-lg whitespace-nowrap active:scale-95">
+                        <i class="fa-solid fa-shuffle text-white"></i>
+                        <span>2부 셔플</span>
+                    </button>
+
+                    <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1.5 bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/50 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-lg whitespace-nowrap active:scale-95">
+                        <i class="fa-solid fa-floppy-disk text-emerald-400"></i>
+                        <span>2부 셔플 이력 저장</span>
+                    </button>
                 </div>
             </div>
         </section>
