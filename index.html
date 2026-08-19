@@ -2807,7 +2807,7 @@
             const tables = Array.from({ length: numTables }, () => []);
 
             // ----------------------------------------------------
-            // 🔀 2부 스마트 셔플: [세대별 또래 집중 매칭 (2030 영 테이블 & 405060 시니어 테이블) + 성별 균형 + 리더 T1 고정]
+            // 🔀 2부 스마트 셔플: [세대(또래) 절대 우선 클러스터링: 2030 완벽 묶음 + 리더 T1 + 내부 성비/1부분리 조율]
             // ----------------------------------------------------
             if (isShuffle) {
                 function getAgeNum(ageStr) {
@@ -2821,7 +2821,7 @@
                     return 35;
                 }
 
-                // 1) 리더(Jett, 30대)는 2부에서도 1번 테이블(2030 청년 그룹) 고정
+                // 1) 리더(Jett, 30대)는 1번 테이블(2030 청년 그룹)에 고정
                 let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
                 if (leader) {
                     tables[0].push(leader);
@@ -2829,99 +2829,38 @@
 
                 const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
 
-                // 연령 순으로 정렬 (젊은 층 -> 시니어 순)
-                let males = restMembers.filter(m => m.gender === 'M').sort((a, b) => getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup));
-                let females = restMembers.filter(m => m.gender !== 'M').sort((a, b) => getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup));
+                // 2) 🌟 [세대 절대 우선]: 연령 순으로 엄격하게 오름차순 정렬 (동점일 땐 랜덤)
+                const sortedByAge = [...restMembers].sort((a, b) => {
+                    const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
+                    return diff !== 0 ? diff : (Math.random() - 0.5);
+                });
 
-                const maxFemalesPerTable = Math.ceil(females.length / numTables);
-                const maxMalesPerTable = Math.ceil(males.length / numTables);
-                const maxCapacityPerTable = Math.ceil(totalCount / numTables);
+                // 3) 각 테이블 목표 정원 계산
+                const baseCapacity = Math.floor(totalCount / numTables);
+                const remainder = totalCount % numTables;
+                const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
-                function getShuffleCost(tIdx, tbl, member, isMaleGroup) {
-                    let cost = 0;
-                    
-                    // 테이블 인원 균등성
-                    cost += tbl.length * 50;
-
-                    // 성비 상한 초과 방지
-                    const currentSameGender = tbl.filter(m => (m.gender === 'M') === isMaleGroup).length;
-                    const maxAllowed = isMaleGroup ? maxMalesPerTable : maxFemalesPerTable;
-                    if (currentSameGender >= maxAllowed) {
-                        cost += 10000;
+                // 4) 나이 순서대로 테이블에 순차 직행 배정 (Table 1 = 가장 젊은 2030, Table N = 5060 시니어)
+                let memberIdx = 0;
+                for (let t = 0; t < numTables; t++) {
+                    const needed = capacities[t] - tables[t].length;
+                    for (let k = 0; k < needed && memberIdx < sortedByAge.length; k++) {
+                        tables[t].push(sortedByAge[memberIdx++]);
                     }
-
-                    // 🌟 세대별 또래 클러스터링: 테이블 내 다른 멤버들과의 연령 차이 최소화
-                    const mAge = getAgeNum(member.ageGroup);
-                    if (tbl.length > 0) {
-                        let totalAgeDiff = 0;
-                        for (const existing of tbl) {
-                            const diff = Math.abs(mAge - getAgeNum(existing.ageGroup));
-                            totalAgeDiff += diff;
-                        }
-                        const avgAgeDiff = totalAgeDiff / tbl.length;
-                        cost += avgAgeDiff * 150; // 또래 매칭에 강력한 가중치 부여!
-                    }
-
-                    // 테이블 번호 기반 세대 배치 (앞쪽 테이블 = 2030 젊은 층, 뒤쪽 테이블 = 405060 시니어)
-                    const targetTableRatio = tIdx / Math.max(1, numTables - 1);
-                    const memberAgeRatio = Math.max(0, Math.min(1, (mAge - 20) / 40));
-                    cost += Math.abs(targetTableRatio - memberAgeRatio) * 600;
-
-                    // 1부 멤버 중복 완화 페널티
-                    if (part1SeatingSnapshot) {
-                        for (const existing of tbl) {
-                            for (const p1Table of part1SeatingSnapshot) {
-                                const wasTogether = p1Table.some(m => m.id === existing.id) && p1Table.some(m => m.id === member.id);
-                                if (wasTogether) {
-                                    cost += 2000;
-                                }
-                            }
-                        }
-                    }
-
-                    return cost;
                 }
 
-                // 2) 여성 멤버 배정 (연령순 & 성비균등 & 또래매칭)
-                for (const female of females) {
-                    let bestIdx = 0;
-                    let minCost = Infinity;
-                    for (let t = 0; t < numTables; t++) {
-                        if (tables[t].length >= maxCapacityPerTable) continue;
-                        const cost = getShuffleCost(t, tables[t], female, false);
-                        if (cost < minCost) {
-                            minCost = cost;
-                            bestIdx = t;
-                        }
-                    }
-                    tables[bestIdx].push(female);
-                }
-
-                // 3) 남성 멤버 배정 (연령순 & 성비균등 & 또래매칭)
-                for (const male of males) {
-                    let bestIdx = 0;
-                    let minCost = Infinity;
-                    for (let t = 0; t < numTables; t++) {
-                        if (tables[t].length >= maxCapacityPerTable) continue;
-                        const cost = getShuffleCost(t, tables[t], male, true);
-                        if (cost < minCost) {
-                            minCost = cost;
-                            bestIdx = t;
-                        }
-                    }
-                    tables[bestIdx].push(male);
-                }
-
-                // 4) 2-Opt 최적화 (성비 100% 보존하면서 테이블 내 연령 편차 최소화)
+                // 5) 미세 최적화: [동일/인접 연령대 내부에서만] 성비 및 1부 중복 완화 스왑 (나이 차이 벌어지는 스왑은 원천 차단)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
+                    // 1순위: 연령 격차 (가장 강력한 페널티)
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
-                            const diff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += diff * 20;
+                            const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
+                            score += ageDiff * 300; // 나이가 다르면 큰 페널티
 
+                            // 1부 멤버 중복 완화
                             if (part1SeatingSnapshot) {
                                 for (const p1T of part1SeatingSnapshot) {
                                     if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
@@ -2931,10 +2870,16 @@
                             }
                         }
                     }
+
+                    // 2순위: 성비 불균형 (성별 차이가 심할 때만 약하게 완화)
+                    const mCount = tbl.filter(m => m.gender === 'M').length;
+                    const fCount = tbl.filter(m => m.gender !== 'M').length;
+                    score += Math.abs(mCount - fCount) * 80;
+
                     return score;
                 }
 
-                for (let iter = 0; iter < 50; iter++) {
+                for (let iter = 0; iter < 60; iter++) {
                     let improved = false;
                     for (let t1 = 0; t1 < numTables; t1++) {
                         for (let t2 = t1 + 1; t2 < numTables; t2++) {
@@ -2945,7 +2890,10 @@
                                 for (let j = 0; j < tables[t2].length; j++) {
                                     const m2 = tables[t2][j];
                                     if (m2.isLeader || (m2.name || '').includes('Jett')) continue;
-                                    if (m1.gender !== m2.gender) continue; // 성별 밸런스 100% 보존
+
+                                    // 🚫 나이 차이가 15세 이상 벌어지는 세대 파괴 스왑은 원천 금지!
+                                    const ageGap1 = Math.abs(getAgeNum(m1.ageGroup) - getAgeNum(m2.ageGroup));
+                                    if (ageGap1 > 15) continue;
 
                                     const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
 
