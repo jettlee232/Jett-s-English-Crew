@@ -492,8 +492,8 @@
             </div>
 
             <!-- 2. 멤버별 당근 현황 리스트 -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between gap-2">
+            <div class="space-y-2">
+                <div class="flex items-center justify-between gap-2 pb-1">
                     <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
                         <i class="fa-solid fa-users text-emerald-400"></i>
                         <span>멤버별 당근 출석 현황판</span>
@@ -504,7 +504,28 @@
                     </div>
                 </div>
 
-                <div id="membersList" class="space-y-2.5">
+                <!-- Column Header Bar -->
+                <div class="px-2 sm:px-4 py-1.5 flex items-center justify-between gap-1 sm:gap-3 text-zinc-400 text-[11px] sm:text-xs font-bold border-b border-zinc-800/80">
+                    <!-- Col 1: 이름 -->
+                    <div class="w-[64px] sm:w-[110px] shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-user text-[10px] text-zinc-500"></i>
+                        <span>이름</span>
+                    </div>
+
+                    <!-- Col 2: 출석 -->
+                    <div class="w-[66px] sm:w-[95px] shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-calendar-days text-[10px] text-zinc-500"></i>
+                        <span>출석</span>
+                    </div>
+
+                    <!-- Col 3: 보유 당근 -->
+                    <div class="flex items-center justify-end gap-1 shrink-0 ml-auto text-right">
+                        <i class="fa-solid fa-carrot text-[10px] text-orange-400"></i>
+                        <span>보유 당근 (6개 완성)</span>
+                    </div>
+                </div>
+
+                <div id="membersList" class="space-y-2">
                     <div class="p-8 text-center text-zinc-500 bg-[#1E1E22] rounded-xl border border-[#2E2E35] text-xs sm:text-sm">
                         현황판 데이터를 로딩하고 있습니다...
                     </div>
