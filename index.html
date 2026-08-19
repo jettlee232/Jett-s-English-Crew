@@ -1280,8 +1280,14 @@
         let isPart2Shuffle = false;
         let showLeaderFreshness = false;
 
-        const DEFAULT_PIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 for '1234'
+        const DEFAULT_PIN_HASH = "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e"; // SHA-256 for '2323'
         let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
+
+        // If previously saved with legacy '1234' hash, update to new default '2323'
+        if (leaderPinHash === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4") {
+            leaderPinHash = DEFAULT_PIN_HASH;
+            localStorage.setItem('leaderPinHash', leaderPinHash);
+        }
 
         async function hashPin(pin) {
             if (!pin) return '';
@@ -1294,8 +1300,8 @@
         const legacyPin = localStorage.getItem('leaderPin');
         if (legacyPin) {
             hashPin(legacyPin).then(h => {
-                leaderPinHash = h;
-                localStorage.setItem('leaderPinHash', h);
+                leaderPinHash = (h === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4") ? DEFAULT_PIN_HASH : h;
+                localStorage.setItem('leaderPinHash', leaderPinHash);
                 localStorage.removeItem('leaderPin');
             });
         }
