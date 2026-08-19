@@ -343,12 +343,6 @@
                         </a>
                     </div>
 
-                    <!-- Refund Notice Box (Directly below Fee Row) -->
-                    <div class="bg-red-950/40 border border-red-500/30 p-2.5 rounded-xl flex items-center justify-center text-center text-xs text-red-300 font-bold gap-1.5">
-                        <i class="fa-solid fa-circle-exclamation text-red-400"></i>
-                        <span>송금 완료 후 환불/이월 불가</span>
-                    </div>
-
                     <!-- Schedule Accordion Button -->
                     <div class="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/60">
                         <button onclick="toggleTimelineAccordion()" class="w-full p-3 flex items-center justify-between bg-zinc-950 hover:bg-zinc-900 transition text-left">
@@ -359,7 +353,7 @@
                             <i id="timelineAccordionIcon" class="fa-solid fa-chevron-down text-zinc-400 text-xs sm:text-sm transition-transform duration-300"></i>
                         </button>
 
-                        <!-- Accordion Body: Step Timeline List -->
+                        <!-- Accordion Body: Step Timeline List & Refund Policy -->
                         <div id="timelineAccordionContent" class="hidden p-3 border-t border-zinc-800/80 space-y-2 text-xs sm:text-sm bg-zinc-950">
                             <!-- Step 1 -->
                             <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-start gap-2.5">
@@ -404,6 +398,12 @@
                                         • 입금 확인 시 즉시 승인
                                     </p>
                                 </div>
+                            </div>
+
+                            <!-- Refund Notice Box (Inside Accordion) -->
+                            <div class="bg-red-950/40 border border-red-500/30 p-2.5 rounded-xl flex items-center justify-center text-center text-xs text-red-300 font-bold gap-1.5 mt-2">
+                                <i class="fa-solid fa-circle-exclamation text-red-400"></i>
+                                <span>송금 완료 후 환불/이월 불가</span>
                             </div>
                         </div>
                     </div>
