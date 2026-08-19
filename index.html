@@ -3191,48 +3191,28 @@
                 }
 
                 return `
-                    <div class="${isKing ? 'rainbow-super-card p-3 sm:p-4 shadow-md' : 'bg-[#1E1E22] border border-[#2E2E35] rounded-xl p-3 sm:p-4 shadow-sm'} transition-all duration-200 flex flex-col sm:grid sm:grid-cols-12 items-stretch sm:items-center gap-2 sm:gap-3">
-                        <div class="sm:col-span-2 flex items-center justify-between gap-2 w-full whitespace-nowrap">
-                            <div class="flex items-center gap-1.5 truncate">
-                                <span class="font-black text-lg sm:text-xl text-white truncate">
-                                    ${m.name || '미지정'}
-                                </span>
-                                ${isKing ? `
-                                    <span class="text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-2 py-0.5 rounded-full flex items-center gap-1 sm:hidden shrink-0 whitespace-nowrap">
-                                        무료참가!
-                                    </span>
-                                ` : ''}
-                            </div>
-                            <div class="sm:hidden shrink-0">
-                                ${getAttendanceBadge(m.totalAttended)}
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:flex sm:col-span-2 items-center justify-start w-full whitespace-nowrap">
+                    <div class="${isKing ? 'rainbow-super-card px-3 sm:px-4 py-2.5 sm:py-3.5 shadow-md' : 'bg-[#1E1E22] border border-[#2E2E35] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3.5 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-2 w-full hover:border-zinc-700">
+                        <!-- Left: Member Name & Attendance Badge -->
+                        <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0 shrink">
+                            <span class="font-black text-base sm:text-xl text-white truncate max-w-[90px] sm:max-w-[150px]">
+                                ${m.name || '미지정'}
+                            </span>
                             ${getAttendanceBadge(m.totalAttended)}
-                        </div>
-
-                        <div class="sm:col-span-4 flex items-center justify-between sm:justify-start gap-2 w-full bg-zinc-950/50 sm:bg-transparent p-2 sm:p-0 rounded-lg border sm:border-0 border-zinc-800/50">
-                            <div class="flex items-center gap-1 shrink-0">
-                                ${slotsHtml}
-                            </div>
-                            <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                                <span class="font-extrabold text-sm sm:text-base text-orange-400">
-                                    ${coins}/6
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-2 w-full text-xs sm:text-sm text-zinc-300 border-t sm:border-t-0 border-zinc-800/80 pt-2 sm:pt-0 whitespace-nowrap">
                             ${isKing ? `
-                                <span class="hidden sm:inline-flex text-xs font-black text-pink-300 bg-gradient-to-r from-blue-950/80 via-pink-950/80 to-orange-950/80 border border-pink-500/50 px-2.5 py-1 rounded-lg shrink-0">
-                                    무료참가!
+                                <span class="text-[10px] sm:text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                                    👑 무료참가
                                 </span>
                             ` : ''}
-                            <div class="text-right truncate ml-auto w-full sm:w-auto">
-                                <span class="text-zinc-400 font-bold text-xs sm:text-sm">최근:</span>
-                                <span class="text-zinc-100 font-extrabold text-xs sm:text-sm ml-1 truncate">${m.lastAction || '기록 없음'}</span>
+                        </div>
+
+                        <!-- Right: Carrot Coin Slots & Score -->
+                        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                            <div class="flex items-center gap-0.5 sm:gap-1">
+                                ${slotsHtml}
                             </div>
+                            <span class="font-black text-xs sm:text-base text-orange-400 min-w-[24px] sm:min-w-[32px] text-right whitespace-nowrap">
+                                ${coins}/6
+                            </span>
                         </div>
                     </div>
                 `;
