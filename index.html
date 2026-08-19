@@ -2,7 +2,7 @@
 <html lang="ko" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>성북구 중상급 영어회화 - 올인원 스마트 Kiosk</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -180,16 +180,24 @@
 </head>
 <body class="min-h-screen pb-8 flex flex-col items-center select-none">
 
-    <header class="w-full max-w-full lg:max-w-7xl bg-[#1E1E22]/95 backdrop-blur-md border-b border-[#2E2E35] sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3 shadow-xl transition-all">
+    <header class="w-full max-w-full lg:max-w-7xl bg-[#1E1E22]/95 backdrop-blur-md border-b border-[#2E2E35] sticky top-0 z-40 px-3 sm:px-6 pt-[calc(0.6rem+env(safe-area-inset-top,0px))] pb-2.5 sm:py-3 shadow-xl transition-all">
         <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
             <div class="flex items-center gap-2">
-                <h1 class="font-black text-lg sm:text-2xl text-white leading-snug flex items-center gap-2 whitespace-nowrap">
+                <h1 class="font-black text-base sm:text-2xl text-white leading-snug flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
                     <span>성북구 중상급 영어회화</span>
                     <span class="text-xs text-zinc-400 font-normal hidden sm:inline">| 올인원 스마트 Kiosk</span>
                 </h1>
             </div>
 
-            <!-- Top Utility Control Buttons (Desktop/iPad Only - Hidden on Mobile) -->
+            <!-- Top Utility Control Buttons: Mobile View -->
+            <div class="flex sm:hidden items-center gap-1.5">
+                <button onclick="requestAdminAccess()" class="whitespace-nowrap text-xs font-bold text-blue-300 hover:text-white bg-blue-950/80 active:bg-blue-900 active:scale-95 px-2.5 py-1.5 rounded-xl border border-blue-600/50 transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-user-gear text-blue-400 text-xs"></i>
+                    <span>리더 관리</span>
+                </button>
+            </div>
+
+            <!-- Top Utility Control Buttons: Desktop/iPad View -->
             <div class="hidden sm:flex items-center gap-1.5 sm:gap-2">
                 <button onclick="requestAdminAccess()" class="whitespace-nowrap text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-2.5 sm:px-3 py-1.5 rounded-xl border border-zinc-700 transition flex items-center gap-1 sm:gap-1.5 shadow">
                     <i class="fa-solid fa-user-gear text-blue-400"></i>
@@ -431,34 +439,33 @@
                     <span>당근 포인트 적립 및 무료참가 안내</span>
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs sm:text-sm">
-                    <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50 font-black text-xs flex items-center justify-center shrink-0">+1</span>
+                    <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div>
                             <div class="font-bold text-zinc-100">제시간 도착</div>
-                            <div class="text-[11px] text-zinc-400">시작 시간 도착시 +1당근</div>
+                            <div class="text-[11px] text-zinc-400">오전 10시 전 음료와 함께 현장터치</div>
                         </div>
+                        <span class="px-2 py-1 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50 font-black text-xs shrink-0 whitespace-nowrap">+1 당근</span>
                     </div>
-                    <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-pink-950 text-pink-400 border border-pink-800/50 font-black text-xs flex items-center justify-center shrink-0">+1</span>
+                    <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div>
                             <div class="font-bold text-zinc-100">후기 작성</div>
                             <div class="text-[11px] text-zinc-400 leading-tight">후기 작성하고 현장 셀프 터치</div>
                         </div>
+                        <span class="px-2 py-1 rounded-lg bg-pink-950 text-pink-400 border border-pink-800/50 font-black text-xs shrink-0 whitespace-nowrap">+1 당근</span>
                     </div>
-                    <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-black text-xs flex items-center justify-center shrink-0">+2</span>
+                    <div class="bg-zinc-950 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div>
                             <div class="font-bold text-zinc-100">사전 고지</div>
                             <div class="text-[11px] text-zinc-400">금요일 자정까지 불참 연락</div>
                         </div>
+                        <span class="px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-black text-xs shrink-0 whitespace-nowrap">+2 당근</span>
                     </div>
                 </div>
-                <div class="bg-gradient-to-r from-amber-950/60 to-orange-950/60 p-2.5 rounded-xl border border-orange-500/30 flex items-center justify-between text-xs sm:text-sm">
+                <div class="bg-gradient-to-r from-amber-950/60 to-orange-950/60 p-2.5 rounded-xl border border-orange-500/30 flex items-center justify-center text-xs sm:text-sm">
                     <span class="font-bold text-orange-200 flex items-center gap-1.5 whitespace-nowrap">
                         <i class="fa-solid fa-crown text-amber-400"></i>
                         <span>당근 6개 모으면 1회 무료참가!</span>
                     </span>
-                    <span class="text-xs text-orange-300 font-extrabold whitespace-nowrap">6개 달성 시 자동 전환</span>
                 </div>
             </div>
 
@@ -471,7 +478,7 @@
                     </h2>
                     <div class="relative w-36 sm:w-48">
                         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
-                        <input id="memberSearchInput" type="text" oninput="renderMemberList()" placeholder="이름 검색..." class="w-full bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg pl-7 pr-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        <input id="memberSearchInput" type="text" oninput="renderMemberList()" placeholder="이름/초성 검색..." class="w-full bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg pl-7 pr-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                     </div>
                 </div>
 
@@ -848,9 +855,15 @@
                     <i class="fa-solid fa-user-gear text-blue-400"></i>
                     <span>리더 스터디 관리 메뉴</span>
                 </h3>
-                <button onclick="toggleModal('adminModal')" class="text-zinc-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleModal('adminModal'); toggleIpadLockModal();" class="text-xs font-bold text-amber-300 hover:text-white bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-sliders text-amber-400 text-xs"></i>
+                        <span class="whitespace-nowrap">적립 모드 설정</span>
+                    </button>
+                    <button onclick="toggleModal('adminModal')" class="text-zinc-400 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- 3 Sub-Tabs Bar -->
@@ -971,7 +984,7 @@
 
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
-                        <input id="adminMemberSearchInput" type="text" oninput="renderAdminMemberList()" placeholder="이름 직접 입력 검색..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs sm:text-sm rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <input id="adminMemberSearchInput" type="text" oninput="renderAdminMemberList()" placeholder="이름/초성 직접 입력 검색..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs sm:text-sm rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
                     </div>
                 </div>
 
@@ -2106,7 +2119,11 @@
             }
 
             if (query) {
-                filtered = filtered.filter(m => (m.name || '').toLowerCase().includes(query));
+                filtered = filtered.filter(m => {
+                    const name = (m.name || '').toLowerCase();
+                    const choseong = getChoseong(m.name || '').toLowerCase();
+                    return name.startsWith(query) || choseong.startsWith(query) || name.split(' ').some(part => part.startsWith(query));
+                });
             }
 
             filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
@@ -2136,7 +2153,7 @@
                             <span class="text-xs text-zinc-400 whitespace-nowrap">(${m.gender === 'M' ? '남' : '여'}/${m.ageGroup || '30대'})</span>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                            ${(m.coins || 0) >= 6 ? '<span class="text-xs bg-orange-950 text-orange-300 border border-orange-500/40 px-1.5 py-0.5 rounded font-bold">6개</span>' : ''}
+                            ${(m.coins || 0) >= 6 ? '<span class="text-xs bg-orange-950 text-orange-300 border border-orange-500/40 px-1.5 py-0.5 rounded font-bold">👑6개</span>' : ''}
                             <span class="text-xs sm:text-sm text-orange-400 font-bold">🥕${m.coins || 0}</span>
                         </div>
                     </button>
@@ -2557,12 +2574,12 @@
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
                                 const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
                                 const isMale = m.gender === 'M';
+                                const nameColor = isMale ? 'text-blue-400' : 'text-pink-400';
 
                                 return `
                                     <div class="bg-zinc-900/90 border border-zinc-800 p-2.5 sm:p-3 rounded-xl flex items-center justify-center text-center shadow">
                                         <div class="flex items-center justify-center gap-1.5 truncate w-full whitespace-nowrap">
-                                            <span class="text-base sm:text-lg">${isMale ? '🙋‍♂️' : '🙋‍♀️'}</span>
-                                            <span class="font-black text-white text-sm sm:text-lg truncate">
+                                            <span class="font-black ${nameColor} text-sm sm:text-lg truncate">
                                                 ${m.name || '미지정'}
                                             </span>
                                             ${isLeader ? '<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-bold whitespace-nowrap">리더</span>' : ''}
@@ -2571,10 +2588,6 @@
                                     </div>
                                 `;
                             }).join('')}
-                        </div>
-
-                        <div class="pt-0.5 text-center border-t border-zinc-800/60">
-                            <span class="text-[11px] sm:text-xs text-zinc-500 whitespace-nowrap">성별·세대 균등 배치 완료</span>
                         </div>
                     </div>
                 `;
@@ -2589,7 +2602,6 @@
             });
         };
 
-        // 한글 초성 추출 함수 (한글 초성 및 한 글자 검색 지원)
         function getChoseong(str) {
             if (!str) return '';
             const choseongs = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -2618,8 +2630,7 @@
                 nonLeaderMembers = nonLeaderMembers.filter(m => {
                     const name = (m.name || '').toLowerCase();
                     const choseong = getChoseong(m.name || '').toLowerCase();
-                    // 이름 또는 한글 초성(ㄱ, ㄴ, ㄷ...) 중 하나라도 일치하면 검색
-                    return name.includes(searchQuery) || choseong.includes(searchQuery);
+                    return name.startsWith(searchQuery) || choseong.startsWith(searchQuery) || name.split(' ').some(part => part.startsWith(searchQuery));
                 });
             }
 
@@ -2685,7 +2696,7 @@
                                 </span>
                                 ${isKing ? `
                                     <span class="text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-2 py-0.5 rounded-full flex items-center gap-1 sm:hidden shrink-0 whitespace-nowrap">
-                                        무료참가!
+                                        👑 무료참가!
                                     </span>
                                 ` : ''}
                             </div>
@@ -2712,7 +2723,7 @@
                         <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-2 w-full text-xs sm:text-sm text-zinc-300 border-t sm:border-t-0 border-zinc-800/80 pt-2 sm:pt-0 whitespace-nowrap">
                             ${isKing ? `
                                 <span class="hidden sm:inline-flex text-xs font-black text-pink-300 bg-gradient-to-r from-blue-950/80 via-pink-950/80 to-orange-950/80 border border-pink-500/50 px-2.5 py-1 rounded-lg shrink-0">
-                                    무료참가!
+                                    👑 무료참가!
                                 </span>
                             ` : ''}
                             <div class="text-right truncate ml-auto w-full sm:w-auto">
