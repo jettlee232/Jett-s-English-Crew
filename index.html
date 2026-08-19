@@ -165,6 +165,21 @@
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
         }
 
+        @keyframes tabSlideFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-content:not(.hidden) {
+            animation: tabSlideFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -2622,6 +2637,71 @@
                 deactivateWakeLock();
             }
         };
+
+        // ----------------------------------------------------
+        // 📱 스마트 터치 스와이프 제스처 네비게이션 (4대 안전장치 탑재)
+        // ----------------------------------------------------
+        (function initTouchSwipeNavigation() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            let isSwipingValid = false;
+
+            document.addEventListener('touchstart', (e) => {
+                // 1. 모달이 열려있을 땐 스와이프 비활성화
+                const activeModals = document.querySelectorAll('.fixed:not(.hidden)');
+                if (activeModals.length > 0) return;
+
+                // 2. 인터랙티브 요소 (인풋, 버튼, 초성바, 스크롤 박스 등) 내부 터치는 제외
+                const target = e.target;
+                if (target.closest('input, textarea, select, button, #consonantFilterBar, #adminModal, #customPinModal, #confirmModal, #customAlertModal, #ipadLockModal')) {
+                    isSwipingValid = false;
+                    return;
+                }
+
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartTime = Date.now();
+
+                // 3. 브라우저 뒤로가기/앞으로가기 제스처 영역 (화면 좌우 가장자리 25px) 제외
+                if (touchStartX < 25 || touchStartX > window.innerWidth - 25) {
+                    isSwipingValid = false;
+                    return;
+                }
+
+                isSwipingValid = true;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (!isSwipingValid) return;
+
+                const touch = e.changedTouches[0];
+                const deltaX = touch.clientX - touchStartX;
+                const deltaY = touch.clientY - touchStartY;
+                const elapsedTime = Date.now() - touchStartTime;
+
+                // 4. 스와이프 판정: 시간 500ms 이내 & 가로 이동 50px 이상 & 가로가 세로보다 1.5배 이상 클 때
+                if (elapsedTime <= 500 && Math.abs(deltaX) >= 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+                    // 키오스크 단독 모드(TAB 5)가 아닐 때 1~4번 탭 간 스와이프
+                    if (activeTab >= 1 && activeTab <= 4) {
+                        if (deltaX < 0) {
+                            // 왼쪽으로 스와이프 -> 다음 탭 (1->2->3->4)
+                            if (activeTab < 4) {
+                                switchTab(activeTab + 1);
+                            }
+                        } else {
+                            // 오른쪽으로 스와이프 -> 이전 탭 (4->3->2->1)
+                            if (activeTab > 1) {
+                                switchTab(activeTab - 1);
+                            }
+                        }
+                    }
+                }
+
+                isSwipingValid = false;
+            }, { passive: true });
+        })();
 
         window.requestAdminAccess = function() {
             openCustomPinModal("🔑 리더 관리 메뉴 비밀번호 확인", () => {
