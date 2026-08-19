@@ -238,10 +238,15 @@
         </nav>
     </header>
 
-    <main class="w-full max-w-full lg:max-w-7xl px-3 sm:px-6 pt-3 sm:pt-4 space-y-4 sm:space-y-5">
+    <main class="w-full max-w-full lg:max-w-7xl px-3 sm:px-6 pt-3 sm:pt-4">
 
-        <!-- TAB 1: 이번 주 주제 & 종합 안내 -->
-        <section id="tab-content-1" class="tab-content space-y-4 sm:space-y-5">
+        <!-- ViewPager Viewport for True 1:1 Swipe Carousel -->
+        <div id="tabsViewport" class="w-full overflow-hidden relative">
+            <div id="tabsTrack" class="w-[400%] flex flex-row items-start transition-transform duration-300 ease-out" style="transform: translateX(0%);">
+                
+                <!-- TAB 1 Pane -->
+                <div id="tab-pane-1" class="w-1/4 shrink-0 min-w-full px-0.5">
+                    <section id="tab-content-1" class="space-y-4 sm:space-y-5">
             
             <!-- 1. 스터디 일정 & 장소 섹션 -->
             <div class="space-y-1.5">
@@ -411,12 +416,12 @@
                         </div>
                     </div>
 
+                    </section>
                 </div>
-            </div>
-        </section>
 
-        <!-- TAB 2: 스마트 테이블 배치도 -->
-        <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
+                <!-- TAB 2 Pane -->
+                <div id="tab-pane-2" class="w-1/4 shrink-0 min-w-full px-0.5">
+                    <section id="tab-content-2" class="space-y-4 sm:space-y-6">
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
                 <div class="border-b border-zinc-800 pb-3 flex items-center justify-between">
                     <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-lg sm:text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
@@ -448,12 +453,12 @@
                         <i class="fa-solid fa-floppy-disk text-emerald-400"></i>
                         <span>이력 저장</span>
                     </button>
+                    </section>
                 </div>
-            </div>
-        </section>
 
-        <!-- TAB 3: 당근 현황판 -->
-        <section id="tab-content-3" class="tab-content space-y-4 sm:space-y-5 hidden">
+                <!-- TAB 3 Pane -->
+                <div id="tab-pane-3" class="w-1/4 shrink-0 min-w-full px-0.5">
+                    <section id="tab-content-3" class="space-y-4 sm:space-y-5">
             
             <!-- 1. 당근 적립 가이드 박스 -->
             <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 sm:p-5 space-y-3 shadow-lg">
@@ -530,12 +535,12 @@
                     <div class="p-8 text-center text-zinc-500 bg-[#1E1E22] rounded-xl border border-[#2E2E35] text-xs sm:text-sm">
                         현황판 데이터를 로딩하고 있습니다...
                     </div>
+                    </section>
                 </div>
-            </div>
-        </section>
 
-        <!-- TAB 4: 필수 에티켓 & 스터디 공지사항 -->
-        <section id="tab-content-4" class="tab-content space-y-4 sm:space-y-6 hidden">
+                <!-- TAB 4 Pane -->
+                <div id="tab-pane-4" class="w-1/4 shrink-0 min-w-full px-0.5">
+                    <section id="tab-content-4" class="space-y-4 sm:space-y-6">
             <!-- 1. 리더 환영 인사 & 가입 후 할 일 (모바일 퍼스트) -->
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-4 sm:p-6 shadow-xl space-y-3.5 sm:space-y-4">
                 <div class="flex items-center gap-3.5 border-b border-zinc-800/80 pb-3.5">
@@ -776,11 +781,13 @@
                         </div>
                     </div>
 
+                    </section>
                 </div>
-            </div>
-        </section>
 
-        <!-- TAB 5: 출석 / 적립 (아이패드 전용) -->
+            </div>
+        </div>
+
+        <!-- TAB 5: 출석 / 적립 (아이패드 전용 독립 뷰) -->
         <section id="tab-content-5" class="tab-content space-y-4 sm:space-y-5 hidden">
             <!-- Mobile Warning Banner (Only visible on mobile) -->
             <div class="sm:hidden bg-amber-950/80 border border-amber-500/50 rounded-xl p-3 text-center flex items-center justify-center gap-2 text-amber-200 text-xs font-bold shadow-md">
@@ -2616,15 +2623,39 @@
 
         window.switchTab = function(tabNum) {
             activeTab = tabNum;
+            const tabsViewport = document.getElementById('tabsViewport');
+            const tabsTrack = document.getElementById('tabsTrack');
+            const content5 = document.getElementById('tab-content-5');
+
+            if (tabNum >= 1 && tabNum <= 4) {
+                if (tabsViewport) tabsViewport.classList.remove('hidden');
+                if (content5) content5.classList.add('hidden');
+
+                if (tabsTrack) {
+                    tabsTrack.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+                    const offsetPct = -(tabNum - 1) * 25; // 4개 탭이므로 각 탭당 25% 폭
+                    tabsTrack.style.transform = `translateX(${offsetPct}%)`;
+                }
+
+                // 탭 페인 상호작용 제어
+                for (let i = 1; i <= 4; i++) {
+                    const pane = document.getElementById(`tab-pane-${i}`);
+                    if (pane) {
+                        pane.style.pointerEvents = (i === tabNum) ? 'auto' : 'none';
+                    }
+                }
+            } else if (tabNum === 5) {
+                if (tabsViewport) tabsViewport.classList.add('hidden');
+                if (content5) content5.classList.remove('hidden');
+            }
+
+            // 상단 탭 버튼 active 스타일 동기화
             for (let i = 1; i <= 5; i++) {
-                const content = document.getElementById(`tab-content-${i}`);
                 const btn = document.getElementById(`tab-btn-${i}`);
-                if (content && btn) {
+                if (btn) {
                     if (i === tabNum) {
-                        content.classList.remove('hidden');
                         btn.classList.add('tab-btn-active');
                     } else {
-                        content.classList.add('hidden');
                         btn.classList.remove('tab-btn-active');
                     }
                 }
@@ -2639,13 +2670,15 @@
         };
 
         // ----------------------------------------------------
-        // 📱 실시간 1:1 손가락 추적 터치 슬라이드 (Elastic Rubberband & Snap)
+        // 📱 실시간 1:1 손가락 추적 뷰페이저 트랙 터치 슬라이드
         // ----------------------------------------------------
-        (function initRealtimeTouchFollow() {
+        (function initRealtimeViewPagerSwipe() {
             let startX = 0, startY = 0;
+            let currentDeltaX = 0;
             let isTracking = false;
             let isHorizontalSwipe = false;
-            let activeTabEl = null;
+            let tabsTrack = null;
+            let viewportWidth = 0;
 
             document.addEventListener('touchstart', (e) => {
                 const activeModals = document.querySelectorAll('.fixed:not(.hidden)');
@@ -2657,9 +2690,21 @@
                     return;
                 }
 
+                if (activeTab < 1 || activeTab > 4) {
+                    isTracking = false;
+                    return;
+                }
+
+                tabsTrack = document.getElementById('tabsTrack');
+                const viewport = document.getElementById('tabsViewport');
+                if (!tabsTrack || !viewport) return;
+
+                viewportWidth = viewport.offsetWidth || window.innerWidth;
+
                 const touch = e.touches[0];
                 startX = touch.clientX;
                 startY = touch.clientY;
+                currentDeltaX = 0;
 
                 // 브라우저 뒤로가기 영역 (화면 양끝 20px) 제외
                 if (startX < 20 || startX > window.innerWidth - 20) {
@@ -2667,18 +2712,12 @@
                     return;
                 }
 
-                if (activeTab >= 1 && activeTab <= 4) {
-                    activeTabEl = document.getElementById(`tab-content-${activeTab}`);
-                    if (activeTabEl) {
-                        isTracking = true;
-                        isHorizontalSwipe = false;
-                        activeTabEl.style.transition = 'none';
-                    }
-                }
+                isTracking = true;
+                isHorizontalSwipe = false;
             }, { passive: true });
 
             document.addEventListener('touchmove', (e) => {
-                if (!isTracking || !activeTabEl) return;
+                if (!isTracking || !tabsTrack) return;
 
                 const touch = e.touches[0];
                 const deltaX = touch.clientX - startX;
@@ -2687,73 +2726,49 @@
                 // 가로/세로 방향 판정
                 if (!isHorizontalSwipe) {
                     if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-                        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+                        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
                             isHorizontalSwipe = true;
+                            tabsTrack.style.transition = 'none'; // 드래그 중에는 1:1 직결 반응
                         } else {
-                            // 세로 스크롤 중이면 터치 추적 해제
                             isTracking = false;
-                            activeTabEl.style.transform = '';
                             return;
                         }
                     }
                 }
 
                 if (isHorizontalSwipe) {
-                    // 경계 탭(1번 탭 오른쪽 드래그 / 4번 탭 왼쪽 드래그)에 쫀득한 고무줄 저항감 적용
-                    let transformX = deltaX;
-                    if ((activeTab === 1 && deltaX > 0) || (activeTab === 4 && deltaX < 0)) {
-                        transformX = deltaX * 0.28;
+                    currentDeltaX = deltaX;
+                    const basePx = -(activeTab - 1) * viewportWidth;
+                    let movePx = basePx + deltaX;
+
+                    // 경계 탭(1번 오른쪽 드래그 / 4번 왼쪽 드래그)에 쫀득한 고무줄 저항감 적용
+                    if (activeTab === 1 && deltaX > 0) {
+                        movePx = basePx + deltaX * 0.28;
+                    } else if (activeTab === 4 && deltaX < 0) {
+                        movePx = basePx + deltaX * 0.28;
                     }
-                    activeTabEl.style.transform = `translateX(${transformX}px)`;
+
+                    tabsTrack.style.transform = `translateX(${movePx}px)`;
                 }
             }, { passive: true });
 
             document.addEventListener('touchend', (e) => {
-                if (!isTracking || !activeTabEl) {
+                if (!isTracking || !tabsTrack) {
                     isTracking = false;
                     return;
                 }
 
-                const touch = e.changedTouches[0];
-                const deltaX = touch.clientX - startX;
-                const threshold = Math.min(75, window.innerWidth * 0.22);
-
                 if (isHorizontalSwipe) {
-                    activeTabEl.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+                    const threshold = Math.min(65, viewportWidth * 0.18);
 
-                    if (deltaX < -threshold && activeTab < 4) {
-                        // 다음 탭으로 스냅 이동
-                        activeTabEl.style.transform = `translateX(-100%)`;
-                        activeTabEl.style.opacity = '0';
-                        setTimeout(() => {
-                            activeTabEl.style.transform = '';
-                            activeTabEl.style.opacity = '';
-                            activeTabEl.style.transition = '';
-                            switchTab(activeTab + 1);
-                        }, 170);
-                    } else if (deltaX > threshold && activeTab > 1) {
-                        // 이전 탭으로 스냅 이동
-                        activeTabEl.style.transform = `translateX(100%)`;
-                        activeTabEl.style.opacity = '0';
-                        setTimeout(() => {
-                            activeTabEl.style.transform = '';
-                            activeTabEl.style.opacity = '';
-                            activeTabEl.style.transition = '';
-                            switchTab(activeTab - 1);
-                        }, 170);
+                    if (currentDeltaX < -threshold && activeTab < 4) {
+                        switchTab(activeTab + 1);
+                    } else if (currentDeltaX > threshold && activeTab > 1) {
+                        switchTab(activeTab - 1);
                     } else {
-                        // 덜 넘겼을 때 원래 위치로 쫀득하게 복귀
-                        activeTabEl.style.transform = 'translateX(0)';
-                        setTimeout(() => {
-                            if (activeTabEl) {
-                                activeTabEl.style.transform = '';
-                                activeTabEl.style.transition = '';
-                            }
-                        }, 210);
+                        // 원래 탭으로 복귀
+                        switchTab(activeTab);
                     }
-                } else {
-                    activeTabEl.style.transform = '';
-                    activeTabEl.style.transition = '';
                 }
 
                 isTracking = false;
