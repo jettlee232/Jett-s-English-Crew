@@ -210,27 +210,27 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs (4 Main Tabs on Mobile, 5 Tabs on iPad/Desktop) -->
-        <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2.5 pt-0.5">
-            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn tab-btn-active py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
-                <i class="fa-solid fa-book-open text-blue-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">일정</span><span class="hidden sm:inline">이번 주 주제</span></span>
+        <!-- Navigation Tabs (Single Row: 일정, 자리, 출석, 공지) -->
+        <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2 pt-0.5">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn tab-btn-active py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+                <i class="fa-solid fa-book-open text-blue-400 text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">일정</span>
             </button>
-            <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
-                <i class="fa-solid fa-puzzle-piece text-blue-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">테이블</span><span class="hidden sm:inline">테이블 배치도</span></span>
+            <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+                <i class="fa-solid fa-puzzle-piece text-blue-400 text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">자리</span>
             </button>
-            <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
-                <i class="fa-solid fa-chart-simple text-emerald-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">포인트</span><span class="hidden sm:inline">당근 현황판</span></span>
+            <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+                <i class="fa-solid fa-chart-simple text-emerald-400 text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">출석</span>
             </button>
-            <button id="tab-btn-4" onclick="switchTab(4)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
-                <i class="fa-solid fa-bullhorn text-pink-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap"><span class="sm:hidden">공지</span><span class="hidden sm:inline">스터디 공지</span></span>
+            <button id="tab-btn-4" onclick="switchTab(4)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+                <i class="fa-solid fa-bullhorn text-pink-400 text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">공지</span>
             </button>
-            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 rounded-xl transition hidden sm:flex flex-col sm:flex-row items-center justify-center gap-1 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
-                <i class="fa-solid fa-carrot text-orange-400 text-sm"></i>
-                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">출석/적립</span>
+            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition hidden sm:flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-800/90 text-zinc-300 border border-zinc-700 hover:bg-zinc-700">
+                <i class="fa-solid fa-carrot text-orange-400 text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-extrabold whitespace-nowrap">적립</span>
             </button>
         </nav>
     </header>
