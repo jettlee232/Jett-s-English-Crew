@@ -3949,8 +3949,13 @@
 
             const tables = Array.from({ length: numTables }, () => []);
 
+            function isNewbieMember(m) {
+                if (!m) return false;
+                return m.isNew === true || m.totalAttended <= 1 || m.lastAction === '신규 참석';
+            }
+
             // ----------------------------------------------------
-            // 🔀 2부 스마트 셔플: [세대(또래) 절대 우선 클러스터링: 2030 완벽 묶음 + 리더 T1 + 내부 성비/1부분리 조율]
+            // 🔀 2부 스마트 셔플: [리더+신규 Table 1 절대 고정 + 세대별 또래 집중 클러스터링]
             // ----------------------------------------------------
             if (isShuffle) {
                 function getAgeNum(ageStr) {
@@ -3964,7 +3969,7 @@
                     return 35;
                 }
 
-                // 1) 리더(Jett, 30대)는 1번 테이블(2030 청년 그룹)에 고정
+                // 1) 리더(Jett)는 1번 테이블에 고정
                 let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
                 if (leader) {
                     tables[0].push(leader);
@@ -3972,38 +3977,46 @@
 
                 const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
 
-                // 2) 🌟 [세대 절대 우선]: 연령 순으로 엄격하게 오름차순 정렬 (동점일 땐 랜덤)
-                const sortedByAge = [...restMembers].sort((a, b) => {
-                    const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
-                    return diff !== 0 ? diff : (Math.random() - 0.5);
-                });
+                // 2) 🌟 [신규 회원 리더 테이블 절대 고정]: 1부/2부 모두 신규 회원은 1번 테이블에 리더와 함께 배치
+                const newMembers = restMembers.filter(m => isNewbieMember(m));
+                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
 
-                // 3) 각 테이블 목표 정원 계산
                 const baseCapacity = Math.floor(totalCount / numTables);
                 const remainder = totalCount % numTables;
                 const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
-                // 4) 나이 순서대로 테이블에 순차 직행 배정 (Table 1 = 가장 젊은 2030, Table N = 5060 시니어)
-                let memberIdx = 0;
-                for (let t = 0; t < numTables; t++) {
-                    const needed = capacities[t] - tables[t].length;
-                    for (let k = 0; k < needed && memberIdx < sortedByAge.length; k++) {
-                        tables[t].push(sortedByAge[memberIdx++]);
+                for (const nm of newMembers) {
+                    if (tables[0].length < capacities[0]) {
+                        tables[0].push(nm);
+                    } else {
+                        regularMembers.push(nm);
                     }
                 }
 
-                // 5) 미세 최적화: [동일/인접 연령대 내부에서만] 성비 및 1부 중복 완화 스왑 (나이 차이 벌어지는 스왑은 원천 차단)
+                // 3) 🌟 [세대 절대 우선]: 나머지 정규 회원들을 연령 순으로 정렬하여 젊은 순서대로 테이블 배정
+                const sortedRegulars = [...regularMembers].sort((a, b) => {
+                    const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
+                    return diff !== 0 ? diff : (Math.random() - 0.5);
+                });
+
+                let memberIdx = 0;
+                for (let t = 0; t < numTables; t++) {
+                    const needed = capacities[t] - tables[t].length;
+                    for (let k = 0; k < needed && memberIdx < sortedRegulars.length; k++) {
+                        tables[t].push(sortedRegulars[memberIdx++]);
+                    }
+                }
+
+                // 4) 미세 최적화: [리더 & 신규 제외] 동일/인접 연령대 내부에서만 성비/1부분리 스왑
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
-                    // 1순위: 연령 격차 (가장 강력한 페널티)
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += ageDiff * 300; // 나이가 다르면 큰 페널티
+                            score += ageDiff * 300;
 
-                            // 1부 멤버 중복 완화
                             if (part1SeatingSnapshot) {
                                 for (const p1T of part1SeatingSnapshot) {
                                     if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
@@ -4014,7 +4027,6 @@
                         }
                     }
 
-                    // 2순위: 성비 불균형 (성별 차이가 심할 때만 약하게 완화)
                     const mCount = tbl.filter(m => m.gender === 'M').length;
                     const fCount = tbl.filter(m => m.gender !== 'M').length;
                     score += Math.abs(mCount - fCount) * 80;
@@ -4028,13 +4040,12 @@
                         for (let t2 = t1 + 1; t2 < numTables; t2++) {
                             for (let i = 0; i < tables[t1].length; i++) {
                                 const m1 = tables[t1][i];
-                                if (m1.isLeader || (m1.name || '').includes('Jett')) continue;
+                                if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue; // 리더 및 신규 스왑 원천 차단
 
                                 for (let j = 0; j < tables[t2].length; j++) {
                                     const m2 = tables[t2][j];
-                                    if (m2.isLeader || (m2.name || '').includes('Jett')) continue;
+                                    if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue; // 리더 및 신규 스왑 원천 차단
 
-                                    // 🚫 나이 차이가 15세 이상 벌어지는 세대 파괴 스왑은 원천 금지!
                                     const ageGap1 = Math.abs(getAgeNum(m1.ageGroup) - getAgeNum(m2.ageGroup));
                                     if (ageGap1 > 15) continue;
 
@@ -4064,13 +4075,13 @@
             }
 
             // ----------------------------------------------------
-            // 📌 1부 스마트 배치: [안 만난 사람 우선 + 리더·신규 T1 + 성별/세대 분배]
+            // 📌 1부 스마트 배치: [리더+신규 Table 1 절대 고정 + 안 만난 사람 우선 + 성별/세대 분배]
             // ----------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
             if (!leader) leader = todayMembers[0];
 
-            const newMembers = todayMembers.filter(m => m.id !== leader.id && (m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석'));
-            let regularMembers = todayMembers.filter(m => m.id !== leader.id && !newMembers.some(nm => nm.id === m.id));
+            const newMembers = todayMembers.filter(m => m.id !== leader.id && isNewbieMember(m));
+            let regularMembers = todayMembers.filter(m => m.id !== leader.id && !isNewbieMember(m));
 
             tables[0].push(leader);
 
@@ -4127,7 +4138,7 @@
                 tables[bestTableIdx].push(member);
             }
 
-            // 1부 로컬 최적화
+            // 1부 로컬 최적화 (리더 및 신규 회원 스왑 절대 불가!)
             function evaluateTablePart1(tbl) {
                 let p = 0;
                 for (let i = 0; i < tbl.length; i++) {
@@ -4145,11 +4156,11 @@
                     for (let t2 = t1 + 1; t2 < numTables; t2++) {
                         for (let i = 0; i < tables[t1].length; i++) {
                             const m1 = tables[t1][i];
-                            if (m1.isLeader || (m1.name || '').includes('Jett')) continue;
+                            if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue; // 리더 및 신규 스왑 원천 차단
 
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
-                                if (m2.isLeader || (m2.name || '').includes('Jett')) continue;
+                                if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue; // 리더 및 신규 스왑 원천 차단
                                 if (m1.gender !== m2.gender) continue;
 
                                 const curCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
