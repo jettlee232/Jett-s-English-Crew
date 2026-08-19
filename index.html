@@ -2103,7 +2103,7 @@
             if (localSaved) {
                 try {
                     const parsed = JSON.parse(localSaved);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (Array.isArray(parsed) && parsed.length >= 50) {
                         membersData = parsed;
                         renderUI();
                         return;
