@@ -1273,6 +1273,13 @@
             localStorage.setItem('localMembersData', JSON.stringify(membersData));
             renderUI();
         }
+
+        function persistTableSessions(newList) {
+            tableSessionsData = newList;
+            localStorage.setItem('localTableSessions', JSON.stringify(tableSessionsData));
+            const historyCountEl = document.getElementById('sessionHistoryCount');
+            if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
+        }
         let membersData = [];
         let tableSessionsData = [];
         let currentSeatingTables = [];
@@ -2077,12 +2084,28 @@
                     if (membersData.length === 0) seedInitialMembers();
                 });
 
+                // Load local cached table sessions
+                const savedSessions = localStorage.getItem('localTableSessions');
+                if (savedSessions) {
+                    try {
+                        const parsed = JSON.parse(savedSessions);
+                        if (Array.isArray(parsed)) {
+                            tableSessionsData = parsed;
+                            const historyCountEl = document.getElementById('sessionHistoryCount');
+                            if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
+                        }
+                    } catch(e) {}
+                }
+
                 onSnapshot(sessionsCollectionRef, (snapshot) => {
                     const list = [];
                     snapshot.forEach((docSnap) => {
                         list.push({ id: docSnap.id, ...docSnap.data() });
                     });
-                    tableSessionsData = list;
+                    if (list.length > 0) {
+                        tableSessionsData = list;
+                        persistTableSessions(list);
+                    }
                     const historyCountEl = document.getElementById('sessionHistoryCount');
                     if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
                     
@@ -3022,21 +3045,24 @@
             }
 
             openCustomPinModal("🔑 오늘 테이블 확정 & 만남 이력 저장", async () => {
-                try {
-                    const sessionDocId = crypto.randomUUID();
-                    const newSession = {
-                        date: new Date().toISOString().slice(0, 10),
-                        part: isPart2Shuffle ? 2 : 1,
-                        tables: currentSeatingTables.map(tbl => tbl.map(m => m.id || m.name)),
-                        tableNames: currentSeatingTables.map(tbl => tbl.map(m => m.name)),
-                        createdAt: new Date().toISOString()
-                    };
+                const sessionDocId = crypto.randomUUID();
+                const newSession = {
+                    id: sessionDocId,
+                    date: new Date().toISOString().slice(0, 10),
+                    part: isPart2Shuffle ? 2 : 1,
+                    tables: currentSeatingTables.map(tbl => tbl.map(m => m.id || m.name)),
+                    tableNames: currentSeatingTables.map(tbl => tbl.map(m => m.name)),
+                    createdAt: new Date().toISOString()
+                };
 
+                const updatedSessions = [newSession, ...tableSessionsData];
+                persistTableSessions(updatedSessions);
+                showToast(`💾 오늘 ${newSession.part}부 테이블 구성이 만남 이력에 성공적으로 저장되었습니다!`, "success");
+
+                try {
                     await setDoc(doc(sessionsCollectionRef, sessionDocId), newSession);
-                    showToast(`💾 오늘 ${newSession.part}부 테이블 구성이 만남 이력에 성공적으로 저장되었습니다!`, "success");
                 } catch (err) {
-                    console.error("Failed to save seating history:", err);
-                    showToast("이력 저장 중 오류가 발생했습니다.", "error");
+                    console.log("Session saved locally (offline):", err);
                 }
             });
         };
