@@ -3192,11 +3192,15 @@
 
                 return `
                     <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-3 shadow-md' : 'bg-[#1E1E22] border border-[#2E2E35] rounded-xl px-2.5 sm:px-4 py-2 sm:py-3 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1.5 sm:gap-3 w-full hover:border-zinc-700">
-                        <!-- Left: Member Name & Attendance Badge (Expanded space) -->
-                        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                            <span class="font-black text-base sm:text-xl text-white truncate">
+                        <!-- Col 1: Member Name (Fixed width for alignment) -->
+                        <div class="w-[76px] sm:w-[120px] shrink-0 truncate">
+                            <span class="font-black text-base sm:text-xl text-white truncate" title="${m.name || '미지정'}">
                                 ${m.name || '미지정'}
                             </span>
+                        </div>
+
+                        <!-- Col 2: Attendance & Free Badge (Fixed position for vertical alignment) -->
+                        <div class="w-[82px] sm:w-[120px] shrink-0 flex items-center gap-1">
                             ${getAttendanceBadge(m.totalAttended)}
                             ${isKing ? `
                                 <span class="text-[9px] sm:text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 shadow-sm">
@@ -3205,8 +3209,8 @@
                             ` : ''}
                         </div>
 
-                        <!-- Right: Carrot Coin Slots & Score (Compact) -->
-                        <div class="flex items-center gap-1 sm:gap-2.5 shrink-0">
+                        <!-- Col 3: Carrot Coin Slots & Score (Aligned to right) -->
+                        <div class="flex-1 flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
