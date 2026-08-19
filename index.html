@@ -165,6 +165,21 @@
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
         }
 
+        @keyframes tabSlideFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-content:not(.hidden) {
+            animation: tabSlideFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -2622,6 +2637,129 @@
                 deactivateWakeLock();
             }
         };
+
+        // ----------------------------------------------------
+        // 📱 실시간 1:1 손가락 추적 터치 슬라이드 (Elastic Rubberband & Snap)
+        // ----------------------------------------------------
+        (function initRealtimeTouchFollow() {
+            let startX = 0, startY = 0;
+            let isTracking = false;
+            let isHorizontalSwipe = false;
+            let activeTabEl = null;
+
+            document.addEventListener('touchstart', (e) => {
+                const activeModals = document.querySelectorAll('.fixed:not(.hidden)');
+                if (activeModals.length > 0) return;
+
+                const target = e.target;
+                if (target.closest('input, textarea, select, button, #consonantFilterBar, #adminModal, #customPinModal, #confirmModal, #customAlertModal, #ipadLockModal')) {
+                    isTracking = false;
+                    return;
+                }
+
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+
+                // 브라우저 뒤로가기 영역 (화면 양끝 20px) 제외
+                if (startX < 20 || startX > window.innerWidth - 20) {
+                    isTracking = false;
+                    return;
+                }
+
+                if (activeTab >= 1 && activeTab <= 4) {
+                    activeTabEl = document.getElementById(`tab-content-${activeTab}`);
+                    if (activeTabEl) {
+                        isTracking = true;
+                        isHorizontalSwipe = false;
+                        activeTabEl.style.transition = 'none';
+                    }
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isTracking || !activeTabEl) return;
+
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - startX;
+                const deltaY = touch.clientY - startY;
+
+                // 가로/세로 방향 판정
+                if (!isHorizontalSwipe) {
+                    if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+                        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+                            isHorizontalSwipe = true;
+                        } else {
+                            // 세로 스크롤 중이면 터치 추적 해제
+                            isTracking = false;
+                            activeTabEl.style.transform = '';
+                            return;
+                        }
+                    }
+                }
+
+                if (isHorizontalSwipe) {
+                    // 경계 탭(1번 탭 오른쪽 드래그 / 4번 탭 왼쪽 드래그)에 쫀득한 고무줄 저항감 적용
+                    let transformX = deltaX;
+                    if ((activeTab === 1 && deltaX > 0) || (activeTab === 4 && deltaX < 0)) {
+                        transformX = deltaX * 0.28;
+                    }
+                    activeTabEl.style.transform = `translateX(${transformX}px)`;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (!isTracking || !activeTabEl) {
+                    isTracking = false;
+                    return;
+                }
+
+                const touch = e.changedTouches[0];
+                const deltaX = touch.clientX - startX;
+                const threshold = Math.min(75, window.innerWidth * 0.22);
+
+                if (isHorizontalSwipe) {
+                    activeTabEl.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+
+                    if (deltaX < -threshold && activeTab < 4) {
+                        // 다음 탭으로 스냅 이동
+                        activeTabEl.style.transform = `translateX(-100%)`;
+                        activeTabEl.style.opacity = '0';
+                        setTimeout(() => {
+                            activeTabEl.style.transform = '';
+                            activeTabEl.style.opacity = '';
+                            activeTabEl.style.transition = '';
+                            switchTab(activeTab + 1);
+                        }, 170);
+                    } else if (deltaX > threshold && activeTab > 1) {
+                        // 이전 탭으로 스냅 이동
+                        activeTabEl.style.transform = `translateX(100%)`;
+                        activeTabEl.style.opacity = '0';
+                        setTimeout(() => {
+                            activeTabEl.style.transform = '';
+                            activeTabEl.style.opacity = '';
+                            activeTabEl.style.transition = '';
+                            switchTab(activeTab - 1);
+                        }, 170);
+                    } else {
+                        // 덜 넘겼을 때 원래 위치로 쫀득하게 복귀
+                        activeTabEl.style.transform = 'translateX(0)';
+                        setTimeout(() => {
+                            if (activeTabEl) {
+                                activeTabEl.style.transform = '';
+                                activeTabEl.style.transition = '';
+                            }
+                        }, 210);
+                    }
+                } else {
+                    activeTabEl.style.transform = '';
+                    activeTabEl.style.transition = '';
+                }
+
+                isTracking = false;
+                isHorizontalSwipe = false;
+            }, { passive: true });
+        })();
 
         window.requestAdminAccess = function() {
             openCustomPinModal("🔑 리더 관리 메뉴 비밀번호 확인", () => {
