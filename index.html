@@ -2641,18 +2641,143 @@
 
             const tables = Array.from({ length: numTables }, () => []);
 
-            // 1. Leader finding (Jett has priority)
+            // ----------------------------------------------------
+            // 🔀 2부 스마트 셔플: [성별·세대 완벽 균등 믹스 + 1부 멤버 100% 분리]
+            // ----------------------------------------------------
+            if (isShuffle) {
+                let males = todayMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
+                let females = todayMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
+
+                const maxFemalesPerTable = Math.ceil(females.length / numTables);
+                const maxMalesPerTable = Math.ceil(males.length / numTables);
+                const maxCapacityPerTable = Math.ceil(totalCount / numTables);
+
+                function getShuffleCost(tbl, member, isMaleGroup) {
+                    let cost = 0;
+                    
+                    // Table size cost
+                    cost += tbl.length * 50;
+
+                    // Gender balance constraint (Hard limit on gender capacity)
+                    const currentSameGender = tbl.filter(m => (m.gender === 'M') === isMaleGroup).length;
+                    const maxAllowed = isMaleGroup ? maxMalesPerTable : maxFemalesPerTable;
+                    if (currentSameGender >= maxAllowed) {
+                        cost += 8000;
+                    }
+
+                    // Age group diversity penalty (같은 연령대 몰림 방지)
+                    const sameAgeCount = tbl.filter(m => m.ageGroup === member.ageGroup).length;
+                    cost += sameAgeCount * 50;
+
+                    // 1부 멤버 중복 페널티 (100% 분리)
+                    if (part1SeatingSnapshot) {
+                        for (const existing of tbl) {
+                            for (const p1Table of part1SeatingSnapshot) {
+                                const wasTogether = p1Table.some(m => m.id === existing.id) && p1Table.some(m => m.id === member.id);
+                                if (wasTogether) {
+                                    cost += 15000;
+                                }
+                            }
+                        }
+                    }
+
+                    return cost;
+                }
+
+                // 1) 여성 멤버를 각 테이블에 균등하게 먼저 배정
+                for (const female of females) {
+                    let bestIdx = 0;
+                    let minCost = Infinity;
+                    for (let t = 0; t < numTables; t++) {
+                        if (tables[t].length >= maxCapacityPerTable) continue;
+                        const cost = getShuffleCost(tables[t], female, false);
+                        if (cost < minCost) {
+                            minCost = cost;
+                            bestIdx = t;
+                        }
+                    }
+                    tables[bestIdx].push(female);
+                }
+
+                // 2) 남성 멤버를 각 테이블에 균등하게 배정 (남녀 균형 완성)
+                for (const male of males) {
+                    let bestIdx = 0;
+                    let minCost = Infinity;
+                    for (let t = 0; t < numTables; t++) {
+                        if (tables[t].length >= maxCapacityPerTable) continue;
+                        const cost = getShuffleCost(tables[t], male, true);
+                        if (cost < minCost) {
+                            minCost = cost;
+                            bestIdx = t;
+                        }
+                    }
+                    tables[bestIdx].push(male);
+                }
+
+                // 3) 2-Opt 최적화 (성별 비율을 유지하면서 1부 중복 및 세대 분산 극대화)
+                function evaluateTablePart2(tbl) {
+                    let score = 0;
+                    for (let i = 0; i < tbl.length; i++) {
+                        for (let j = i + 1; j < tbl.length; j++) {
+                            if (tbl[i].ageGroup === tbl[j].ageGroup) score += 30;
+                            if (part1SeatingSnapshot) {
+                                for (const p1T of part1SeatingSnapshot) {
+                                    if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
+                                        score += 10000;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return score;
+                }
+
+                for (let iter = 0; iter < 40; iter++) {
+                    let improved = false;
+                    for (let t1 = 0; t1 < numTables; t1++) {
+                        for (let t2 = t1 + 1; t2 < numTables; t2++) {
+                            for (let i = 0; i < tables[t1].length; i++) {
+                                for (let j = 0; j < tables[t2].length; j++) {
+                                    const m1 = tables[t1][i];
+                                    const m2 = tables[t2][j];
+                                    if (m1.gender !== m2.gender) continue; // 성별 밸런스 100% 보존
+
+                                    const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
+
+                                    tables[t1][i] = m2;
+                                    tables[t2][j] = m1;
+
+                                    const newScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
+                                    if (newScore < curScore) {
+                                        improved = true;
+                                        break;
+                                    } else {
+                                        tables[t1][i] = m1;
+                                        tables[t2][j] = m2;
+                                    }
+                                }
+                                if (improved) break;
+                            }
+                            if (improved) break;
+                        }
+                    }
+                    if (!improved) break;
+                }
+
+                return tables;
+            }
+
+            // ----------------------------------------------------
+            // 📌 1부 스마트 배치: [안 만난 사람 우선 + 리더·신규 T1 + 성별/세대 분배]
+            // ----------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
             if (!leader) leader = todayMembers[0];
 
-            // 2. New members (first time or attended === 1)
             const newMembers = todayMembers.filter(m => m.id !== leader.id && (m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석'));
             let regularMembers = todayMembers.filter(m => m.id !== leader.id && !newMembers.some(nm => nm.id === m.id));
 
-            // Place leader in Table 1 (index 0)
             tables[0].push(leader);
 
-            // Place new members in Table 1 up to 4 people capacity
             for (const nm of newMembers) {
                 if (tables[0].length < 4) {
                     tables[0].push(nm);
@@ -2661,9 +2786,28 @@
                 }
             }
 
-            // 3. Regular members separation by gender & initial random mix
             let males = regularMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
             let females = regularMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
+
+            const maxCapacity = Math.ceil(totalCount / numTables);
+
+            function getPart1Cost(tbl, member) {
+                let cost = 0;
+                cost += tbl.length * 60;
+
+                const mCount = tbl.filter(m => m.gender === 'M').length;
+                const fCount = tbl.filter(m => m.gender !== 'M').length;
+                if (member.gender === 'M' && mCount > fCount) cost += 45;
+                if (member.gender !== 'M' && fCount > mCount) cost += 45;
+
+                const sameAgeCount = tbl.filter(m => m.ageGroup === member.ageGroup).length;
+                cost += sameAgeCount * 15;
+
+                for (const existing of tbl) {
+                    cost += getPairMeetingCount(existing, member) * 60;
+                }
+                return cost;
+            }
 
             const unassigned = [];
             let mi = 0, fi = 0;
@@ -2672,51 +2816,13 @@
                 if (mi < males.length) unassigned.push(males[mi++]);
             }
 
-            // Cost evaluation for placing member into a candidate table
-            function getTablePlacementCost(tbl, member) {
-                let cost = 0;
-
-                // Table size penalty
-                cost += tbl.length * 60;
-
-                // Gender balance penalty
-                const mCount = tbl.filter(m => m.gender === 'M').length;
-                const fCount = tbl.filter(m => m.gender !== 'M').length;
-                if (member.gender === 'M' && mCount > fCount) cost += 35;
-                if (member.gender !== 'M' && fCount > mCount) cost += 35;
-
-                // Age group diversity
-                const sameAgeCount = tbl.filter(m => m.ageGroup === member.ageGroup).length;
-                cost += sameAgeCount * 10;
-
-                // Past meeting count penalty (서로 덜 만난 사람 우선)
-                for (const existing of tbl) {
-                    const meetingCount = getPairMeetingCount(existing, member);
-                    cost += meetingCount * 50;
-
-                    // IF Part 2 Shuffle: Strong penalty if they were together in Part 1 today
-                    if (isShuffle && part1SeatingSnapshot) {
-                        for (const p1Table of part1SeatingSnapshot) {
-                            const hadBoth = p1Table.some(m => m.id === existing.id) && p1Table.some(m => m.id === member.id);
-                            if (hadBoth) {
-                                cost += 15000; // Force 100% split from Part 1 table members
-                            }
-                        }
-                    }
-                }
-
-                return cost;
-            }
-
-            // Greedy Placement
-            const maxPerTable = Math.ceil(totalCount / numTables);
             for (const member of unassigned) {
                 let bestTableIdx = 0;
                 let minCost = Infinity;
 
                 for (let t = 0; t < numTables; t++) {
-                    if (tables[t].length >= 4 && tables[t].length >= maxPerTable) continue;
-                    const cost = getTablePlacementCost(tables[t], member);
+                    if (tables[t].length >= 4 && tables[t].length >= maxCapacity) continue;
+                    const cost = getPart1Cost(tables[t], member);
                     if (cost < minCost) {
                         minCost = cost;
                         bestTableIdx = t;
@@ -2725,19 +2831,13 @@
                 tables[bestTableIdx].push(member);
             }
 
-            // 4. Local Search Optimization (2-Opt Swaps between regular members)
-            function calculateTablePenalty(tbl) {
+            // 1부 로컬 최적화
+            function evaluateTablePart1(tbl) {
                 let p = 0;
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 30;
-                        if (isShuffle && part1SeatingSnapshot) {
-                            for (const p1T of part1SeatingSnapshot) {
-                                if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
-                                    p += 10000;
-                                }
-                            }
-                        }
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 40;
+                        if (tbl[i].ageGroup === tbl[j].ageGroup) p += 10;
                     }
                 }
                 return p;
@@ -2754,14 +2854,14 @@
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
                                 if (m2.isLeader || (m2.name || '').includes('Jett')) continue;
-                                if (m1.gender !== m2.gender) continue; // preserve gender balance
+                                if (m1.gender !== m2.gender) continue;
 
-                                const curCost = calculateTablePenalty(tables[t1]) + calculateTablePenalty(tables[t2]);
+                                const curCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
 
                                 tables[t1][i] = m2;
                                 tables[t2][j] = m1;
 
-                                const newCost = calculateTablePenalty(tables[t1]) + calculateTablePenalty(tables[t2]);
+                                const newCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
                                 if (newCost < curCost) {
                                     improved = true;
                                     break;
