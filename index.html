@@ -273,7 +273,7 @@
                     <div class="w-full flex items-center justify-between border-b border-zinc-800 pb-2.5 gap-2">
                         <h2 class="text-sm sm:text-xl font-black text-white flex items-center gap-2 leading-snug">
                             <span class="bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs px-2.5 py-0.5 rounded-full font-black shadow shrink-0 whitespace-nowrap">TOPIC</span>
-                            <span id="topicTitleDisplay" class="break-words">"Everything you need to know to read Homer's \"Odyssey\" - Jill Dash"</span>
+                            <span id="topicTitleDisplay" class="break-words">"호메로스의 '오디세이' 읽기 전 꼭 알아야 할 꿀잼 가이드 ⚔️🏛️"</span>
                         </h2>
                         <span class="text-xs sm:text-sm font-bold text-zinc-400 shrink-0 hidden md:inline">TED-Ed Series</span>
                     </div>
@@ -1359,7 +1359,7 @@
             schedule: "8월 22일 (토) 10:00 - 11:50",
             location: "성신여대입구역 인근 카페",
             locationUrl: "https://kko.to/eZx7E9kExG",
-            title: '"Everything you need to know to read Homer\'s \\"Odyssey\\" - Jill Dash"',
+            title: '"호메로스의 \'오디세이\' 읽기 전 꼭 알아야 할 꿀잼 가이드 ⚔️🏛️"',
             youtubeUrl: "https://youtu.be/8Z9FQxcCAZ0?si=YqjzitQ6uYTOVKI_",
             customThumbnailUrl: "",
             docsUrl: "https://docs.google.com/document/d/1HJVjwGmlh0eT3YWehy7EtAZnHzN2Pp3ZEW2BqVBqM00/mobilebasic",
@@ -2180,9 +2180,9 @@
                         const parsedTopic = JSON.parse(localTopicSaved);
                         if (parsedTopic && parsedTopic.title) {
                             // If local storage still holds the old sample video, update to new topic
-                            if (parsedTopic.youtubeUrl && parsedTopic.youtubeUrl.includes('-61qDRPG3to')) {
+                            if (parsedTopic.youtubeUrl && (parsedTopic.youtubeUrl.includes('-61qDRPG3to') || parsedTopic.title.includes('Everything you need'))) {
                                 parsedTopic.schedule = "8월 22일 (토) 10:00 - 11:50";
-                                parsedTopic.title = '"Everything you need to know to read Homer\'s \\"Odyssey\\" - Jill Dash"';
+                                parsedTopic.title = '"호메로스의 \'오디세이\' 읽기 전 꼭 알아야 할 꿀잼 가이드 ⚔️🏛️"';
                                 parsedTopic.youtubeUrl = "https://youtu.be/8Z9FQxcCAZ0?si=YqjzitQ6uYTOVKI_";
                                 parsedTopic.docsUrl = "https://docs.google.com/document/d/1HJVjwGmlh0eT3YWehy7EtAZnHzN2Pp3ZEW2BqVBqM00/mobilebasic";
                                 parsedTopic.carrotGatheringUrl = "https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK";
