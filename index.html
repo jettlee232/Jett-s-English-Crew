@@ -402,30 +402,30 @@
         </section>
 
         <!-- TAB 2: 스마트 테이블 배치도 -->
-        <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-5 hidden">
-            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
-                <div class="border-b border-zinc-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
+            <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
+                <div class="border-b border-zinc-800 pb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center gap-2">
-                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
-                            <i class="fa-solid fa-puzzle-piece text-blue-400 text-base sm:text-xl"></i>
+                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-lg sm:text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                            <i class="fa-solid fa-puzzle-piece text-blue-400 text-lg sm:text-2xl"></i>
                             <span>오늘 스터디 스마트 테이블 배치도</span>
                         </h2>
                     </div>
 
                     <!-- Action Buttons for Seating (Single line, compact) -->
-                    <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
-                        <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-rotate-left text-zinc-400 text-xs"></i>
+                    <div class="flex items-center gap-2 shrink-0 flex-nowrap">
+                        <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-base font-bold transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-rotate-left text-zinc-400 text-xs sm:text-sm"></i>
                             <span>1부 복원</span>
                         </button>
                         
-                        <button onclick="requestShuffleWithPin()" class="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-shuffle text-white text-xs"></i>
+                        <button onclick="requestShuffleWithPin()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-base transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-shuffle text-white text-xs sm:text-sm"></i>
                             <span>2부 셔플</span>
                         </button>
 
-                        <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap active:scale-95">
-                            <i class="fa-solid fa-floppy-disk text-emerald-400 text-xs"></i>
+                        <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1.5 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-base font-bold transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-floppy-disk text-emerald-400 text-xs sm:text-sm"></i>
                             <span>이력 저장</span>
                         </button>
                     </div>
@@ -2815,26 +2815,26 @@
                 }
 
                 return `
-                    <div class="table-card rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4 relative overflow-hidden">
-                        <div class="flex items-center justify-between border-b border-zinc-800/80 pb-2.5 gap-1.5 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-black text-xs sm:text-sm flex items-center justify-center shadow whitespace-nowrap">
+                    <div class="table-card rounded-2xl p-4 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-4 relative overflow-hidden">
+                        <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-black text-sm sm:text-base flex items-center justify-center shadow whitespace-nowrap">
                                     T${tableNo}
                                 </span>
                                 <div>
-                                    <h3 class="font-extrabold text-xs sm:text-base text-white whitespace-nowrap">${tableNo}번 테이블</h3>
-                                    <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 + 신규 우선' : `그룹 ${tableNo}`}</p>
+                                    <h3 class="font-extrabold text-base sm:text-xl text-white whitespace-nowrap">${tableNo}번 테이블</h3>
+                                    <p class="text-xs sm:text-sm text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 + 신규 우선' : `그룹 ${tableNo}`}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 ${freshnessBadge}
-                                <span class="text-xs font-bold ${capacity === 3 ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/40' : 'text-blue-400 bg-blue-950/80 border-blue-500/40'} border px-2 py-0.5 rounded-full whitespace-nowrap">
+                                <span class="text-xs sm:text-sm font-bold ${capacity === 3 ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/40' : 'text-blue-400 bg-blue-950/80 border-blue-500/40'} border px-2.5 py-1 rounded-full whitespace-nowrap">
                                     ${capacity}명
                                 </span>
                             </div>
                         </div>
 
-                        <div class="space-y-2">
+                        <div class="space-y-2.5">
                             ${members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
                                 const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
@@ -2842,15 +2842,15 @@
                                 const nameColor = isMale ? 'text-blue-400' : 'text-pink-400';
 
                                 return `
-                                    <div class="relative bg-zinc-900/90 border border-zinc-800 p-2.5 sm:p-3 rounded-xl flex items-center justify-center text-center shadow overflow-hidden">
+                                    <div class="relative bg-zinc-900/90 border border-zinc-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-center justify-center text-center shadow overflow-hidden">
                                         <!-- Left Side Badges -->
-                                        <div class="absolute left-2.5 sm:left-3 flex items-center gap-1">
-                                            ${isLeader ? '<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold whitespace-nowrap shadow-sm">리더</span>' : ''}
-                                            ${isNew ? '<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold whitespace-nowrap shadow-sm">신규</span>' : ''}
+                                        <div class="absolute left-3 sm:left-3.5 flex items-center gap-1">
+                                            ${isLeader ? '<span class="bg-blue-600 text-white px-2 py-0.5 rounded-md text-xs sm:text-sm font-bold whitespace-nowrap shadow-sm">리더</span>' : ''}
+                                            ${isNew ? '<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md text-xs sm:text-sm font-bold whitespace-nowrap shadow-sm">신규</span>' : ''}
                                         </div>
 
-                                        <!-- Centered Member Name -->
-                                        <span class="font-black ${nameColor} text-sm sm:text-lg truncate px-10">
+                                        <!-- Centered Member Name (Enlarged) -->
+                                        <span class="font-black ${nameColor} text-base sm:text-xl truncate px-10">
                                             ${m.name || '미지정'}
                                         </span>
                                     </div>
