@@ -2312,10 +2312,12 @@
             const count = totalAttended || 1;
             if (count === 1) {
                 return `<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🌱 1회차</span>`;
-            } else if (count < 10) {
+            } else if (count < 5) {
                 return `<span class="bg-zinc-800 text-zinc-300 border border-zinc-700 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🏃 ${count}회차</span>`;
+            } else if (count < 10) {
+                return `<span class="bg-blue-950 text-blue-300 border border-blue-500/50 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">⚡ ${count}회차</span>`;
             } else {
-                return `<span class="bg-amber-950 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🔥 ${count}회차</span>`;
+                return `<span class="bg-amber-950 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">🔥 ${count}회차</span>`;
             }
         }
 
