@@ -404,20 +404,31 @@
         <!-- TAB 2: 스마트 테이블 배치도 -->
         <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-5 hidden">
             <div class="bg-[#1E1E22] border border-[#2E2E35] rounded-2xl p-3.5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5">
-                <div class="border-b border-zinc-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap">
-                            <i class="fa-solid fa-puzzle-piece text-blue-400 text-lg sm:text-2xl"></i>
+                <div class="border-b border-zinc-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2">
+                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-xl font-black text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                            <i class="fa-solid fa-puzzle-piece text-blue-400 text-base sm:text-xl"></i>
                             <span>오늘 스터디 스마트 테이블 배치도</span>
                         </h2>
-                        <p class="text-xs sm:text-sm text-amber-400 mt-0.5 font-bold">💡 당일 불참자 발생 시 배치 변동 가능</p>
                     </div>
 
-                    <!-- Shuffle Button (Visible on Desktop/iPad) -->
-                    <button onclick="requestShuffleWithPin()" class="hidden sm:flex items-center gap-1.5 bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-700/50 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap">
-                        <i class="fa-solid fa-shuffle text-blue-400"></i>
-                        <span>2부 테이블 셔플</span>
-                    </button>
+                    <!-- Action Buttons for Seating (Single line, compact) -->
+                    <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
+                        <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-rotate-left text-zinc-400 text-xs"></i>
+                            <span>1부 복원</span>
+                        </button>
+                        
+                        <button onclick="requestShuffleWithPin()" class="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-shuffle text-white text-xs"></i>
+                            <span>2부 셔플</span>
+                        </button>
+
+                        <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition shadow whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-floppy-disk text-emerald-400 text-xs"></i>
+                            <span>이력 저장</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Dynamic Seating Grid -->
@@ -1136,6 +1147,30 @@
                     </div>
                 </div>
 
+                <!-- Meeting History Management Card -->
+                <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-400 text-base"></i>
+                            <span>👥 누적 만남 이력 관리 (<span id="sessionHistoryCount">0</span>회 기록됨)</span>
+                        </label>
+                        <span class="text-[11px] text-zinc-500 font-medium">스마트 페어링 연동</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                        매 스터디마다 확정된 테이블 배치를 기록하여, 향후 테이블 편성 시 <strong>"덜 만난 사람 우선 배정"</strong>에 자동 반영됩니다.
+                    </p>
+                    <div class="grid grid-cols-2 gap-2.5 pt-0.5">
+                        <button onclick="viewHistorySummaryModal()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition whitespace-nowrap">
+                            <i class="fa-solid fa-list-check text-blue-400"></i>
+                            <span>이력 상세 보기</span>
+                        </button>
+                        <button onclick="openClearHistoryModal()" class="bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-700/40 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition whitespace-nowrap">
+                            <i class="fa-solid fa-trash-can text-red-400"></i>
+                            <span>만남 이력 초기화</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-3">
                     <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
                         <i class="fa-solid fa-arrows-rotate text-pink-400 text-base"></i>
@@ -1231,12 +1266,38 @@
 
         const membersCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
         const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
+        const sessionsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'table_sessions');
 
         let membersData = [];
+        let tableSessionsData = [];
+        let currentSeatingTables = [];
+        let part1SeatingSnapshot = null;
+        let isPart2Shuffle = false;
+        let showLeaderFreshness = false;
+
+        const DEFAULT_PIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 for '1234'
+        let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
+
+        async function hashPin(pin) {
+            if (!pin) return '';
+            const msgUint8 = new TextEncoder().encode(pin.toString().trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Migrate legacy plaintext PIN if exists
+        const legacyPin = localStorage.getItem('leaderPin');
+        if (legacyPin) {
+            hashPin(legacyPin).then(h => {
+                leaderPinHash = h;
+                localStorage.setItem('leaderPinHash', h);
+                localStorage.removeItem('leaderPin');
+            });
+        }
+
         let selectedMemberId = null;
         let selectedAdminMemberId = null;
         let activeMode = localStorage.getItem('activeMode') || 'locked';
-        let leaderPin = localStorage.getItem('leaderPin') || '1234';
         let isKioskRegistered = localStorage.getItem('isKioskDevice') === 'true';
         let activeTab = 1;
         let activeAdminTab = 1;
@@ -1457,11 +1518,12 @@
             }
         }
 
-        window.toggleDeviceKioskRegistration = function() {
+        window.toggleDeviceKioskRegistration = async function() {
             const pinInput = document.getElementById('pinInput');
             const pin = pinInput ? pinInput.value : '';
+            const enteredHash = await hashPin(pin);
             
-            if (pin !== leaderPin) {
+            if (enteredHash !== leaderPinHash) {
                 showToast("비밀번호를 바르게 입력해주세요.", "error");
                 return;
             }
@@ -1492,10 +1554,12 @@
             }
         };
 
-        window.setLeaderMode = function(mode) {
+        window.setLeaderMode = async function(mode) {
             const pinInput = document.getElementById('pinInput');
             const pin = pinInput ? pinInput.value : '';
-            if (pin === leaderPin) {
+            const enteredHash = await hashPin(pin);
+
+            if (enteredHash === leaderPinHash) {
                 activeMode = mode;
                 localStorage.setItem('activeMode', activeMode);
                 updateLockUIState();
@@ -1513,16 +1577,17 @@
             }
         };
 
-        window.changeLeaderPin = function() {
+        window.changeLeaderPin = async function() {
             const newPinInput = document.getElementById('newPinInput');
             const newPin = newPinInput ? newPinInput.value.trim() : '';
             if (newPin.length < 4) {
                 showToast("비밀번호는 최소 4자리 이상이어야 합니다.", "warning");
                 return;
             }
-            leaderPin = newPin;
-            localStorage.setItem('leaderPin', leaderPin);
-            showToast("🔑 리더 비밀번호가 성공적으로 변경되었습니다!", "success");
+            leaderPinHash = await hashPin(newPin);
+            localStorage.setItem('leaderPinHash', leaderPinHash);
+            localStorage.removeItem('leaderPin');
+            showToast("🔑 리더 비밀번호가 안전하게 암호화되어 변경되었습니다!", "success");
             if (newPinInput) newPinInput.value = '';
             document.getElementById('pinChangeBox').classList.add('hidden');
         };
@@ -1760,10 +1825,12 @@
             customPinCallback = null;
         };
 
-        window.confirmCustomPinModal = function() {
+        window.confirmCustomPinModal = async function() {
             const pinInput = document.getElementById('customPinPromptInput');
             const entered = pinInput ? pinInput.value : '';
-            if (entered === leaderPin) {
+            const enteredHash = await hashPin(entered);
+
+            if (enteredHash === leaderPinHash) {
                 const cb = customPinCallback;
                 closeCustomPinModal();
                 if (cb) cb();
@@ -1998,6 +2065,21 @@
                     console.error("Firestore error:", error);
                     if (membersData.length === 0) seedInitialMembers();
                 });
+
+                onSnapshot(sessionsCollectionRef, (snapshot) => {
+                    const list = [];
+                    snapshot.forEach((docSnap) => {
+                        list.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    tableSessionsData = list;
+                    const historyCountEl = document.getElementById('sessionHistoryCount');
+                    if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
+                    
+                    // 만약 테이블 탭이 열려있고 1부 상태면 스마트 배치 새로고침
+                    if (activeTab === 2 && !isPart2Shuffle) {
+                        renderSeatingPlan(false);
+                    }
+                }, (err) => console.error("Table sessions error:", err));
 
                 setTimeout(() => {
                     if (membersData.length === 0) {
@@ -2486,6 +2568,199 @@
             }
         }
 
+        // ==========================================
+        // 🌟 SMART SEATING & MEETING HISTORY ENGINE
+        // ==========================================
+
+        function getPairMeetingCount(m1, m2) {
+            if (!m1 || !m2 || m1.id === m2.id) return 0;
+            let count = 0;
+            const id1 = m1.id, id2 = m2.id;
+            const name1 = m1.name || '', name2 = m2.name || '';
+            
+            for (const session of tableSessionsData) {
+                if (!session.tables || !Array.isArray(session.tables)) continue;
+                for (const tbl of session.tables) {
+                    if (!Array.isArray(tbl)) continue;
+                    const has1 = tbl.includes(id1) || tbl.includes(name1);
+                    const has2 = tbl.includes(id2) || tbl.includes(name2);
+                    if (has1 && has2) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function getTableFreshness(tbl) {
+            if (!tbl || tbl.length <= 1) return { score: 100, newPairs: 0, totalPairs: 0 };
+            let totalPairs = 0;
+            let newPairs = 0;
+            for (let i = 0; i < tbl.length; i++) {
+                for (let j = i + 1; j < tbl.length; j++) {
+                    totalPairs++;
+                    if (getPairMeetingCount(tbl[i], tbl[j]) === 0) {
+                        newPairs++;
+                    }
+                }
+            }
+            const score = totalPairs > 0 ? Math.round((newPairs / totalPairs) * 100) : 100;
+            return { score, newPairs, totalPairs };
+        }
+
+        function calculateSmartSeatingPlan(todayMembers, isShuffle = false) {
+            const totalCount = todayMembers.length;
+            if (totalCount === 0) return [];
+
+            let numTables = 1;
+            if (totalCount >= 6) {
+                numTables = Math.floor(totalCount / 3);
+            } else if (totalCount >= 5) {
+                numTables = 2;
+            }
+
+            const tables = Array.from({ length: numTables }, () => []);
+
+            // 1. Leader finding (Jett has priority)
+            let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
+            if (!leader) leader = todayMembers[0];
+
+            // 2. New members (first time or attended === 1)
+            const newMembers = todayMembers.filter(m => m.id !== leader.id && (m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석'));
+            let regularMembers = todayMembers.filter(m => m.id !== leader.id && !newMembers.some(nm => nm.id === m.id));
+
+            // Place leader in Table 1 (index 0)
+            tables[0].push(leader);
+
+            // Place new members in Table 1 up to 4 people capacity
+            for (const nm of newMembers) {
+                if (tables[0].length < 4) {
+                    tables[0].push(nm);
+                } else {
+                    regularMembers.push(nm);
+                }
+            }
+
+            // 3. Regular members separation by gender & initial random mix
+            let males = regularMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
+            let females = regularMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
+
+            const unassigned = [];
+            let mi = 0, fi = 0;
+            while (mi < males.length || fi < females.length) {
+                if (fi < females.length) unassigned.push(females[fi++]);
+                if (mi < males.length) unassigned.push(males[mi++]);
+            }
+
+            // Cost evaluation for placing member into a candidate table
+            function getTablePlacementCost(tbl, member) {
+                let cost = 0;
+
+                // Table size penalty
+                cost += tbl.length * 60;
+
+                // Gender balance penalty
+                const mCount = tbl.filter(m => m.gender === 'M').length;
+                const fCount = tbl.filter(m => m.gender !== 'M').length;
+                if (member.gender === 'M' && mCount > fCount) cost += 35;
+                if (member.gender !== 'M' && fCount > mCount) cost += 35;
+
+                // Age group diversity
+                const sameAgeCount = tbl.filter(m => m.ageGroup === member.ageGroup).length;
+                cost += sameAgeCount * 10;
+
+                // Past meeting count penalty (서로 덜 만난 사람 우선)
+                for (const existing of tbl) {
+                    const meetingCount = getPairMeetingCount(existing, member);
+                    cost += meetingCount * 50;
+
+                    // IF Part 2 Shuffle: Strong penalty if they were together in Part 1 today
+                    if (isShuffle && part1SeatingSnapshot) {
+                        for (const p1Table of part1SeatingSnapshot) {
+                            const hadBoth = p1Table.some(m => m.id === existing.id) && p1Table.some(m => m.id === member.id);
+                            if (hadBoth) {
+                                cost += 15000; // Force 100% split from Part 1 table members
+                            }
+                        }
+                    }
+                }
+
+                return cost;
+            }
+
+            // Greedy Placement
+            const maxPerTable = Math.ceil(totalCount / numTables);
+            for (const member of unassigned) {
+                let bestTableIdx = 0;
+                let minCost = Infinity;
+
+                for (let t = 0; t < numTables; t++) {
+                    if (tables[t].length >= 4 && tables[t].length >= maxPerTable) continue;
+                    const cost = getTablePlacementCost(tables[t], member);
+                    if (cost < minCost) {
+                        minCost = cost;
+                        bestTableIdx = t;
+                    }
+                }
+                tables[bestTableIdx].push(member);
+            }
+
+            // 4. Local Search Optimization (2-Opt Swaps between regular members)
+            function calculateTablePenalty(tbl) {
+                let p = 0;
+                for (let i = 0; i < tbl.length; i++) {
+                    for (let j = i + 1; j < tbl.length; j++) {
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 30;
+                        if (isShuffle && part1SeatingSnapshot) {
+                            for (const p1T of part1SeatingSnapshot) {
+                                if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
+                                    p += 10000;
+                                }
+                            }
+                        }
+                    }
+                }
+                return p;
+            }
+
+            for (let iter = 0; iter < 30; iter++) {
+                let improved = false;
+                for (let t1 = 0; t1 < numTables; t1++) {
+                    for (let t2 = t1 + 1; t2 < numTables; t2++) {
+                        for (let i = 0; i < tables[t1].length; i++) {
+                            const m1 = tables[t1][i];
+                            if (m1.isLeader || (m1.name || '').includes('Jett')) continue;
+
+                            for (let j = 0; j < tables[t2].length; j++) {
+                                const m2 = tables[t2][j];
+                                if (m2.isLeader || (m2.name || '').includes('Jett')) continue;
+                                if (m1.gender !== m2.gender) continue; // preserve gender balance
+
+                                const curCost = calculateTablePenalty(tables[t1]) + calculateTablePenalty(tables[t2]);
+
+                                tables[t1][i] = m2;
+                                tables[t2][j] = m1;
+
+                                const newCost = calculateTablePenalty(tables[t1]) + calculateTablePenalty(tables[t2]);
+                                if (newCost < curCost) {
+                                    improved = true;
+                                    break;
+                                } else {
+                                    tables[t1][i] = m1;
+                                    tables[t2][j] = m2;
+                                }
+                            }
+                            if (improved) break;
+                        }
+                        if (improved) break;
+                    }
+                }
+                if (!improved) break;
+            }
+
+            return tables;
+        }
+
         function renderSeatingPlan(isShuffle = false) {
             const container = document.getElementById('seatingGrid');
             if (!container) return;
@@ -2502,78 +2777,63 @@
                 return;
             }
 
-            let numTables = 1;
-            if (totalCount >= 6) {
-                numTables = Math.floor(totalCount / 3);
-            } else if (totalCount >= 5) {
-                numTables = 2;
+            isPart2Shuffle = isShuffle;
+
+            // Generate smart seating plan
+            const tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
+            currentSeatingTables = tables;
+
+            if (!isShuffle) {
+                part1SeatingSnapshot = JSON.parse(JSON.stringify(tables));
             }
 
-            const tables = Array.from({ length: numTables }, () => []);
-
-            let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
-            if (!leader) leader = todayMembers[0];
-
-            const newMembers = todayMembers.filter(m => m.id !== leader.id && (m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석'));
-            let regularMembers = todayMembers.filter(m => m.id !== leader.id && !newMembers.some(nm => nm.id === m.id));
-
-            tables[0].push(leader);
-            for (const newMember of newMembers) {
-                if (tables[0].length < 4) {
-                    tables[0].push(newMember);
+            // Update Restore Button
+            const restoreBtn = document.getElementById('btnPart1Restore');
+            if (restoreBtn) {
+                if (isShuffle) {
+                    restoreBtn.classList.remove('hidden');
+                    restoreBtn.classList.add('flex');
                 } else {
-                    regularMembers.push(newMember);
+                    restoreBtn.classList.remove('flex');
+                    restoreBtn.classList.add('hidden');
                 }
-            }
-
-            const males = regularMembers.filter(m => m.gender === 'M');
-            const females = regularMembers.filter(m => m.gender !== 'M');
-
-            if (isShuffle) {
-                males.sort(() => Math.random() - 0.5);
-                females.sort(() => Math.random() - 0.5);
-            } else {
-                males.sort((a, b) => (a.ageGroup || '30대').localeCompare(b.ageGroup || '30대') || (a.name || '').localeCompare(b.name || '', 'ko'));
-                females.sort((a, b) => (a.ageGroup || '30대').localeCompare(b.ageGroup || '30대') || (a.name || '').localeCompare(b.name || '', 'ko'));
-            }
-
-            const remainingToPlace = [];
-            let mIdx = 0, fIdx = 0;
-            while (mIdx < males.length || fIdx < females.length) {
-                if (fIdx < females.length) remainingToPlace.push(females[fIdx++]);
-                if (mIdx < males.length) remainingToPlace.push(males[mIdx++]);
-            }
-
-            for (const member of remainingToPlace) {
-                let minTableIdx = 0;
-                for (let t = 1; t < numTables; t++) {
-                    if (tables[t].length < tables[minTableIdx].length) {
-                        minTableIdx = t;
-                    }
-                }
-                tables[minTableIdx].push(member);
             }
 
             container.innerHTML = tables.map((members, idx) => {
                 const tableNo = idx + 1;
                 const capacity = members.length;
                 const hasLeader = members.some(m => m.isLeader || (m.name || '').includes('Jett'));
+                
+                let freshnessBadge = '';
+                if (showLeaderFreshness) {
+                    const freshness = getTableFreshness(members);
+                    if (freshness.score === 100) {
+                        freshnessBadge = `<span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full whitespace-nowrap">🌟 100% 첫 만남</span>`;
+                    } else if (freshness.score >= 50) {
+                        freshnessBadge = `<span class="bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">✨ 신선도 ${freshness.score}%</span>`;
+                    } else {
+                        freshnessBadge = `<span class="bg-zinc-800 text-zinc-400 border border-zinc-700 text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">친밀 조합</span>`;
+                    }
+                }
 
                 return `
                     <div class="table-card rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4 relative overflow-hidden">
-                        <div class="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
+                        <div class="flex items-center justify-between border-b border-zinc-800/80 pb-2.5 gap-1.5 flex-wrap">
                             <div class="flex items-center gap-2">
                                 <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-black text-xs sm:text-sm flex items-center justify-center shadow whitespace-nowrap">
                                     T${tableNo}
                                 </span>
                                 <div>
                                     <h3 class="font-extrabold text-xs sm:text-base text-white whitespace-nowrap">${tableNo}번 테이블</h3>
-                                    <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 + 신규 고정' : `그룹 ${tableNo}`}</p>
+                                    <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 + 신규 우선' : `그룹 ${tableNo}`}</p>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold ${capacity === 3 ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/40' : 'text-blue-400 bg-blue-950/80 border-blue-500/40'} border px-2 py-0.5 rounded-full whitespace-nowrap">
-                                ${capacity}명 앉음
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                ${freshnessBadge}
+                                <span class="text-xs font-bold ${capacity === 3 ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/40' : 'text-blue-400 bg-blue-950/80 border-blue-500/40'} border px-2 py-0.5 rounded-full whitespace-nowrap">
+                                    ${capacity}명
+                                </span>
+                            </div>
                         </div>
 
                         <div class="space-y-2">
@@ -2584,14 +2844,17 @@
                                 const nameColor = isMale ? 'text-blue-400' : 'text-pink-400';
 
                                 return `
-                                    <div class="bg-zinc-900/90 border border-zinc-800 p-2.5 sm:p-3 rounded-xl flex items-center justify-center text-center shadow">
-                                        <div class="flex items-center justify-center gap-1.5 truncate w-full whitespace-nowrap">
-                                            <span class="font-black ${nameColor} text-sm sm:text-lg truncate">
-                                                ${m.name || '미지정'}
-                                            </span>
-                                            ${isLeader ? '<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-bold whitespace-nowrap">리더</span>' : ''}
-                                            ${isNew ? '<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-bold whitespace-nowrap">신규</span>' : ''}
+                                    <div class="relative bg-zinc-900/90 border border-zinc-800 p-2.5 sm:p-3 rounded-xl flex items-center justify-center text-center shadow overflow-hidden">
+                                        <!-- Left Side Badges -->
+                                        <div class="absolute left-2.5 sm:left-3 flex items-center gap-1">
+                                            ${isLeader ? '<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold whitespace-nowrap shadow-sm">리더</span>' : ''}
+                                            ${isNew ? '<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold whitespace-nowrap shadow-sm">신규</span>' : ''}
                                         </div>
+
+                                        <!-- Centered Member Name -->
+                                        <span class="font-black ${nameColor} text-sm sm:text-lg truncate px-10">
+                                            ${m.name || '미지정'}
+                                        </span>
                                     </div>
                                 `;
                             }).join('')}
@@ -2601,11 +2864,88 @@
             }).join('');
         }
 
+        window.toggleLeaderFreshnessWithPin = function() {
+            openCustomPinModal("🔑 리더 전용 신선도 지수 확인", () => {
+                showLeaderFreshness = !showLeaderFreshness;
+                renderSeatingPlan(isPart2Shuffle);
+                showToast(showLeaderFreshness ? "👁️ 리더 전용 신선도 지수가 표시됩니다." : "🔒 신선도 지수가 숨김 처리되었습니다.", "info");
+            });
+        };
+
         window.requestShuffleWithPin = function() {
             openCustomPinModal("🔑 2부 테이블 셔플 비밀번호 확인", () => {
                 playShuffleSound();
                 renderSeatingPlan(true);
-                showToast("🔀 성별·세대 균등 믹스로 2부 테이블 배치가 섞였습니다!", "info");
+                showToast("🔀 1부 멤버와 100% 분리된 2부 스마트 배치가 완료되었습니다!", "info");
+            });
+        };
+
+        window.restorePart1Seating = function() {
+            renderSeatingPlan(false);
+            showToast("↩️ 1부 테이블 배치로 복원되었습니다.", "info");
+        };
+
+        window.requestSaveSeatingHistory = function() {
+            if (!currentSeatingTables || currentSeatingTables.length === 0) {
+                showToast("저장할 테이블 배치 정보가 없습니다.", "warning");
+                return;
+            }
+
+            openCustomPinModal("🔑 오늘 테이블 확정 & 만남 이력 저장", async () => {
+                try {
+                    const sessionDocId = crypto.randomUUID();
+                    const newSession = {
+                        date: new Date().toISOString().slice(0, 10),
+                        part: isPart2Shuffle ? 2 : 1,
+                        tables: currentSeatingTables.map(tbl => tbl.map(m => m.id || m.name)),
+                        tableNames: currentSeatingTables.map(tbl => tbl.map(m => m.name)),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    await setDoc(doc(sessionsCollectionRef, sessionDocId), newSession);
+                    showToast(`💾 오늘 ${newSession.part}부 테이블 구성이 만남 이력에 성공적으로 저장되었습니다!`, "success");
+                } catch (err) {
+                    console.error("Failed to save seating history:", err);
+                    showToast("이력 저장 중 오류가 발생했습니다.", "error");
+                }
+            });
+        };
+
+        window.viewHistorySummaryModal = function() {
+            if (!tableSessionsData || tableSessionsData.length === 0) {
+                showToast("저장된 과거 모임 만남 이력이 없습니다.", "info");
+                return;
+            }
+
+            const summaryList = tableSessionsData.map((s, idx) => {
+                const tablesDesc = (s.tableNames && Array.isArray(s.tableNames))
+                    ? s.tableNames.map((tbl, tIdx) => `[T${tIdx+1}: ${tbl.join(', ')}]`).join(' ')
+                    : '테이블 세션 정보';
+                return `• ${s.date || '날짜 미상'} (${s.part || 1}부): ${tablesDesc}`;
+            }).join('\n');
+
+            alert(`👥 누적된 모임 만남 이력 (총 ${tableSessionsData.length}회 기록):\n\n${summaryList}\n\n* 향후 테이블 자동 편성 시 위 기록을 바탕으로 덜 만난 사람끼리 우선 배정됩니다.`);
+        };
+
+        window.openClearHistoryModal = function() {
+            openCustomPinModal("🔑 만남 이력 전체 초기화 비밀번호 확인", () => {
+                openConfirmModal({
+                    title: "⚠️ 만남 이력 전체 초기화",
+                    message: `현재까지 누적된 ${tableSessionsData.length}회의 모든 테이블 만남 이력을 영구 삭제하시겠습니까? (회원 정보나 당근 포인트는 보존됩니다)`,
+                    confirmText: "초기화 실행",
+                    cancelText: "취소",
+                    callback: async () => {
+                        try {
+                            const deletePromises = tableSessionsData.map(s => deleteDoc(doc(sessionsCollectionRef, s.id)));
+                            await Promise.all(deletePromises);
+                            showToast("🧹 모든 과거 테이블 만남 이력이 초기화되었습니다.", "success");
+                            renderSeatingPlan(false);
+                        } catch (err) {
+                            console.error(err);
+                            showToast("초기화 중 오류가 발생했습니다.", "error");
+                        }
+                    }
+                });
             });
         };
 
