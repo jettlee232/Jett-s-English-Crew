@@ -2315,8 +2315,6 @@
 
             if (count <= 0) {
                 return `<span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">🌱 신규</span>`;
-            } else if (count === 1) {
-                return `<span class="bg-teal-950 text-teal-300 border border-teal-500/40 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">🌱 1회차</span>`;
             } else if (count < 5) {
                 return `<span class="bg-zinc-800 text-zinc-300 border border-zinc-700 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">🏃 ${count}회차</span>`;
             } else if (count < 10) {
