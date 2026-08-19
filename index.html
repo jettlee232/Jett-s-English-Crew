@@ -181,29 +181,19 @@
 <body class="min-h-screen pb-8 flex flex-col items-center select-none">
 
     <header class="w-full max-w-full lg:max-w-7xl bg-[#1E1E22]/95 backdrop-blur-md border-b border-[#2E2E35] sticky top-0 z-40 px-3 sm:px-6 pt-[calc(0.6rem+env(safe-area-inset-top,0px))] pb-2.5 sm:py-3 shadow-xl transition-all">
-        <div class="relative flex items-center justify-center min-h-[38px] sm:min-h-[44px] mb-2 sm:mb-2.5">
-            <!-- Center: App Logo Image (Replaced Text) -->
+        <div class="relative flex items-center justify-center min-h-[46px] sm:min-h-[58px] mb-2 sm:mb-2.5">
+            <!-- Center: App Logo Image (Enlarged) -->
             <div class="flex items-center justify-center">
-                <img src="logo.png" alt="성북구 중상급 영어회화" class="h-8 sm:h-10 md:h-11 object-contain drop-shadow cursor-pointer active:scale-95 transition-transform" onclick="switchTab(1)" title="성북구 중상급 영어회화">
+                <img src="logo.png" alt="성북구 중상급 영어회화" class="h-11 sm:h-14 md:h-16 max-h-[62px] object-contain drop-shadow-md cursor-pointer active:scale-95 transition-transform" onclick="switchTab(1)" title="성북구 중상급 영어회화">
             </div>
 
-            <!-- Top Utility Control Buttons: Mobile View (Positioned Right) -->
-            <div class="absolute right-0 flex sm:hidden items-center gap-1.5">
-                <button onclick="requestAdminAccess()" class="whitespace-nowrap text-xs font-bold text-blue-300 hover:text-white bg-blue-950/80 active:bg-blue-900 active:scale-95 px-2.5 py-1.5 rounded-xl border border-blue-600/50 transition flex items-center gap-1.5 shadow">
-                    <i class="fa-solid fa-user-gear text-blue-400 text-xs"></i>
-                    <span>리더 관리</span>
+            <!-- Top Right: Minimalist Gear Icon Setting Button -->
+            <div class="absolute right-0 flex items-center gap-1.5 sm:gap-2">
+                <button onclick="requestAdminAccess()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-blue-400 border border-zinc-700/70 shadow active:scale-95 transition" title="리더 관리 설정">
+                    <i class="fa-solid fa-gear text-sm sm:text-base"></i>
                 </button>
-            </div>
-
-            <!-- Top Utility Control Buttons: Desktop/iPad View (Positioned Right) -->
-            <div class="absolute right-0 hidden sm:flex items-center gap-1.5 sm:gap-2">
-                <button onclick="requestAdminAccess()" class="whitespace-nowrap text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-2.5 sm:px-3 py-1.5 rounded-xl border border-zinc-700 transition flex items-center gap-1 sm:gap-1.5 shadow">
-                    <i class="fa-solid fa-user-gear text-blue-400"></i>
-                    <span>리더 관리</span>
-                </button>
-                <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="whitespace-nowrap text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition flex items-center gap-1 sm:gap-1.5 shadow">
-                    <i id="modeSelectIcon" class="fa-solid fa-lock text-amber-400"></i>
-                    <span id="modeSelectText" class="whitespace-nowrap">적립 설정</span>
+                <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
+                    <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
             </div>
         </div>
