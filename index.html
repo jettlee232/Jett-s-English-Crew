@@ -83,20 +83,20 @@
 
         /* Carrot Slots Visualization Styling */
         .coin-slot {
-            width: 20px;
-            height: 20px;
+            width: 17px;
+            height: 17px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             transition: all 0.2s ease;
         }
 
         @media (min-width: 640px) {
             .coin-slot {
-                width: 24px;
-                height: 24px;
+                width: 22px;
+                height: 22px;
                 font-size: 11px;
             }
         }
@@ -3191,30 +3191,30 @@
                 }
 
                 return `
-                    <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-3 shadow-md' : 'bg-[#1E1E22] border border-[#2E2E35] rounded-xl px-2.5 sm:px-4 py-2 sm:py-3 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1.5 sm:gap-3 w-full hover:border-zinc-700">
+                    <div class="${isKing ? 'rainbow-super-card px-2 sm:px-4 py-2 sm:py-3 shadow-md' : 'bg-[#1E1E22] border border-[#2E2E35] rounded-xl px-2 sm:px-4 py-2 sm:py-3 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1 sm:gap-3 w-full hover:border-zinc-700 overflow-hidden">
                         <!-- Col 1: Member Name (Fixed width for alignment) -->
-                        <div class="w-[76px] sm:w-[120px] shrink-0 truncate">
-                            <span class="font-black text-base sm:text-xl text-white truncate" title="${m.name || '미지정'}">
+                        <div class="w-[64px] sm:w-[110px] shrink-0 truncate">
+                            <span class="font-black text-sm sm:text-lg text-white truncate" title="${m.name || '미지정'}">
                                 ${m.name || '미지정'}
                             </span>
                         </div>
 
                         <!-- Col 2: Attendance & Free Badge (Fixed position for vertical alignment) -->
-                        <div class="w-[82px] sm:w-[120px] shrink-0 flex items-center gap-1">
+                        <div class="w-[66px] sm:w-[95px] shrink-0 flex items-center gap-1">
                             ${getAttendanceBadge(m.totalAttended)}
                             ${isKing ? `
-                                <span class="text-[9px] sm:text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 shadow-sm">
-                                    👑 무료
+                                <span class="text-[9px] sm:text-xs font-black text-pink-300 bg-pink-950/80 border border-pink-500/50 px-1 py-0.5 rounded-full whitespace-nowrap shrink-0 shadow-sm">
+                                    👑
                                 </span>
                             ` : ''}
                         </div>
 
-                        <!-- Col 3: Carrot Coin Slots & Score (Aligned to right) -->
-                        <div class="flex-1 flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
+                        <!-- Col 3: Carrot Coin Slots & Score (Aligned perfectly inside card) -->
+                        <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
-                            <span class="font-black text-xs sm:text-base text-orange-400 min-w-[20px] sm:min-w-[28px] text-right whitespace-nowrap">
+                            <span class="font-black text-[11px] sm:text-sm text-orange-400 min-w-[20px] sm:min-w-[26px] text-right whitespace-nowrap">
                                 ${coins}/6
                             </span>
                         </div>
