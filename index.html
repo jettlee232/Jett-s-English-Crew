@@ -4279,6 +4279,8 @@
 
             const totalYoung = todayMembers.filter(isYoungMember).length;
             const totalYoung30 = todayMembers.filter(isYoungOr30Member).length;
+            const totalAgeSum = todayMembers.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
+            const overallAvgAge = totalCount > 0 ? (totalAgeSum / totalCount) : 40;
 
             // 각 테이블별 목표 수용 정원 계산 (인원 수 차이가 1명 이내로 완벽 균등 배분)
             const baseCapacity = Math.floor(totalCount / numTables);
@@ -4478,13 +4480,19 @@
                 let cost = 0;
                 cost += tbl.length * 70;
 
-                // 1) 성비 균형
+                // 1) 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
+                const nextCount = tbl.length + 1;
+                const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
+                const nextAvgAge = nextAgeSum / nextCount;
+                cost += Math.abs(nextAvgAge - overallAvgAge) * 15;
+
+                // 2) 성비 균형
                 const mCount = tbl.filter(m => m.gender === 'M').length;
                 const fCount = tbl.filter(m => m.gender !== 'M').length;
                 if (member.gender === 'M' && mCount > fCount) cost += 45;
                 if (member.gender !== 'M' && fCount > mCount) cost += 45;
 
-                // 2) 신선도 및 1부 세대 다양성 (동일 연령대 중복 분산)
+                // 3) 신선도 및 1부 세대 다양성 (동일 연령대 중복 분산)
                 for (const existing of tbl) {
                     cost += getPairMeetingCount(existing, member) * 75;
                     if (existing.ageGroup === member.ageGroup) {
@@ -4584,6 +4592,11 @@
                 } else if (tblSeniors >= 2 && totalSeniors <= numTables + 1) {
                     p += 400;
                 }
+
+                // [2순위] 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
+                const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
+                const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
+                p += Math.abs(tblAvgAge - overallAvgAge) * 60;
 
                 // [2순위] 1부 동일 연령대 중복 분산 (다양성 극대화)
                 const ageMap = {};
