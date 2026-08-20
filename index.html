@@ -4270,14 +4270,20 @@
                         targetYoungPerTable[t] += take;
                         remainingYoungToDistribute -= take;
                     }
-                    // 아직 남은 20~40대가 있다면 순차적으로 추가 (정원 내)
-                    let tIdx = 0;
+                    // 아직 남은 20~40대가 있다면 young이 가장 적은 테이블부터 순차 분배 (특정 테이블 3명 몰빵 방지)
                     while (remainingYoungToDistribute > 0) {
-                        if (targetYoungPerTable[tIdx] < capacities[tIdx]) {
-                            targetYoungPerTable[tIdx]++;
-                            remainingYoungToDistribute--;
+                        let minT = 0;
+                        for (let t = 1; t < numTables; t++) {
+                            if (targetYoungPerTable[t] < targetYoungPerTable[minT] && targetYoungPerTable[t] < capacities[t]) {
+                                minT = t;
+                            }
                         }
-                        tIdx = (tIdx + 1) % numTables;
+                        if (targetYoungPerTable[minT] < capacities[minT]) {
+                            targetYoungPerTable[minT]++;
+                            remainingYoungToDistribute--;
+                        } else {
+                            break;
+                        }
                     }
                 }
 
@@ -4307,13 +4313,14 @@
                     tables[minT].push(seniorList[sIdx++]);
                 }
 
-                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 20~40대 2:2 페어링 엄격 보존)
+                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 20~40대 2:2 페어링 + 시니어 고립 방지)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
                     const tblYoungBridge = tbl.filter(isYoungOrBridge).length;
                     const tblYoung30s = tbl.filter(isYoungOr30Member).length;
+                    const tblSeniors = tbl.filter(isSeniorMember).length;
                     const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
 
                     // 🌟 20~40대 단독 고립 강력 방지 (리더 없는 테이블에 2030대 1명 고립 시 초강력 페널티)
@@ -4324,6 +4331,11 @@
                     // 🌟 20~40대가 4명 이상일 때 2개 테이블 기준 2:2 밸런스 강제 (신규 있는 날 3:1 몰빵 금지)
                     if (hasNewbiesToday && numTables === 2 && tblYoungBridge >= 3 && youngBridgeList.length + currentT0Young <= 4) {
                         score += 2000;
+                    }
+
+                    // 🌟 시니어 100% 몰빵 테이블 방지 (20~40대가 충분한데 시니어들만 한 테이블에 고립되는 현상 차단)
+                    if (tblSeniors === tbl.length && youngBridgeList.length + currentT0Young >= numTables) {
+                        score += 2200;
                     }
 
                     for (let i = 0; i < tbl.length; i++) {
