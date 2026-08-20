@@ -444,10 +444,27 @@
         <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
             <div class="bg-[#121216] border border-[#23232b] rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
                 <div class="border-b border-zinc-800/80 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
-                        <i class="fa-solid fa-users-viewfinder text-blue-400"></i>
-                        <span>이번 주 스터디 테이블 배치도</span>
-                    </h2>
+                    <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                            <i class="fa-solid fa-users-viewfinder text-blue-400"></i>
+                            <span>이번 주 스터디 테이블 배치도</span>
+                        </h2>
+
+                        <!-- Compact Action Icon Buttons Header Placement -->
+                        <div class="flex items-center gap-1.5">
+                            <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition shadow-sm active:scale-95" title="1부 배치로 복원">
+                                <i class="fa-solid fa-rotate-left text-xs text-zinc-400"></i>
+                            </button>
+                            
+                            <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition shadow-md active:scale-95" title="2부 자리 셔플">
+                                <i class="fa-solid fa-shuffle text-xs"></i>
+                            </button>
+
+                            <button onclick="requestSaveSeatingHistory()" class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition shadow-sm active:scale-95" title="배치 이력 저장">
+                                <i class="fa-solid fa-floppy-disk text-xs text-emerald-400"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Seating Criteria Capsule Badge -->
                     <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
@@ -462,24 +479,6 @@
                     <div class="col-span-full p-8 text-center text-xs sm:text-sm text-zinc-500 bg-zinc-900/60 rounded-xl border border-zinc-800">
                         참가자 명단을 확인하여 테이블 배치를 준비하는 중입니다...
                     </div>
-                </div>
-
-                <!-- Action Buttons for Seating (Bottom Center Aligned) -->
-                <div class="pt-3 border-t border-zinc-800/80 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-                    <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-3.5 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap active:scale-95">
-                        <i class="fa-solid fa-rotate-left text-zinc-400"></i>
-                        <span>1부 복원</span>
-                    </button>
-                    
-                    <button onclick="requestShuffleWithPin()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow-lg whitespace-nowrap active:scale-95">
-                        <i class="fa-solid fa-shuffle text-white"></i>
-                        <span>2부 셔플</span>
-                    </button>
-
-                    <button onclick="requestSaveSeatingHistory()" class="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap active:scale-95">
-                        <i class="fa-solid fa-floppy-disk text-emerald-400"></i>
-                        <span>이력 저장</span>
-                    </button>
                 </div>
 
                 <!-- Smart Seating Principles Accordion -->
