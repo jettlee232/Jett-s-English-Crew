@@ -444,13 +444,21 @@
         <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
             <div class="bg-[#121216] border border-[#23232b] rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
                 <div class="border-b border-zinc-800/80 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                        <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
-                            <i class="fa-solid fa-users-viewfinder text-blue-400"></i>
-                            <span>스터디 테이블 배치도</span>
-                        </h2>
+                    <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                        <i class="fa-solid fa-users-viewfinder text-blue-400"></i>
+                        <span>스터디 테이블 배치도</span>
+                    </h2>
 
-                        <!-- Compact Action Icon Buttons Header Placement -->
+                    <!-- Right-aligned Badge and Action Buttons -->
+                    <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:justify-end">
+                        <!-- Seating Criteria Capsule Badge -->
+                        <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                            <span class="text-zinc-400 font-medium">1부 매칭:</span>
+                            <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                        </div>
+
+                        <!-- Compact Action Icon Buttons -->
                         <div class="flex items-center gap-1.5">
                             <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition shadow-sm active:scale-95" title="1부 배치로 복원">
                                 <i class="fa-solid fa-rotate-left text-xs text-zinc-400"></i>
@@ -464,13 +472,6 @@
                                 <i class="fa-solid fa-floppy-disk text-xs text-emerald-400"></i>
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Seating Criteria Capsule Badge -->
-                    <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                        <span class="text-zinc-400 font-medium">1부 매칭:</span>
-                        <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
                     </div>
                 </div>
 
