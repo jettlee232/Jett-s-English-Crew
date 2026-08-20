@@ -4589,19 +4589,21 @@
                     }
                 }
 
-                // 4) 🌟 [시니어 공정 순환 & 리더 호스팅 룰]
+                // 4) 🌟 [시니어 1부 전 테이블 균등 분산 & 공정 순환 룰]
                 if (isSeniorMember(member)) {
-                    // 신규가 없는 날 리더 테이블은 시니어 흡수 보너스 (리더가 호스팅하여 다른 테이블 부담 경감)
-                    if (!hasNewbiesToday && isLeaderTbl) {
-                        cost -= 120; // 리더 테이블 우선 배정 보너스
-                    } else if (seniorCount >= 2 && (!isLeaderTbl || hasNewbiesToday)) {
-                        cost += 220;
+                    const totalSeniors = todayMembers.filter(isSeniorMember).length;
+                    
+                    // 전 테이블 시니어 1명 이상 균등 분산 강력 유도 (0명인 테이블 우선 배정)
+                    if (seniorCount === 0 && totalSeniors >= numTables) {
+                        cost -= 300; // 시니어가 아직 없는 테이블에 우선 배정 보너스
+                    } else if (seniorCount >= 2) {
+                        cost += 380; // 한 테이블에 2명 이상 몰리는 것 방지
                     }
 
                     const hasYoungOrLeader = tblYoungs > 0 || isLeaderTbl;
                     if (hasYoungOrLeader) {
                         const pastExp = getSeniorYoungMeetingCount(member);
-                        cost += pastExp * 30;
+                        cost += pastExp * 25;
                     }
                 }
 
@@ -4644,6 +4646,7 @@
                 const tblYoungs = tbl.filter(isYoungMember).length;
                 const tblSeniors = tbl.filter(isSeniorMember).length;
                 const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
+                const totalSeniors = todayMembers.filter(isSeniorMember).length;
 
                 // 20대 단독 고립 방지 페널티
                 if (tblYoungs === 1 && totalYoung >= 2) {
@@ -4652,9 +4655,14 @@
                     p += 800;
                 }
 
-                // 시니어 과밀 방지 페널티
+                // 🌟 시니어 전 테이블 균등 분산 최적화 (0명 방지 & 3명 이상 과밀 방지)
+                if (totalSeniors >= numTables && tblSeniors === 0) {
+                    p += 850; // 시니어가 0명인 테이블 강력 방지 페널티
+                }
                 if (tblSeniors >= 3) {
-                    p += 400;
+                    p += 650; // 시니어 3명 과밀 방지 페널티
+                } else if (tblSeniors >= 2 && totalSeniors <= numTables + 1) {
+                    p += 300;
                 }
 
                 // 🌟 시니어 2030 만남 공정 순환 (특정 시니어의 젊은층/리더 테이블 독점 방지)
