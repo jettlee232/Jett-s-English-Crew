@@ -4774,32 +4774,30 @@
                             </div>
                         </div>
 
-                        <div class="space-y-2">
+                        <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
                             ${members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
                                 const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
                                 const isMale = m.gender === 'M';
 
-                                let badgeHtml = '';
+                                let tagHtml = '';
                                 if (isLeader) {
-                                    badgeHtml = `<span class="w-[50px] sm:w-[56px] text-center inline-flex items-center justify-center bg-blue-600 text-white py-0.5 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-sm">리더</span>`;
+                                    tagHtml = `<span class="inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-blue-600 text-white font-black text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="리더">L</span>`;
                                 } else if (isNew) {
-                                    badgeHtml = `<span class="w-[50px] sm:w-[56px] text-center inline-flex items-center justify-center bg-emerald-950/80 text-emerald-300 border border-emerald-600/40 py-0.5 rounded text-[10px] sm:text-xs font-semibold whitespace-nowrap shadow-sm">신규</span>`;
-                                } else {
-                                    badgeHtml = getAttendanceBadge(m.totalAttended);
+                                    tagHtml = `<span class="inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="신규">🌱</span>`;
                                 }
 
+                                const cardTheme = isMale 
+                                    ? 'bg-gradient-to-br from-blue-950/30 via-[#131722] to-[#0f1118] border-blue-500/30 hover:border-blue-400/60 text-blue-100'
+                                    : 'bg-gradient-to-br from-rose-950/30 via-[#1e1319] to-[#0f1118] border-rose-500/30 hover:border-rose-400/60 text-rose-100';
+
                                 return `
-                                    <div class="relative bg-zinc-900/90 border border-zinc-800/90 hover:border-zinc-700 p-2.5 sm:p-3 rounded-xl flex items-center justify-between shadow-sm transition overflow-hidden">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <span class="w-2 h-2 rounded-full ${isMale ? 'bg-blue-400' : 'bg-rose-400'} shrink-0"></span>
-                                            <span class="font-bold text-zinc-100 text-sm sm:text-base truncate">
+                                    <div class="aspect-square rounded-xl ${cardTheme} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
+                                        <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
+                                            <span class="font-bold text-sm sm:text-base tracking-wide leading-snug break-keep">
                                                 ${m.name || '미지정'}
                                             </span>
-                                        </div>
-
-                                        <div class="flex items-center shrink-0 ml-2">
-                                            ${badgeHtml}
+                                            ${tagHtml}
                                         </div>
                                     </div>
                                 `;
