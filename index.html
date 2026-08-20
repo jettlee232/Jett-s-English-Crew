@@ -4226,66 +4226,93 @@
                     }
                 }
 
-                // 3) 2부 배정: 30대 특정 테이블 독점 방지 및 40대 브릿지와 조화로운 교차 배정
-                const sortedRegulars = [...regularMembers].sort((a, b) => {
+                // 3) 20~40대(청년/브릿지)와 5060대(시니어) 명확한 2:2 페어 분배 알고리즘
+                function isYoungOrBridge(m) {
+                    if (!m || !m.ageGroup) return false;
+                    return m.ageGroup.includes('10') || m.ageGroup.includes('20') || m.ageGroup.includes('30') || m.ageGroup.includes('40');
+                }
+
+                const youngBridgeList = regularMembers.filter(isYoungOrBridge).sort((a, b) => {
                     const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
                     return diff !== 0 ? diff : (Math.random() - 0.5);
                 });
 
-                const young30s = sortedRegulars.filter(isYoungOr30Member);
-                const bridge40s = sortedRegulars.filter(m => m.ageGroup && m.ageGroup.includes('40'));
-                const seniors = sortedRegulars.filter(isSeniorMember);
+                const seniorList = regularMembers.filter(m => !isYoungOrBridge(m)).sort((a, b) => {
+                    const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
+                    return diff !== 0 ? diff : (Math.random() - 0.5);
+                });
 
-                // 2030대, 40대 브릿지, 시니어를 교차 배치하여 자연스러운 세대별 완충 구조 형성
-                const interleaved = [];
-                let yi = 0, bi = 0, si = 0;
-                while (yi < young30s.length || bi < bridge40s.length || si < seniors.length) {
-                    if (yi < young30s.length) interleaved.push(young30s[yi++]);
-                    if (bi < bridge40s.length) interleaved.push(bridge40s[bi++]);
-                    if (si < seniors.length) interleaved.push(seniors[si++]);
-                    if (yi < young30s.length) interleaved.push(young30s[yi++]);
-                    if (si < seniors.length) interleaved.push(seniors[si++]);
+                // 각 테이블별 20~40대 목표 배정 수 계산 (2:2 / 2:2:1 등 짝지어 배분)
+                const targetYoungPerTable = Array(numTables).fill(0);
+                const currentT0Young = tables[0].filter(isYoungOrBridge).length;
+                targetYoungPerTable[0] = currentT0Young;
+
+                let remainingYoungToDistribute = youngBridgeList.length;
+                // 테이블 1부터 2명씩 우선 배정하여 2:2 짝 형성
+                for (let t = 1; t < numTables && remainingYoungToDistribute > 0; t++) {
+                    const take = Math.min(2, remainingYoungToDistribute, capacities[t]);
+                    targetYoungPerTable[t] += take;
+                    remainingYoungToDistribute -= take;
+                }
+                // 아직 남은 20~40대가 있다면 순차적으로 추가 (정원 내)
+                let tIdx = 0;
+                while (remainingYoungToDistribute > 0) {
+                    if (targetYoungPerTable[tIdx] < capacities[tIdx]) {
+                        targetYoungPerTable[tIdx]++;
+                        remainingYoungToDistribute--;
+                    }
+                    tIdx = (tIdx + 1) % numTables;
                 }
 
-                let memberIdx = 0;
+                // 목표 수치에 따라 youngBridgeList 배치
+                let ybIdx = 0;
                 for (let t = 0; t < numTables; t++) {
-                    const needed = capacities[t] - tables[t].length;
-                    for (let k = 0; k < needed && memberIdx < interleaved.length; k++) {
-                        tables[t].push(interleaved[memberIdx++]);
+                    const currentInTable = tables[t].filter(isYoungOrBridge).length;
+                    const needed = targetYoungPerTable[t] - currentInTable;
+                    for (let k = 0; k < needed && ybIdx < youngBridgeList.length; k++) {
+                        tables[t].push(youngBridgeList[ybIdx++]);
                     }
                 }
 
-                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 30대 독점 방지 + 3040 브릿지 케미)
+                // 남은 빈자리는 seniorList로 순차적으로 채움
+                let sIdx = 0;
+                for (let t = 0; t < numTables; t++) {
+                    while (tables[t].length < capacities[t] && sIdx < seniorList.length) {
+                        tables[t].push(seniorList[sIdx++]);
+                    }
+                }
+                while (ybIdx < youngBridgeList.length) {
+                    const minT = tables.reduce((minI, t, i, arr) => t.length < arr[minI].length ? i : minI, 0);
+                    tables[minT].push(youngBridgeList[ybIdx++]);
+                }
+                while (sIdx < seniorList.length) {
+                    const minT = tables.reduce((minI, t, i, arr) => t.length < arr[minI].length ? i : minI, 0);
+                    tables[minT].push(seniorList[sIdx++]);
+                }
+
+                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 20~40대 2:2 페어링 엄격 보존)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
+                    const tblYoungBridge = tbl.filter(isYoungOrBridge).length;
                     const tblYoung30s = tbl.filter(isYoungOr30Member).length;
-                    const tblBridge = tbl.filter(m => m.ageGroup && m.ageGroup.includes('40')).length;
-                    const tbl30sOnly = tbl.filter(m => m.ageGroup && m.ageGroup.includes('30')).length;
                     const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
 
-                    // 🌟 2030대 고립 방지 (2030대가 1명인데 리더나 40대 브릿지 페어가 없으면 강력 페널티)
-                    if (tblYoung30s === 1 && !hasLeader && tblBridge === 0) {
+                    // 🌟 20~40대 단독 고립 강력 방지 (리더 없는 테이블에 2030대 1명 고립 시 초강력 페널티)
+                    if (tblYoung30s === 1 && !hasLeader && tblYoungBridge <= 1) {
+                        score += 3000; // 1부 분리 점수(2500)보다 높게 설정하여 무조건 2:2 형성 유도
+                    }
+
+                    // 🌟 20~40대가 4명 이상일 때 2개 테이블 기준 2:2 밸런스 강제 (3:1 몰빵 금지)
+                    if (numTables === 2 && tblYoungBridge >= 3 && youngBridgeList.length + currentT0Young <= 4) {
                         score += 2000;
-                    }
-
-                    // 🌟 30대 특정 테이블 몰빵/독점 방지 (3인 테이블에 30대만 3명 들어가지 않도록 분산)
-                    if (tbl30sOnly >= 3 && tbl.length === 3) {
-                        score += 1500;
-                    }
-
-                    // 🌟 2030대가 4명 이상일 때 한 테이블에 몰빵되어 다른 테이블이 올 시니어가 되는 것보다 2:2 믹스 선호
-                    if (totalYoung30 >= 4 && numTables === 2) {
-                        if (tblYoung30s === tbl.length || tblYoung30s === 0) {
-                            score += 500;
-                        }
                     }
 
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += ageDiff * 60;
+                            score += ageDiff * 50;
 
                             // 1부 만났던 사람과의 재배치 강력 분리
                             if (part1SeatingSnapshot) {
