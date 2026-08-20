@@ -4250,15 +4250,27 @@
 
                 if (!hasNewbiesToday && numTables >= 2) {
                     // 🌟 [신규 없는 날 특화 룰]: 리더 테이블(T0)은 시니어들을 집중 호스팅하고, 나머지 20~40대는 T1, T2 등에 모아 또래 케미 극대화!
-                    targetYoungPerTable[0] = 1; // 리더(Jett) 1명만 유지 (남은 자리는 시니어로 채움)
+                    targetYoungPerTable[0] = 1; // 리더(Jett) 1명 기본
                     let rem = youngBridgeList.length;
-                    let t = 1;
+                    
+                    // T1부터 순차적으로 채우되, T1~T(N-1)이 꽉 차면 안전하게 T0로 오버플로우
                     while (rem > 0) {
-                        if (targetYoungPerTable[t] < capacities[t]) {
-                            targetYoungPerTable[t]++;
-                            rem--;
+                        let allocated = false;
+                        for (let t = 1; t < numTables && rem > 0; t++) {
+                            if (targetYoungPerTable[t] < capacities[t]) {
+                                targetYoungPerTable[t]++;
+                                rem--;
+                                allocated = true;
+                            }
                         }
-                        t = (t % (numTables - 1)) + 1;
+                        if (!allocated) {
+                            if (targetYoungPerTable[0] < capacities[0]) {
+                                targetYoungPerTable[0]++;
+                                rem--;
+                            } else {
+                                break; // 모든 테이블 정원 만석
+                            }
+                        }
                     }
                 } else {
                     // 신규 있는 날: 2:2 페어 분배 룰
@@ -4335,7 +4347,13 @@
 
                     // 🌟 시니어 100% 몰빵 테이블 방지 (20~40대가 충분한데 시니어들만 한 테이블에 고립되는 현상 차단)
                     if (tblSeniors === tbl.length && youngBridgeList.length + currentT0Young >= numTables) {
-                        score += 2200;
+                        score += 4500;
+                    }
+
+                    // 🌟 30대 특정 테이블 몰빵/독점 방지 (3인 테이블에 30대만 3명 들어가지 않도록 분산)
+                    const tbl30sOnly = tbl.filter(m => m.ageGroup && m.ageGroup.includes('30')).length;
+                    if (tbl30sOnly >= 3 && tbl.length === 3) {
+                        score += 2500;
                     }
 
                     for (let i = 0; i < tbl.length; i++) {
