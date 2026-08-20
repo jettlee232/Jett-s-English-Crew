@@ -443,11 +443,18 @@
         <!-- TAB 2: 스마트 테이블 배치도 -->
         <section id="tab-content-2" class="tab-content space-y-4 sm:space-y-6 hidden">
             <div class="bg-[#121216] border border-[#23232b] rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
-                <div class="border-b border-zinc-800/80 pb-3 flex items-center justify-between">
-                    <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-xl font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
+                <div class="border-b border-zinc-800/80 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <h2 onclick="toggleLeaderFreshnessWithPin()" class="text-base sm:text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap cursor-pointer select-none" title="클릭 시 리더 전용 신선도 지수 토글">
                         <i class="fa-solid fa-users-viewfinder text-blue-400"></i>
                         <span>이번 주 스터디 테이블 배치도</span>
                     </h2>
+
+                    <!-- Seating Criteria Capsule Badge -->
+                    <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span class="text-zinc-400 font-medium">1부 매칭:</span>
+                        <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                    </div>
                 </div>
 
                 <!-- Dynamic Seating Grid -->
@@ -4406,6 +4413,24 @@
                 } else {
                     restoreBtn.classList.remove('flex');
                     restoreBtn.classList.add('hidden');
+                }
+            }
+
+            // Update Seating Criteria Badge
+            const criteriaBadge = document.getElementById('seatingCriteriaBadge');
+            if (criteriaBadge) {
+                if (isShuffle) {
+                    criteriaBadge.innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                        <span class="text-zinc-400 font-medium">2부 셔플:</span>
+                        <strong class="text-rose-300 font-semibold">또래 세대 & 공감대 중심</strong>
+                    `;
+                } else {
+                    criteriaBadge.innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span class="text-zinc-400 font-medium">1부 매칭:</span>
+                        <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                    `;
                 }
             }
 
