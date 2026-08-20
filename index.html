@@ -4488,6 +4488,11 @@
                 const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
                 p += Math.abs(tblAvgAge - overallAvgAge) * 65;
 
+                // [3순위] 남녀 성비 균형
+                const mCount = tbl.filter(m => m.gender === "M").length;
+                const fCount = tbl.filter(m => m.gender !== "M").length;
+                p += Math.abs(mCount - fCount) * 60;
+
                 // [3순위] 과거 만남 누적 신선도
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
