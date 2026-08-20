@@ -450,18 +450,18 @@
                             <span>스터디 테이블 배치도</span>
                         </h2>
 
-                        <!-- Action Buttons on the Right Side of the Title -->
-                        <div class="flex items-center gap-1.5">
-                            <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition shadow-sm active:scale-95" title="1부 배치로 복원">
-                                <i class="fa-solid fa-rotate-left text-xs text-zinc-400"></i>
+                        <!-- Discreet Action Buttons for Leader (Blends into background) -->
+                        <div class="flex items-center gap-0.5 opacity-30 hover:opacity-100 transition-opacity">
+                            <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="1부 배치 복원">
+                                <i class="fa-solid fa-rotate-left text-[11px]"></i>
                             </button>
                             
-                            <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition shadow-md active:scale-95" title="2부 자리 셔플">
-                                <i class="fa-solid fa-shuffle text-xs"></i>
+                            <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="2부 셔플">
+                                <i class="fa-solid fa-shuffle text-[11px]"></i>
                             </button>
 
-                            <button onclick="requestSaveSeatingHistory()" class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition shadow-sm active:scale-95" title="배치 이력 저장">
-                                <i class="fa-solid fa-floppy-disk text-xs text-emerald-400"></i>
+                            <button onclick="requestSaveSeatingHistory()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="이력 저장">
+                                <i class="fa-solid fa-floppy-disk text-[11px]"></i>
                             </button>
                         </div>
                     </div>
