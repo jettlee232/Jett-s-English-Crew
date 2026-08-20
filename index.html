@@ -2713,7 +2713,24 @@
             }
         });
 
-        window.switchTab = function(tabNum) {
+        function getTabFromUrl() {
+            const hash = (window.location.hash || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+
+            if (tabParam && !isNaN(parseInt(tabParam))) {
+                return Math.max(1, Math.min(5, parseInt(tabParam)));
+            }
+            if (hash.includes('tab1') || hash.includes('topic') || hash.includes('intro')) return 1;
+            if (hash.includes('tab2') || hash.includes('seating') || hash.includes('table')) return 2;
+            if (hash.includes('tab3') || hash.includes('carrot') || hash.includes('member') || hash.includes('ranking')) return 3;
+            if (hash.includes('tab4') || hash.includes('guide') || hash.includes('curriculum') || hash.includes('rule') || hash.includes('etiquette')) return 4;
+            if (hash.includes('tab5') || hash.includes('kiosk')) return 5;
+
+            return 1;
+        }
+
+        window.switchTab = function(tabNum, updateUrl = true) {
             activeTab = tabNum;
             for (let i = 1; i <= 5; i++) {
                 const content = document.getElementById(`tab-content-${i}`);
@@ -2729,6 +2746,14 @@
                 }
             }
 
+            if (updateUrl) {
+                try {
+                    history.replaceState(null, null, `#tab${tabNum}`);
+                } catch (e) {
+                    window.location.hash = `tab${tabNum}`;
+                }
+            }
+
             // Screen Wake Lock: TAB 5(적립 키오스크) 진입 시에만 켜짐 유지, 다른 탭 이동 시 즉시 해제
             if (tabNum === 5) {
                 activateWakeLock();
@@ -2736,6 +2761,13 @@
                 deactivateWakeLock();
             }
         };
+
+        window.addEventListener('hashchange', () => {
+            const targetTab = getTabFromUrl();
+            if (targetTab !== activeTab) {
+                switchTab(targetTab, false);
+            }
+        });
 
         // ----------------------------------------------------
         // 📱 실시간 1:1 손가락 추적 터치 슬라이드 (Elastic Rubberband & Snap)
@@ -3517,7 +3549,7 @@
                     await signInAnonymously(auth);
                 }
 
-                switchTab(1);
+                switchTab(getTabFromUrl(), false);
                 updateLockUIState();
 
                 const customPinInput = document.getElementById('customPinPromptInput');
