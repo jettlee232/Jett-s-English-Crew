@@ -498,7 +498,7 @@
                                 <span class="text-blue-400 font-bold mt-0.5"><i class="fa-solid fa-arrows-rotate"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">새로운 대화 상대 & 만남 순환</strong>
-                                    1부와 2부 대화 상대를 자동 분리하고, 최근 자주 만났던 멤버보다 오랜만에 만나는 멤버를 우선 매칭하여 늘 새로운 분들과 교류하도록 돕습니다.
+                                    1부는 최근 만났던 분보다 오랜만에 만나는 분을 가장 먼저 고려해 매칭하고, 2부는 같은 세대 안에서 1부에 함께 앉지 않았던 분을 우선 매칭해 대화 상대를 바꿔 드립니다.
                                 </div>
                             </div>
                             <div class="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg">
@@ -512,7 +512,7 @@
                                 <span class="text-amber-400 font-bold mt-0.5"><i class="fa-solid fa-scale-balanced"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">세대 간 균형 및 공감대 페어링</strong>
-                                    특정 세대가 한 테이블로 치우치지 않도록 고르게 분산하며, 모든 세대가 편안하게 어우러지도록 테이블당 2인 이상의 공감대 페어를 형성합니다.
+                                    1부에는 특정 세대가 한 테이블로 치우치지 않도록 고르게 섞고(20대가 한 분뿐인 날에는 30대 멤버와 같은 테이블), 2부에는 반대로 비슷한 세대끼리 모아 공감대 있는 대화를 나누실 수 있게 합니다.
                                 </div>
                             </div>
                             <div class="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg">
@@ -526,7 +526,7 @@
                                 <span class="text-rose-400 font-bold mt-0.5"><i class="fa-solid fa-users"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">3~4인 균등 정원 & 발언 시간 보장</strong>
-                                    모든 테이블 인원을 3~4인으로 균등하게 맞춰 특정 테이블에 인원이 쏠리지 않고, 참석자 모두에게 충분한 발언 기회를 보장합니다.
+                                    모든 테이블 인원을 3~4인 규모로 최대한 균등하게 맞춰 특정 테이블에 인원이 쏠리지 않고, 참석자 모두에게 충분한 발언 기회를 보장합니다.
                                 </div>
                             </div>
                         </div>
@@ -2550,6 +2550,8 @@
         let tableSessionsData = [];
         let currentSeatingTables = [];
         let part1SeatingSnapshot = null;
+        let part2SeatingSnapshot = null;
+        let seatingSnapshotSig = '';
         let isPart2Shuffle = false;
         let showLeaderFreshness = false;
 
@@ -4052,7 +4054,7 @@
         function renderUI() {
             renderTodayMemberTiles();
             renderStep2Button();
-            renderSeatingPlan();
+            renderSeatingPlan(isPart2Shuffle);
             renderMemberList();
             if (!document.getElementById('adminModal').classList.contains('hidden')) {
                 renderAdminMemberList();
@@ -4220,21 +4222,6 @@
             return m.ageGroup.includes('20') || m.ageGroup.includes('10');
         }
 
-        function isYoungOr30Member(m) {
-            if (!m || !m.ageGroup) return false;
-            return m.ageGroup.includes('10') || m.ageGroup.includes('20') || m.ageGroup.includes('30');
-        }
-
-        function isBridgeMember(m) {
-            if (!m || !m.ageGroup) return false;
-            return m.ageGroup.includes('30') || m.ageGroup.includes('40');
-        }
-
-        function isSeniorMember(m) {
-            if (!m || !m.ageGroup) return false;
-            return m.ageGroup.includes('50') || m.ageGroup.includes('60');
-        }
-
         // =========================================================================
         // 🎯 스마트 테이블 배치 마스터 알고리즘 (3단계 우선순위 체계)
         // =========================================================================
@@ -4266,9 +4253,11 @@
 
             // -------------------------------------------------------------------------
             // 🔀 [2부 스마트 셔플 알고리즘] (3대 핵심 엔진)
-            // 1순위: 1부 만남 100% 분리 (재만남 차단) & 정원 준수 & 리더/신규 T1
-            // 2순위: 또래 세대 공감대 매칭 (ageDiff 최소화) & 20대 고립 방지
-            // 3순위: 남녀 성비 균형
+            // 1순위: 정원 준수 & 리더/신규 T1 고정
+            // 2순위: 비슷한 세대끼리 묶기 (getAgeNum이 세대 대표값이라 한 세대 차 = 550점)
+            // 3순위: 같은 세대 안에서 오늘 1부 대화 상대와 겹치지 않게 (500점)
+            // 4순위: 같은 세대 안에서 과거 모임 만남 회피 (300점) & 20대 고립 방지
+            // 5순위: 남녀 성비 균형
             // -------------------------------------------------------------------------
             if (isShuffle) {
                 let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
@@ -4311,29 +4300,32 @@
                     const tblYoungOnly = tbl.filter(isYoungMember).length;
                     const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
 
-                    // [2순위] 20대 단독 고립 방지
+                    // [4순위] 20대 단독 고립 방지
                     if (tblYoungOnly === 1 && !hasLeader && totalYoung >= 2) {
                         score += 3000;
                     }
 
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
-                            // [2순위] 또래 세대 공감대 매칭 (나이차가 적을수록 낮은 비용)
+                            // [2순위] 세대 묶기 — 한 세대 벌어질 때마다 550점, 아래 항목들을 전부 이긴다
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
                             score += ageDiff * 55;
 
-                            // [1순위: 절대 규칙] 1부 대화 상대 재만남 100% 차단
+                            // [4순위] 세대가 같을 때의 2차 기준: 과거 모임에서 만난 횟수
+                            score += getPairMeetingCount(tbl[i], tbl[j]) * 300;
+
+                            // [3순위] 세대가 같을 때의 1차 기준: 오늘 1부에서 이미 만난 사이는 피한다
                             if (part1SeatingSnapshot) {
                                 for (const p1T of part1SeatingSnapshot) {
                                     if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
-                                        score += 15000;
+                                        score += 500;
                                     }
                                 }
                             }
                         }
                     }
 
-                    // [3순위] 남녀 성비 균형
+                    // [5순위] 남녀 성비 균형
                     const mCount = tbl.filter(m => m.gender === "M").length;
                     const fCount = tbl.filter(m => m.gender !== "M").length;
                     score += Math.abs(mCount - fCount) * 80;
@@ -4379,10 +4371,11 @@
             }
 
             // -------------------------------------------------------------------------
-            // 📌 [1부 스마트 배치 알고리즘] (4대 핵심 엔진)
+            // 📌 [1부 스마트 배치 알고리즘]
             // 1순위: 정원 준수 + 신규/리더 T1 고정
-            // 2순위: 테이블 평균 연령 균등화 (Age-Balancing 마스터) + 20대 버디 보호
-            // 3순위: 남녀 성비 균형 & 과거 만남 누적 신선도
+            // 2순위: 과거 만남 회피 (같은 조합 반복 차단) — 세대/성비보다 항상 우선
+            // 3순위: 20대가 1명뿐이면 30대와 같은 테이블
+            // 4순위: 테이블 평균 연령 균등화 & 남녀 성비 균형
             // -------------------------------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
             if (!leader) leader = todayMembers[0];
@@ -4412,15 +4405,13 @@
                 const nextAvgAge = nextAgeSum / nextCount;
                 cost += Math.abs(nextAvgAge - overallAvgAge) * 18;
 
-                // [2순위] 20대 청년 버디 보호 및 단독 시니어 고립 방지
+                // [3순위] 20대 배치 규칙: 2명 이상이면 버디로 묶고, 1명뿐이면 반드시 30대 옆
                 const tblYoungs = tbl.filter(isYoungMember).length;
-                const tblSeniors = tbl.filter(isSeniorMember).length;
-                const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
                 const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
 
                 if (isYoungMember(member)) {
                     if (totalYoung >= 2 && tblYoungs === 1) cost -= 250;
-                    if (totalYoung === 1 && tblSeniors >= 2 && !hasLeader && !has30) cost += 1500;
+                    if (totalYoung === 1 && !has30) cost += 1200;
                 }
 
                 // [3순위] 성비 균형
@@ -4429,9 +4420,9 @@
                 if (member.gender === "M" && mCount > fCount) cost += 45;
                 if (member.gender !== "M" && fCount > mCount) cost += 45;
 
-                // [3순위] 과거 만남 누적 신선도
+                // [2순위] 과거 만남 회피 — 1회 재만남(2000)이 어떤 나이/성비 편차보다 비싸다
                 for (const existing of tbl) {
-                    cost += getPairMeetingCount(existing, member) * 60;
+                    cost += getPairMeetingCount(existing, member) * 2000;
                 }
 
                 return cost;
@@ -4472,15 +4463,13 @@
                 let p = 0;
                 const tblYoungs = tbl.filter(isYoungMember).length;
 
-                // [2순위] 20대 단독 고립 방지 (2인 이상 시 버디 결합, 1인 시 시니어 독방 고립 방지)
-                const tblSeniors = tbl.filter(isSeniorMember).length;
-                const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
+                // [3순위] 20대 배치 규칙
                 const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
 
                 if (tblYoungs === 1 && totalYoung >= 2) {
-                    p += 1500;
-                } else if (tblYoungs === 1 && totalYoung === 1 && tblSeniors >= 2 && !hasLeader && !has30) {
-                    p += 2500; // 20대 1명이 완충(30대/리더) 없이 5060 시니어 2명 이상 사이에 단독 고립되는 것 절대 차단!
+                    p += 1500; // 20대가 여럿인데 혼자 떨어지는 것 방지 (버디 결합)
+                } else if (tblYoungs === 1 && totalYoung === 1 && !has30) {
+                    p += 1800; // 20대가 1명뿐이면 30대가 없는 테이블에는 앉히지 않는다
                 }
 
                 // [2순위] 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
@@ -4493,10 +4482,10 @@
                 const fCount = tbl.filter(m => m.gender !== "M").length;
                 p += Math.abs(mCount - fCount) * 60;
 
-                // [3순위] 과거 만남 누적 신선도
+                // [2순위] 과거 만남 회피 (최우선) — 나이 편차 1살=65점, 성비 1명=60점보다 압도적으로 비싸게
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 50;
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 2000;
                     }
                 }
                 return p;
@@ -4530,15 +4519,17 @@
                             }
                             if (improved) break;
                         }
+                        if (improved) break;
                     }
-                    if (!improved) break;
+                    if (improved) break;
                 }
+                if (!improved) break;
             }
 
             return tables;
         }
 
-        function renderSeatingPlan(isShuffle = false) {
+        function renderSeatingPlan(isShuffle = false, forceNew = false) {
             const container = document.getElementById('seatingGrid');
             if (!container) return;
 
@@ -4556,15 +4547,23 @@
 
             isPart2Shuffle = isShuffle;
 
+            // 참석자 명단이 바뀌면 저장된 배치는 무효 (지각자 누락 방지)
+            const todaySig = todayMembers.map(m => m.id).sort().join(',');
+            if (seatingSnapshotSig !== todaySig) {
+                part1SeatingSnapshot = null;
+                part2SeatingSnapshot = null;
+                seatingSnapshotSig = todaySig;
+            }
+
             // Generate or restore smart seating plan
             let tables;
-            if (!isShuffle && part1SeatingSnapshot && part1SeatingSnapshot.length > 0) {
-                tables = JSON.parse(JSON.stringify(part1SeatingSnapshot));
+            const snapshot = isShuffle ? part2SeatingSnapshot : part1SeatingSnapshot;
+            if (!forceNew && snapshot && snapshot.length > 0) {
+                tables = JSON.parse(JSON.stringify(snapshot));
             } else {
                 tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
-                if (!isShuffle) {
-                    part1SeatingSnapshot = JSON.parse(JSON.stringify(tables));
-                }
+                const saved = JSON.parse(JSON.stringify(tables));
+                if (isShuffle) part2SeatingSnapshot = saved; else part1SeatingSnapshot = saved;
             }
             currentSeatingTables = tables;
 
@@ -4680,8 +4679,8 @@
         window.requestShuffleWithPin = function() {
             openCustomPinModal("🔑 2부 테이블 셔플 비밀번호 확인", () => {
                 playShuffleSound();
-                renderSeatingPlan(true);
-                showToast("🔀 1부 멤버와 100% 분리된 2부 스마트 배치가 완료되었습니다!", "info");
+                renderSeatingPlan(true, true);
+                showToast("🔀 비슷한 세대끼리 모은 2부 배치가 완료되었습니다!", "info");
             });
         };
 
