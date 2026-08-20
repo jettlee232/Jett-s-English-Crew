@@ -4188,9 +4188,9 @@
                 if (ageStr.includes('10')) return 18;
                 if (ageStr.includes('20')) return 25;
                 if (ageStr.includes('30')) return 35;
-                if (ageStr.includes('40')) return 45;
+                if (ageStr.includes('40')) return 38; // 3040 청년/브릿지 동세대 케미 (격차 완화)
                 if (ageStr.includes('50')) return 55;
-                if (ageStr.includes('60')) return 65;
+                if (ageStr.includes('60')) return 60;
                 return 35;
             }
 
@@ -4203,7 +4203,7 @@
             const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
             // ----------------------------------------------------
-            // 🔀 2부 스마트 셔플: [리더+신규 Table 1 + 1부 100% 분리 + 2030대 버디(2인 이상/2:2) 룰]
+            // 🔀 2부 스마트 셔플: [리더+신규 Table 1 + 1부 100% 분리 + 3040 브릿지 페어 믹스]
             // ----------------------------------------------------
             if (isShuffle) {
                 // 1) 리더(Jett)는 1번 테이블에 고정
@@ -4226,22 +4226,24 @@
                     }
                 }
 
-                // 3) 2부 배정: 2030대가 1명만 단독으로 고립되지 않도록 2명 단위로 짝지어(2:2 / 3:2) 배정
+                // 3) 2부 배정: 30대 특정 테이블 독점 방지 및 40대 브릿지와 조화로운 교차 배정
                 const sortedRegulars = [...regularMembers].sort((a, b) => {
                     const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
                     return diff !== 0 ? diff : (Math.random() - 0.5);
                 });
 
                 const young30s = sortedRegulars.filter(isYoungOr30Member);
-                const seniors = sortedRegulars.filter(m => !isYoungOr30Member(m));
+                const bridge40s = sortedRegulars.filter(m => m.ageGroup && m.ageGroup.includes('40'));
+                const seniors = sortedRegulars.filter(isSeniorMember);
 
-                // 2030대와 시니어를 2명 단위로 교차 배치하여 특정 테이블에 2030대가 1명만 남는 현상 원천 차단
+                // 2030대, 40대 브릿지, 시니어를 교차 배치하여 자연스러운 세대별 완충 구조 형성
                 const interleaved = [];
-                let yi = 0, si = 0;
-                while (yi < young30s.length || si < seniors.length) {
+                let yi = 0, bi = 0, si = 0;
+                while (yi < young30s.length || bi < bridge40s.length || si < seniors.length) {
                     if (yi < young30s.length) interleaved.push(young30s[yi++]);
-                    if (yi < young30s.length) interleaved.push(young30s[yi++]);
+                    if (bi < bridge40s.length) interleaved.push(bridge40s[bi++]);
                     if (si < seniors.length) interleaved.push(seniors[si++]);
+                    if (yi < young30s.length) interleaved.push(young30s[yi++]);
                     if (si < seniors.length) interleaved.push(seniors[si++]);
                 }
 
@@ -4253,17 +4255,24 @@
                     }
                 }
 
-                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 2030대 단독 고립 절대 방지 + 2:2 밸런스)
+                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 30대 독점 방지 + 3040 브릿지 케미)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
                     const tblYoung30s = tbl.filter(isYoungOr30Member).length;
+                    const tblBridge = tbl.filter(m => m.ageGroup && m.ageGroup.includes('40')).length;
+                    const tbl30sOnly = tbl.filter(m => m.ageGroup && m.ageGroup.includes('30')).length;
                     const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
 
-                    // 🌟 2030대 고립 방지 (2030대가 1명인데 리더가 없으면 강력 페널티)
-                    if (tblYoung30s === 1 && !hasLeader) {
+                    // 🌟 2030대 고립 방지 (2030대가 1명인데 리더나 40대 브릿지 페어가 없으면 강력 페널티)
+                    if (tblYoung30s === 1 && !hasLeader && tblBridge === 0) {
                         score += 2000;
+                    }
+
+                    // 🌟 30대 특정 테이블 몰빵/독점 방지 (3인 테이블에 30대만 3명 들어가지 않도록 분산)
+                    if (tbl30sOnly >= 3 && tbl.length === 3) {
+                        score += 1500;
                     }
 
                     // 🌟 2030대가 4명 이상일 때 한 테이블에 몰빵되어 다른 테이블이 올 시니어가 되는 것보다 2:2 믹스 선호
@@ -4276,7 +4285,7 @@
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += ageDiff * 100;
+                            score += ageDiff * 60;
 
                             // 1부 만났던 사람과의 재배치 강력 분리
                             if (part1SeatingSnapshot) {
