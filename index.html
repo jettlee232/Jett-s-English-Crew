@@ -4388,11 +4388,11 @@
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
                             score += ageDiff * 55; // 또래끼리 묶일수록 낮은 점수(우선 매칭)
 
-                            // 1부 만났던 사람과의 재배치 강력 분리
+                            // 1부 만났던 사람과의 재배치 강력 분리 (1부 겹침 절대 차단)
                             if (part1SeatingSnapshot) {
                                 for (const p1T of part1SeatingSnapshot) {
                                     if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
-                                        score += 3000; // 1부 대화 상대 재만남 강력 차단
+                                        score += 15000; // 1부 대화 상대 재만남 절대 차단
                                     }
                                 }
                             }
@@ -4511,9 +4511,12 @@
                 if (member.gender === 'M' && mCount > fCount) cost += 45;
                 if (member.gender !== 'M' && fCount > mCount) cost += 45;
 
-                // 2) 신선도 (과거 만남 횟수 페널티)
+                // 2) 신선도 및 1부 세대 다양성 (동일 연령대 중복 분산)
                 for (const existing of tbl) {
                     cost += getPairMeetingCount(existing, member) * 75;
+                    if (existing.ageGroup === member.ageGroup) {
+                        cost += 150; // 1부에서는 동일 연령대 중복 분산 (다양성 극대화)
+                    }
                 }
 
                 // 3) 🌟 [20대 청년 보호 & 버디 룰]
