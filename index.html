@@ -4242,26 +4242,43 @@
                     return diff !== 0 ? diff : (Math.random() - 0.5);
                 });
 
+                const hasNewbiesToday = todayMembers.some(m => !m.isLeader && !(m.name || '').includes('Jett') && isNewbieMember(m));
+
                 // 각 테이블별 20~40대 목표 배정 수 계산 (2:2 / 2:2:1 등 짝지어 배분)
                 const targetYoungPerTable = Array(numTables).fill(0);
                 const currentT0Young = tables[0].filter(isYoungOrBridge).length;
-                targetYoungPerTable[0] = currentT0Young;
 
-                let remainingYoungToDistribute = youngBridgeList.length;
-                // 테이블 1부터 2명씩 우선 배정하여 2:2 짝 형성
-                for (let t = 1; t < numTables && remainingYoungToDistribute > 0; t++) {
-                    const take = Math.min(2, remainingYoungToDistribute, capacities[t]);
-                    targetYoungPerTable[t] += take;
-                    remainingYoungToDistribute -= take;
-                }
-                // 아직 남은 20~40대가 있다면 순차적으로 추가 (정원 내)
-                let tIdx = 0;
-                while (remainingYoungToDistribute > 0) {
-                    if (targetYoungPerTable[tIdx] < capacities[tIdx]) {
-                        targetYoungPerTable[tIdx]++;
-                        remainingYoungToDistribute--;
+                if (!hasNewbiesToday && numTables >= 2) {
+                    // 🌟 [신규 없는 날 특화 룰]: 리더 테이블(T0)은 시니어들을 집중 호스팅하고, 나머지 20~40대는 T1, T2 등에 모아 또래 케미 극대화!
+                    targetYoungPerTable[0] = 1; // 리더(Jett) 1명만 유지 (남은 자리는 시니어로 채움)
+                    let rem = youngBridgeList.length;
+                    let t = 1;
+                    while (rem > 0) {
+                        if (targetYoungPerTable[t] < capacities[t]) {
+                            targetYoungPerTable[t]++;
+                            rem--;
+                        }
+                        t = (t % (numTables - 1)) + 1;
                     }
-                    tIdx = (tIdx + 1) % numTables;
+                } else {
+                    // 신규 있는 날: 2:2 페어 분배 룰
+                    targetYoungPerTable[0] = currentT0Young;
+                    let remainingYoungToDistribute = youngBridgeList.length;
+                    // 테이블 1부터 2명씩 우선 배정하여 2:2 짝 형성
+                    for (let t = 1; t < numTables && remainingYoungToDistribute > 0; t++) {
+                        const take = Math.min(2, remainingYoungToDistribute, capacities[t]);
+                        targetYoungPerTable[t] += take;
+                        remainingYoungToDistribute -= take;
+                    }
+                    // 아직 남은 20~40대가 있다면 순차적으로 추가 (정원 내)
+                    let tIdx = 0;
+                    while (remainingYoungToDistribute > 0) {
+                        if (targetYoungPerTable[tIdx] < capacities[tIdx]) {
+                            targetYoungPerTable[tIdx]++;
+                            remainingYoungToDistribute--;
+                        }
+                        tIdx = (tIdx + 1) % numTables;
+                    }
                 }
 
                 // 목표 수치에 따라 youngBridgeList 배치
@@ -4304,8 +4321,8 @@
                         score += 3000; // 1부 분리 점수(2500)보다 높게 설정하여 무조건 2:2 형성 유도
                     }
 
-                    // 🌟 20~40대가 4명 이상일 때 2개 테이블 기준 2:2 밸런스 강제 (3:1 몰빵 금지)
-                    if (numTables === 2 && tblYoungBridge >= 3 && youngBridgeList.length + currentT0Young <= 4) {
+                    // 🌟 20~40대가 4명 이상일 때 2개 테이블 기준 2:2 밸런스 강제 (신규 있는 날 3:1 몰빵 금지)
+                    if (hasNewbiesToday && numTables === 2 && tblYoungBridge >= 3 && youngBridgeList.length + currentT0Young <= 4) {
                         score += 2000;
                     }
 
@@ -4379,6 +4396,7 @@
             // ----------------------------------------------------
             // 📌 1부 스마트 배치: [리더+신규 Table 1 + 20대 버디 보호 + 시니어 공정 순환 + 만남 신선도]
             // ----------------------------------------------------
+            const hasNewbiesToday = todayMembers.some(m => !m.isLeader && !(m.name || '').includes('Jett') && isNewbieMember(m));
             let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
             if (!leader) leader = todayMembers[0];
 
@@ -4437,16 +4455,19 @@
                     }
                 }
 
-                // 4) 🌟 [시니어 공정 순환 룰]
+                // 4) 🌟 [시니어 공정 순환 & 리더 호스팅 룰]
                 if (isSeniorMember(member)) {
-                    // 시니어 한 테이블 과밀 방지
-                    if (seniorCount >= 2) cost += 220;
+                    // 신규가 없는 날 리더 테이블은 시니어 흡수 보너스 (리더가 호스팅하여 다른 테이블 부담 경감)
+                    if (!hasNewbiesToday && isLeaderTbl) {
+                        cost -= 120; // 리더 테이블 우선 배정 보너스
+                    } else if (seniorCount >= 2 && (!isLeaderTbl || hasNewbiesToday)) {
+                        cost += 220;
+                    }
 
-                    // 2030대와의 만남이 적었던 시니어에게 젊은 멤버/리더 테이블 우선 배정
                     const hasYoungOrLeader = tblYoungs > 0 || isLeaderTbl;
                     if (hasYoungOrLeader) {
                         const pastExp = getSeniorYoungMeetingCount(member);
-                        cost += pastExp * 30; // 과거에 많이 만났던 시니어는 비용 증가 -> 다른 시니어에게 기회 제공
+                        cost += pastExp * 30;
                     }
                 }
 
