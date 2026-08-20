@@ -4126,6 +4126,50 @@
             return { score, newPairs, totalPairs };
         }
 
+        function isNewbieMember(m) {
+            if (!m) return false;
+            return m.isNew === true || (m.totalAttended !== undefined && m.totalAttended <= 1) || m.lastAction === '신규 참석';
+        }
+
+        function isYoungMember(m) {
+            if (!m || !m.ageGroup) return false;
+            return m.ageGroup.includes('20') || m.ageGroup.includes('10');
+        }
+
+        function isBridgeMember(m) {
+            if (!m || !m.ageGroup) return false;
+            return m.ageGroup.includes('30') || m.ageGroup.includes('40');
+        }
+
+        function isSeniorMember(m) {
+            if (!m || !m.ageGroup) return false;
+            return m.ageGroup.includes('50') || m.ageGroup.includes('60');
+        }
+
+        // 시니어 멤버가 과거에 2030대와 만난 누적 횟수 계산 (공정 순환 분배용)
+        function getSeniorYoungMeetingCount(seniorMember) {
+            if (!seniorMember) return 0;
+            let count = 0;
+            const sid = seniorMember.id, sname = seniorMember.name || '';
+            for (const session of tableSessionsData) {
+                if (!session.tables || !Array.isArray(session.tables)) continue;
+                for (const tbl of session.tables) {
+                    if (!Array.isArray(tbl)) continue;
+                    const hasSenior = tbl.includes(sid) || tbl.includes(sname);
+                    if (hasSenior) {
+                        for (const targetIdOrName of tbl) {
+                            if (targetIdOrName === sid || targetIdOrName === sname) continue;
+                            const partner = membersData.find(m => m.id === targetIdOrName || m.name === targetIdOrName);
+                            if (partner && (isYoungMember(partner) || (partner.ageGroup && partner.ageGroup.includes('30')))) {
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
         function calculateSmartSeatingPlan(todayMembers, isShuffle = false) {
             const totalCount = todayMembers.length;
             if (totalCount === 0) return [];
@@ -4139,26 +4183,23 @@
 
             const tables = Array.from({ length: numTables }, () => []);
 
-            function isNewbieMember(m) {
-                if (!m) return false;
-                return m.isNew === true || m.totalAttended <= 1 || m.lastAction === '신규 참석';
+            function getAgeNum(ageStr) {
+                if (!ageStr) return 35;
+                if (ageStr.includes('10')) return 18;
+                if (ageStr.includes('20')) return 25;
+                if (ageStr.includes('30')) return 35;
+                if (ageStr.includes('40')) return 45;
+                if (ageStr.includes('50')) return 55;
+                if (ageStr.includes('60')) return 65;
+                return 35;
             }
 
+            const totalYoung = todayMembers.filter(isYoungMember).length;
+
             // ----------------------------------------------------
-            // 🔀 2부 스마트 셔플: [리더+신규 Table 1 절대 고정 + 세대별 또래 집중 클러스터링]
+            // 🔀 2부 스마트 셔플: [리더+신규 Table 1 절대 고정 + 1부 100% 분리 + 20대 버디 유지 + 세대별 케미]
             // ----------------------------------------------------
             if (isShuffle) {
-                function getAgeNum(ageStr) {
-                    if (!ageStr) return 35;
-                    if (ageStr.includes('10')) return 18;
-                    if (ageStr.includes('20')) return 25;
-                    if (ageStr.includes('30')) return 35;
-                    if (ageStr.includes('40')) return 45;
-                    if (ageStr.includes('50')) return 55;
-                    if (ageStr.includes('60')) return 65;
-                    return 35;
-                }
-
                 // 1) 리더(Jett)는 1번 테이블에 고정
                 let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
                 if (leader) {
@@ -4167,7 +4208,7 @@
 
                 const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
 
-                // 2) 🌟 [신규 회원 리더 테이블 절대 고정]: 1부/2부 모두 신규 회원은 1번 테이블에 리더와 함께 배치
+                // 2) [신규 회원 리더 테이블 절대 고정]
                 const newMembers = restMembers.filter(m => isNewbieMember(m));
                 const regularMembers = restMembers.filter(m => !isNewbieMember(m));
 
@@ -4183,7 +4224,7 @@
                     }
                 }
 
-                // 3) 🌟 [세대 절대 우선]: 나머지 정규 회원들을 연령 순으로 정렬하여 젊은 순서대로 테이블 배정
+                // 3) 2부 연령/케미 순 정렬 및 배정
                 const sortedRegulars = [...regularMembers].sort((a, b) => {
                     const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
                     return diff !== 0 ? diff : (Math.random() - 0.5);
@@ -4197,20 +4238,32 @@
                     }
                 }
 
-                // 4) 미세 최적화: [리더 & 신규 제외] 동일/인접 연령대 내부에서만 성비/1부분리 스왑
+                // 4) 2부 로컬 최적화 (1부 만남 100% 분리 + 20대 고립 방지 + 성비)
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
 
+                    const tblYoungs = tbl.filter(isYoungMember).length;
+                    const tblSeniors = tbl.filter(isSeniorMember).length;
+                    const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
+
+                    // 20대 고립 방지 (20대가 1명인데 리더가 없고 시니어가 2명 이상이면 강력 페널티)
+                    if (tblYoungs === 1 && totalYoung >= 2) {
+                        score += 800; // 버디 분리 페널티
+                    } else if (tblYoungs === 1 && !hasLeader && tblSeniors >= 2) {
+                        score += 900; // 단독 20대 시니어 고립 페널티
+                    }
+
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
                             const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += ageDiff * 300;
+                            score += ageDiff * 150;
 
+                            // 1부 만났던 사람과의 재배치 강력 분리
                             if (part1SeatingSnapshot) {
                                 for (const p1T of part1SeatingSnapshot) {
                                     if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
-                                        score += 1500;
+                                        score += 2500;
                                     }
                                 }
                             }
@@ -4224,20 +4277,17 @@
                     return score;
                 }
 
-                for (let iter = 0; iter < 60; iter++) {
+                for (let iter = 0; iter < 80; iter++) {
                     let improved = false;
                     for (let t1 = 0; t1 < numTables; t1++) {
                         for (let t2 = t1 + 1; t2 < numTables; t2++) {
                             for (let i = 0; i < tables[t1].length; i++) {
                                 const m1 = tables[t1][i];
-                                if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue; // 리더 및 신규 스왑 원천 차단
+                                if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue;
 
                                 for (let j = 0; j < tables[t2].length; j++) {
                                     const m2 = tables[t2][j];
-                                    if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue; // 리더 및 신규 스왑 원천 차단
-
-                                    const ageGap1 = Math.abs(getAgeNum(m1.ageGroup) - getAgeNum(m2.ageGroup));
-                                    if (ageGap1 > 15) continue;
+                                    if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue;
 
                                     const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
 
@@ -4265,7 +4315,7 @@
             }
 
             // ----------------------------------------------------
-            // 📌 1부 스마트 배치: [리더+신규 Table 1 절대 고정 + 안 만난 사람 우선 + 성별/세대 분배]
+            // 📌 1부 스마트 배치: [리더+신규 Table 1 + 20대 버디 보호 + 시니어 공정 순환 + 만남 신선도]
             // ----------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || '').includes('Jett'));
             if (!leader) leader = todayMembers[0];
@@ -4283,6 +4333,13 @@
                 }
             }
 
+            // 20대 1명 단독 출석 시: 테이블 1(리더 테이블)에 여유가 있다면 리더 테이블에 우선 배정
+            const singleYoung = regularMembers.find(isYoungMember);
+            if (totalYoung === 1 && singleYoung && tables[0].length < 4) {
+                tables[0].push(singleYoung);
+                regularMembers = regularMembers.filter(m => m.id !== singleYoung.id);
+            }
+
             let males = regularMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
             let females = regularMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
 
@@ -4290,19 +4347,49 @@
 
             function getPart1Cost(tbl, member) {
                 let cost = 0;
-                cost += tbl.length * 60;
+                cost += tbl.length * 70;
 
+                // 1) 성비 균형
                 const mCount = tbl.filter(m => m.gender === 'M').length;
                 const fCount = tbl.filter(m => m.gender !== 'M').length;
                 if (member.gender === 'M' && mCount > fCount) cost += 45;
                 if (member.gender !== 'M' && fCount > mCount) cost += 45;
 
-                const sameAgeCount = tbl.filter(m => m.ageGroup === member.ageGroup).length;
-                cost += sameAgeCount * 15;
-
+                // 2) 신선도 (과거 만남 횟수 페널티)
                 for (const existing of tbl) {
-                    cost += getPairMeetingCount(existing, member) * 60;
+                    cost += getPairMeetingCount(existing, member) * 75;
                 }
+
+                // 3) 🌟 [20대 청년 보호 & 버디 룰]
+                const tblYoungs = tbl.filter(isYoungMember).length;
+                const isLeaderTbl = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
+                const seniorCount = tbl.filter(isSeniorMember).length;
+
+                if (isYoungMember(member)) {
+                    if (totalYoung >= 2) {
+                        // 20대가 2명 이상인 날: 20대가 이미 1명 있는 테이블에 매칭 적극 유도
+                        if (tblYoungs === 1) cost -= 200; // 버디 결합 보너스
+                        else if (tblYoungs === 0) cost += 90;
+                    } else {
+                        // 20대가 1명인 날: 리더 테이블 선호, 시니어 2명 이상 테이블 회피
+                        if (isLeaderTbl) cost -= 150;
+                        if (seniorCount >= 2) cost += 500;
+                    }
+                }
+
+                // 4) 🌟 [시니어 공정 순환 룰]
+                if (isSeniorMember(member)) {
+                    // 시니어 한 테이블 과밀 방지
+                    if (seniorCount >= 2) cost += 220;
+
+                    // 2030대와의 만남이 적었던 시니어에게 젊은 멤버/리더 테이블 우선 배정
+                    const hasYoungOrLeader = tblYoungs > 0 || isLeaderTbl;
+                    if (hasYoungOrLeader) {
+                        const pastExp = getSeniorYoungMeetingCount(member);
+                        cost += pastExp * 30; // 과거에 많이 만났던 시니어는 비용 증가 -> 다른 시니어에게 기회 제공
+                    }
+                }
+
                 return cost;
             }
 
@@ -4328,30 +4415,44 @@
                 tables[bestTableIdx].push(member);
             }
 
-            // 1부 로컬 최적화 (리더 및 신규 회원 스왑 절대 불가!)
+            // 1부 로컬 최적화 (스왑 시뮬레이션)
             function evaluateTablePart1(tbl) {
                 let p = 0;
+                const tblYoungs = tbl.filter(isYoungMember).length;
+                const tblSeniors = tbl.filter(isSeniorMember).length;
+                const hasLeader = tbl.some(m => m.isLeader || (m.name || '').includes('Jett'));
+
+                // 20대 단독 고립 방지 페널티
+                if (tblYoungs === 1 && totalYoung >= 2) {
+                    p += 600;
+                } else if (tblYoungs === 1 && !hasLeader && tblSeniors >= 2) {
+                    p += 800;
+                }
+
+                // 시니어 과밀 방지 페널티
+                if (tblSeniors >= 3) {
+                    p += 400;
+                }
+
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 40;
-                        if (tbl[i].ageGroup === tbl[j].ageGroup) p += 10;
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 50;
                     }
                 }
                 return p;
             }
 
-            for (let iter = 0; iter < 30; iter++) {
+            for (let iter = 0; iter < 50; iter++) {
                 let improved = false;
                 for (let t1 = 0; t1 < numTables; t1++) {
                     for (let t2 = t1 + 1; t2 < numTables; t2++) {
                         for (let i = 0; i < tables[t1].length; i++) {
                             const m1 = tables[t1][i];
-                            if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue; // 리더 및 신규 스왑 원천 차단
+                            if (m1.isLeader || (m1.name || '').includes('Jett') || isNewbieMember(m1)) continue;
 
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
-                                if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue; // 리더 및 신규 스왑 원천 차단
-                                if (m1.gender !== m2.gender) continue;
+                                if (m2.isLeader || (m2.name || '').includes('Jett') || isNewbieMember(m2)) continue;
 
                                 const curCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
 
