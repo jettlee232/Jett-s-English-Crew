@@ -4412,10 +4412,15 @@
                 const nextAvgAge = nextAgeSum / nextCount;
                 cost += Math.abs(nextAvgAge - overallAvgAge) * 18;
 
-                // [2순위] 20대 청년 버디 보호
+                // [2순위] 20대 청년 버디 보호 및 단독 시니어 고립 방지
                 const tblYoungs = tbl.filter(isYoungMember).length;
-                if (isYoungMember(member) && totalYoung >= 2 && tblYoungs === 1) {
-                    cost -= 250;
+                const tblSeniors = tbl.filter(isSeniorMember).length;
+                const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
+                const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
+
+                if (isYoungMember(member)) {
+                    if (totalYoung >= 2 && tblYoungs === 1) cost -= 250;
+                    if (totalYoung === 1 && tblSeniors >= 2 && !hasLeader && !has30) cost += 1500;
                 }
 
                 // [3순위] 성비 균형
@@ -4467,9 +4472,15 @@
                 let p = 0;
                 const tblYoungs = tbl.filter(isYoungMember).length;
 
-                // [2순위] 20대 단독 고립 방지
+                // [2순위] 20대 단독 고립 방지 (2인 이상 시 버디 결합, 1인 시 시니어 독방 고립 방지)
+                const tblSeniors = tbl.filter(isSeniorMember).length;
+                const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
+                const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
+
                 if (tblYoungs === 1 && totalYoung >= 2) {
                     p += 1500;
+                } else if (tblYoungs === 1 && totalYoung === 1 && tblSeniors >= 2 && !hasLeader && !has30) {
+                    p += 2500; // 20대 1명이 완충(30대/리더) 없이 5060 시니어 2명 이상 사이에 단독 고립되는 것 절대 차단!
                 }
 
                 // [2순위] 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
