@@ -4354,6 +4354,27 @@
                         }
                     }
 
+                    // 🌟 [브릿지 멤버(40대) 1부/2부 양방향 세대 교류 보장 룰]
+                    if (part1SeatingSnapshot) {
+                        for (const m of tbl) {
+                            if (m.ageGroup && m.ageGroup.includes('40')) {
+                                const p1Table = part1SeatingSnapshot.find(p1T => p1T.some(x => x.id === m.id));
+                                if (p1Table) {
+                                    const p1Seniors = p1Table.filter(isSeniorMember).length;
+                                    const p1Youngs = p1Table.filter(isYoungOr30Member).length;
+                                    // 1부에서 시니어가 많았던(2명 이상) 브릿지 멤버는 2부에서 2030대와 함께하면 보너스(-250점)
+                                    if (p1Seniors >= 2 && tblYoung30s >= 1) {
+                                        score -= 250;
+                                    }
+                                    // 1부에서 청년이 많았던(2명 이상) 브릿지 멤버는 2부에서 시니어와 완충 교류 시 보너스(-250점)
+                                    if (p1Youngs >= 2 && tblSeniors >= 1) {
+                                        score -= 250;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // 🌟 시니어 2030 만남 공정 순환 (2부에서도 과거 누적 만남이 적은 시니어에게 우선 기회)
                     for (const m of tbl) {
                         if (isSeniorMember(m) && (tblYoung30s > 0 || hasLeader)) {
