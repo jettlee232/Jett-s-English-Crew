@@ -4174,13 +4174,8 @@
             const totalCount = todayMembers.length;
             if (totalCount === 0) return [];
 
-            let numTables = 1;
-            if (totalCount >= 6) {
-                numTables = Math.floor(totalCount / 3);
-            } else if (totalCount >= 5) {
-                numTables = 2;
-            }
-
+            // 테이블 수 계산: 4인 기준 균등 배분 (6명->[3,3], 8명->[4,4], 9명->[3,3,3], 12명->[4,4,4])
+            const numTables = Math.max(1, Math.ceil(totalCount / 4));
             const tables = Array.from({ length: numTables }, () => []);
 
             function getAgeNum(ageStr) {
@@ -4195,6 +4190,11 @@
             }
 
             const totalYoung = todayMembers.filter(isYoungMember).length;
+
+            // 각 테이블별 목표 수용 정원 계산 (인원 수 차이가 1명 이내로 완벽 균등 배분)
+            const baseCapacity = Math.floor(totalCount / numTables);
+            const remainder = totalCount % numTables;
+            const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
             // ----------------------------------------------------
             // 🔀 2부 스마트 셔플: [리더+신규 Table 1 절대 고정 + 1부 100% 분리 + 20대 버디 유지 + 세대별 케미]
@@ -4211,10 +4211,6 @@
                 // 2) [신규 회원 리더 테이블 절대 고정]
                 const newMembers = restMembers.filter(m => isNewbieMember(m));
                 const regularMembers = restMembers.filter(m => !isNewbieMember(m));
-
-                const baseCapacity = Math.floor(totalCount / numTables);
-                const remainder = totalCount % numTables;
-                const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
                 for (const nm of newMembers) {
                     if (tables[0].length < capacities[0]) {
@@ -4326,7 +4322,7 @@
             tables[0].push(leader);
 
             for (const nm of newMembers) {
-                if (tables[0].length < 4) {
+                if (tables[0].length < capacities[0]) {
                     tables[0].push(nm);
                 } else {
                     regularMembers.push(nm);
@@ -4335,15 +4331,13 @@
 
             // 20대 1명 단독 출석 시: 테이블 1(리더 테이블)에 여유가 있다면 리더 테이블에 우선 배정
             const singleYoung = regularMembers.find(isYoungMember);
-            if (totalYoung === 1 && singleYoung && tables[0].length < 4) {
+            if (totalYoung === 1 && singleYoung && tables[0].length < capacities[0]) {
                 tables[0].push(singleYoung);
                 regularMembers = regularMembers.filter(m => m.id !== singleYoung.id);
             }
 
             let males = regularMembers.filter(m => m.gender === 'M').sort(() => Math.random() - 0.5);
             let females = regularMembers.filter(m => m.gender !== 'M').sort(() => Math.random() - 0.5);
-
-            const maxCapacity = Math.ceil(totalCount / numTables);
 
             function getPart1Cost(tbl, member) {
                 let cost = 0;
@@ -4401,18 +4395,26 @@
             }
 
             for (const member of unassigned) {
-                let bestTableIdx = 0;
+                let bestTableIdx = -1;
                 let minCost = Infinity;
 
                 for (let t = 0; t < numTables; t++) {
-                    if (tables[t].length >= 4 && tables[t].length >= maxCapacity) continue;
+                    if (tables[t].length >= capacities[t]) continue; // 엄격한 테이블 정원 준수
                     const cost = getPart1Cost(tables[t], member);
                     if (cost < minCost) {
                         minCost = cost;
                         bestTableIdx = t;
                     }
                 }
-                tables[bestTableIdx].push(member);
+                if (bestTableIdx !== -1) {
+                    tables[bestTableIdx].push(member);
+                } else {
+                    let minT = 0;
+                    for (let t = 1; t < numTables; t++) {
+                        if (tables[t].length < tables[minT].length) minT = t;
+                    }
+                    tables[minT].push(member);
+                }
             }
 
             // 1부 로컬 최적화 (스왑 시뮬레이션)
@@ -4497,13 +4499,17 @@
 
             isPart2Shuffle = isShuffle;
 
-            // Generate smart seating plan
-            const tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
-            currentSeatingTables = tables;
-
-            if (!isShuffle) {
-                part1SeatingSnapshot = JSON.parse(JSON.stringify(tables));
+            // Generate or restore smart seating plan
+            let tables;
+            if (!isShuffle && part1SeatingSnapshot && part1SeatingSnapshot.length > 0) {
+                tables = JSON.parse(JSON.stringify(part1SeatingSnapshot));
+            } else {
+                tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
+                if (!isShuffle) {
+                    part1SeatingSnapshot = JSON.parse(JSON.stringify(tables));
+                }
             }
+            currentSeatingTables = tables;
 
             // Update Restore Button
             const restoreBtn = document.getElementById('btnPart1Restore');
