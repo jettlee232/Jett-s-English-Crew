@@ -12,6 +12,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('user_theme');
+                if (savedTheme === 'light') {
+                    document.documentElement.classList.add('light-theme');
+                }
+            } catch (e) {}
+        })();
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -208,6 +217,150 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #32323e;
         }
+
+        /* =========================================================================
+           ☀️ LIGHT THEME SYSTEM (Clean, Eye-Friendly Modern Slate Palette)
+           ========================================================================= */
+        html.light-theme,
+        html.light-theme body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+
+        /* Light Header & Navigation */
+        html.light-theme header {
+            background-color: rgba(255, 255, 255, 0.94) !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06) !important;
+        }
+
+        html.light-theme .tab-btn:not(.tab-btn-active) {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #64748b !important;
+        }
+        html.light-theme .tab-btn:not(.tab-btn-active):hover {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        html.light-theme .tab-btn-active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #1d4ed8 !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        }
+
+        /* Light Cards & Containers */
+        html.light-theme .bg-\[\#121216\],
+        html.light-theme .bg-\[\#18181f\],
+        html.light-theme .bg-\[\#15151a\],
+        html.light-theme .bg-darkBg,
+        html.light-theme .bg-cardBg,
+        html.light-theme .bg-cardElevated,
+        html.light-theme .table-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        }
+
+        /* Light Inner Sub-Cards & Rows */
+        html.light-theme .bg-zinc-900,
+        html.light-theme .bg-zinc-900\/90,
+        html.light-theme .bg-zinc-900\/80,
+        html.light-theme .bg-zinc-900\/60,
+        html.light-theme .bg-zinc-800,
+        html.light-theme .bg-zinc-800\/80,
+        html.light-theme .bg-zinc-800\/60,
+        html.light-theme .bg-zinc-800\/90,
+        html.light-theme .bg-zinc-800\/70,
+        html.light-theme .bg-zinc-800\/50 {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Light Text Overrides */
+        html.light-theme .text-white,
+        html.light-theme .text-zinc-100,
+        html.light-theme .text-zinc-200 {
+            color: #0f172a !important;
+        }
+        html.light-theme .text-zinc-300,
+        html.light-theme .text-zinc-400 {
+            color: #475569 !important;
+        }
+        html.light-theme .text-zinc-500,
+        html.light-theme .text-zinc-600 {
+            color: #64748b !important;
+        }
+
+        /* Light Borders */
+        html.light-theme .border-\[\#23232b\],
+        html.light-theme .border-zinc-800,
+        html.light-theme .border-zinc-800\/80,
+        html.light-theme .border-zinc-700,
+        html.light-theme .border-zinc-700\/50,
+        html.light-theme .border-zinc-700\/70 {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Light Scrollbar */
+        html.light-theme ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        html.light-theme ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+        }
+        html.light-theme ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Light Coin Slot Empty */
+        html.light-theme .coin-slot-empty {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #94a3b8;
+        }
+
+        /* Light Modals & Backdrops */
+        html.light-theme .bg-zinc-950,
+        html.light-theme .bg-zinc-950\/90 {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        html.light-theme input,
+        html.light-theme select {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light-theme input:focus,
+        html.light-theme select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        }
+
+        /* Light Action Buttons */
+        html.light-theme #themeToggleBtn,
+        html.light-theme #modeSelectBtn,
+        html.light-theme button[title="리더 관리 설정"] {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #475569 !important;
+        }
+        html.light-theme #themeToggleBtn:hover,
+        html.light-theme #modeSelectBtn:hover,
+        html.light-theme button[title="리더 관리 설정"]:hover {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+
+        /* Light Rainbow Super Card */
+        html.light-theme .rainbow-super-card {
+            background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%) !important;
+            border-color: #f97316 !important;
+            box-shadow: 0 4px 20px -4px rgba(249, 115, 22, 0.2) !important;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-8 flex flex-col items-center select-none bg-[#09090c] text-zinc-100">
@@ -230,6 +383,9 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="화면 테마 전환 (라이트/다크)">
+                    <i id="themeToggleIcon" class="fa-solid fa-sun text-sm sm:text-base"></i>
+                </button>
                 <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
                     <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
@@ -2732,6 +2888,36 @@
             return 1;
         }
 
+        // ----------------------------------------------------
+        // 🌓 화면 테마 제어 시스템 (Light / Dark Theme Controller)
+        // ----------------------------------------------------
+        function initTheme() {
+            const savedTheme = localStorage.getItem('user_theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            const htmlEl = document.documentElement;
+            const iconEl = document.getElementById('themeToggleIcon');
+            const btnEl = document.getElementById('themeToggleBtn');
+
+            if (theme === 'light') {
+                htmlEl.classList.add('light-theme');
+                if (iconEl) iconEl.className = 'fa-solid fa-moon text-sm sm:text-base text-indigo-500';
+                if (btnEl) btnEl.title = '다크 모드로 전환';
+            } else {
+                htmlEl.classList.remove('light-theme');
+                if (iconEl) iconEl.className = 'fa-solid fa-sun text-sm sm:text-base text-amber-400';
+                if (btnEl) btnEl.title = '라이트 모드로 전환';
+            }
+            localStorage.setItem('user_theme', theme);
+        }
+
+        window.toggleTheme = function() {
+            const isLight = document.documentElement.classList.contains('light-theme');
+            applyTheme(isLight ? 'dark' : 'light');
+        };
+
         window.switchTab = function(tabNum, updateUrl = true) {
             activeTab = tabNum;
             for (let i = 1; i <= 5; i++) {
@@ -3551,6 +3737,7 @@
                     await signInAnonymously(auth);
                 }
 
+                initTheme();
                 switchTab(getTabFromUrl(), false);
                 updateLockUIState();
 
