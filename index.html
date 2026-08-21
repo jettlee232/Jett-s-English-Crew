@@ -4074,9 +4074,9 @@
         }
 
         async function seedInitialMembers() {
-            const targetAttendees = ["Jett", "표토르", "Sunny", "Richard", "Elle", "Jackie", "Lucy", "대니얼", "DY", "Jun"];
+            const targetAttendees = ["Jett", "표토르", "Sunny", "Richard", "Elle", "Jackie", "Lucy", "대니얼", "DY", "Jun", "Emilia", "나지E"];
             const localSaved = localStorage.getItem('localMembersData');
-            const syncKey = localStorage.getItem('session_attendees_sync_0822_v3');
+            const syncKey = localStorage.getItem('session_attendees_sync_0822_v4');
 
             if (localSaved) {
                 try {
@@ -4088,7 +4088,7 @@
                                 m.isToday = targetAttendees.includes(m.name);
                             });
                             localStorage.setItem('localMembersData', JSON.stringify(parsed));
-                            localStorage.setItem('session_attendees_sync_0822_v3', 'true');
+                            localStorage.setItem('session_attendees_sync_0822_v4', 'true');
                         }
                         membersData = parsed;
                         renderUI();
@@ -4104,7 +4104,7 @@
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             }));
-            localStorage.setItem('session_attendees_sync_0822_v3', 'true');
+            localStorage.setItem('session_attendees_sync_0822_v4', 'true');
             persistMembers(membersData);
 
             try {
