@@ -5067,11 +5067,32 @@
 
             isPart2Shuffle = isShuffle;
 
-            // 참석자 명단이 바뀌면 저장된 배치는 무효 (지각자 누락 방지)
+            // 참석자 명단이 바뀌어도 기존 배치를 버리지 않고 증분 반영한다.
+            // (통째로 다시 뽑으면 1부 복원이 깨지고, 2부의 "1부 회피" 규칙이 무력화된다)
             const todaySig = todayMembers.map(m => m.id).sort().join(',');
             if (seatingSnapshotSig !== todaySig) {
-                part1SeatingSnapshot = null;
-                part2SeatingSnapshot = null;
+                const todayIds = new Set(todayMembers.map(m => m.id));
+                const patchSnapshot = (snap) => {
+                    if (!snap || snap.length === 0) return null;
+                    // 1) 빠진 사람 제거 + 남은 사람은 최신 회원 정보로 갱신
+                    const patched = snap.map(tbl =>
+                        tbl.filter(m => todayIds.has(m.id))
+                           .map(m => membersData.find(x => x.id === m.id) || m)
+                    );
+                    // 2) 새로 합류한 사람은 가장 적은 테이블에 붙인다
+                    const seated = new Set(patched.flat().map(m => m.id));
+                    for (const m of todayMembers) {
+                        if (seated.has(m.id)) continue;
+                        let minT = 0;
+                        for (let t = 1; t < patched.length; t++) {
+                            if (patched[t].length < patched[minT].length) minT = t;
+                        }
+                        patched[minT].push(m);
+                    }
+                    return patched;
+                };
+                part1SeatingSnapshot = patchSnapshot(part1SeatingSnapshot);
+                part2SeatingSnapshot = patchSnapshot(part2SeatingSnapshot);
                 seatingSnapshotSig = todaySig;
             }
 
