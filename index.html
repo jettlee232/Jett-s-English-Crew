@@ -4181,6 +4181,21 @@
             renderAdminMemberList();
         };
 
+        function getChoseong(str) {
+            if (!str) return '';
+            const choseongs = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+            let result = "";
+            for (let i = 0; i < str.length; i++) {
+                const code = str.charCodeAt(i) - 44032;
+                if (code >= 0 && code <= 11172) {
+                    result += choseongs[Math.floor(code / 588)];
+                } else {
+                    result += str[i];
+                }
+            }
+            return result;
+        }
+
         function renderAdminMemberList() {
             const listContainer = document.getElementById('adminFilteredMembersList');
             const countSpan = document.getElementById('filteredMemberCount');
@@ -4191,7 +4206,16 @@
 
             let filtered = [...membersData];
 
-            if (activeConsonantFilter !== 'all') {
+            // 1. 직접 검색어가 있는 경우: 초성 및 부분 문자열 전체 검색 (알파벳 필터 우선 우회)
+            if (query) {
+                filtered = filtered.filter(m => {
+                    if (!m.name) return false;
+                    const name = m.name.toLowerCase();
+                    const choseong = getChoseong(m.name).toLowerCase();
+                    return name.includes(query) || choseong.includes(query) || name.split(/\s+/).some(part => part.startsWith(query));
+                });
+            } else if (activeConsonantFilter !== 'all') {
+                // 2. 검색어가 없을 때만 자음/알파벳 필터 적용
                 if (activeConsonantFilter === 'ㄱ-ㅎ') {
                     filtered = filtered.filter(m => {
                         if (!m.name) return false;
@@ -4206,20 +4230,13 @@
                 }
             }
 
+            // 3. 참석 상태 필터
             if (activeStatusFilter === 'today') {
                 filtered = filtered.filter(m => m.isToday);
             } else if (activeStatusFilter === 'absent') {
                 filtered = filtered.filter(m => !m.isToday);
             } else if (activeStatusFilter === 'king') {
                 filtered = filtered.filter(m => (m.coins || 0) >= 6);
-            }
-
-            if (query) {
-                filtered = filtered.filter(m => {
-                    const name = (m.name || '').toLowerCase();
-                    const choseong = getChoseong(m.name || '').toLowerCase();
-                    return name.startsWith(query) || choseong.startsWith(query) || name.split(' ').some(part => part.startsWith(query));
-                });
             }
 
             filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
@@ -4229,7 +4246,7 @@
             if (filtered.length === 0) {
                 listContainer.innerHTML = `
                     <div class="text-center text-xs sm:text-sm text-zinc-500 py-6">
-                        조건에 맞는 회원이 없습니다.
+                        ${query ? `'${query}' 검색 결과가 없습니다.` : '조건에 맞는 회원이 없습니다.'}
                     </div>
                 `;
                 return;
@@ -4240,11 +4257,11 @@
                 return `
                     <button onclick="selectAdminMember('${m.id}')" class="w-full text-left p-2.5 rounded-lg border text-xs sm:text-sm transition flex items-center justify-between ${
                         isSelected 
-                            ? 'bg-blue-950/80 border-blue-500 text-white shadow font-extrabold' 
+                            ? 'bg-blue-950/80 border-blue-500 text-white shadow font-extrabold ring-1 ring-blue-500' 
                             : 'bg-zinc-900/90 border-zinc-800 text-zinc-200 hover:bg-zinc-800'
                     }">
                         <div class="flex items-center gap-2 truncate">
-                            <span class="w-2.5 h-2.5 rounded-full ${m.isToday ? 'bg-blue-400' : 'bg-zinc-600'}"></span>
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0 ${m.isToday ? 'bg-blue-400' : 'bg-zinc-600'}"></span>
                             <span class="font-bold truncate text-sm">${m.name || '미지정'}</span>
                             <span class="text-xs text-zinc-400 whitespace-nowrap">(${m.gender === 'M' ? '남' : '여'}/${m.ageGroup || '30대'})</span>
                         </div>
@@ -5283,9 +5300,10 @@
 
             if (searchQuery) {
                 nonLeaderMembers = nonLeaderMembers.filter(m => {
-                    const name = (m.name || '').toLowerCase();
-                    const choseong = getChoseong(m.name || '').toLowerCase();
-                    return name.startsWith(searchQuery) || choseong.startsWith(searchQuery) || name.split(' ').some(part => part.startsWith(searchQuery));
+                    if (!m.name) return false;
+                    const name = m.name.toLowerCase();
+                    const choseong = getChoseong(m.name).toLowerCase();
+                    return name.includes(searchQuery) || choseong.includes(searchQuery) || name.split(/\s+/).some(part => part.startsWith(searchQuery));
                 });
             }
 
