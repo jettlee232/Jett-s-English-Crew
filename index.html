@@ -4073,10 +4073,8 @@
                     snapshot.forEach((docSnap) => {
                         list.push({ id: docSnap.id, ...docSnap.data() });
                     });
-                    if (list.length > 0) {
-                        tableSessionsData = list;
-                        persistTableSessions(list);
-                    }
+                    tableSessionsData = list;
+                    persistTableSessions(list);
                     const historyCountEl = document.getElementById('sessionHistoryCount');
                     if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
                     
@@ -5260,18 +5258,23 @@
             openCustomPinModal("🔑 만남 이력 전체 초기화 비밀번호 확인", () => {
                 openConfirmModal({
                     title: "⚠️ 만남 이력 전체 초기화",
-                    message: `현재까지 누적된 ${tableSessionsData.length}회의 모든 테이블 만남 이력을 영구 삭제하시겠습니까? (회원 정보나 당근 포인트는 보존됩니다)`,
-                    confirmText: "초기화 실행",
-                    cancelText: "취소",
-                    callback: async () => {
+                    msg: `현재까지 누적된 ${tableSessionsData.length}회의 모든 테이블 만남 이력을 영구 삭제하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>(회원 정보나 당근 포인트는 보존됩니다)</span>`,
+                    showOption: false,
+                    onConfirm: async () => {
+                        const targets = [...tableSessionsData];
+
+                        // 로컬을 먼저 비운다 (Firestore가 없어도 초기화가 실제로 동작해야 한다)
+                        persistTableSessions([]);
+                        part1SeatingSnapshot = null;
+                        part2SeatingSnapshot = null;
+                        seatingSnapshotSig = '';
+                        showToast("🧹 모든 과거 테이블 만남 이력이 초기화되었습니다.", "success");
+                        renderSeatingPlan(false, true);
+
                         try {
-                            const deletePromises = tableSessionsData.map(s => deleteDoc(doc(sessionsCollectionRef, s.id)));
-                            await Promise.all(deletePromises);
-                            showToast("🧹 모든 과거 테이블 만남 이력이 초기화되었습니다.", "success");
-                            renderSeatingPlan(false);
+                            await Promise.all(targets.map(s => deleteDoc(doc(sessionsCollectionRef, s.id))));
                         } catch (err) {
-                            console.error(err);
-                            showToast("초기화 중 오류가 발생했습니다.", "error");
+                            console.warn("이력 원격 삭제 실패 (로컬은 초기화됨):", err);
                         }
                     }
                 });
