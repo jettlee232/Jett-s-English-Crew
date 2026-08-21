@@ -4291,7 +4291,7 @@
             if (filtered.length === 0) {
                 listContainer.innerHTML = `
                     <div class="text-center text-xs sm:text-sm text-zinc-500 py-6">
-                        ${query ? `'${query}' 검색 결과가 없습니다.` : '조건에 맞는 회원이 없습니다.'}
+                        ${query ? `'${esc(query)}' 검색 결과가 없습니다.` : '조건에 맞는 회원이 없습니다.'}
                     </div>
                 `;
                 return;
@@ -4307,7 +4307,7 @@
                     }">
                         <div class="flex items-center gap-2 truncate">
                             <span class="w-2.5 h-2.5 rounded-full shrink-0 ${m.isToday ? 'bg-blue-400' : 'bg-zinc-600'}"></span>
-                            <span class="font-bold truncate text-sm">${m.name || '미지정'}</span>
+                            <span class="font-bold truncate text-sm">${esc(m.name || '미지정')}</span>
                             <span class="text-xs text-zinc-400 whitespace-nowrap">(${m.gender === 'M' ? '남' : '여'}/${m.ageGroup || '30대'})</span>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
@@ -4353,7 +4353,7 @@
 
             headerTitle.innerHTML = `
                 <div class="flex items-center justify-between flex-wrap gap-2">
-                    <span class="text-base sm:text-lg font-black text-white whitespace-nowrap">${member.name || '회원'} 님 선택됨</span>
+                    <span class="text-base sm:text-lg font-black text-white whitespace-nowrap">${esc(member.name || '회원')} 님 선택됨</span>
                     <div class="flex items-center gap-1.5 text-xs sm:text-sm font-bold whitespace-nowrap">
                         ${statusBadgeHtml}
                         <span class="bg-orange-950 text-orange-300 border border-orange-500/50 px-2.5 py-0.5 rounded-full">
@@ -4555,7 +4555,7 @@
 
             openConfirmModal({
                 title: "⚠️ 회원 삭제 확인",
-                msg: `'${member.name}' 님을 영구히 삭제하시겠습니까?`,
+                msg: `'${esc(member.name)}' 님을 영구히 삭제하시겠습니까?`,
                 showOption: false,
                 onConfirm: async () => {
                     const targetId = selectedAdminMemberId;
@@ -4672,7 +4672,7 @@
                                 ? 'bg-zinc-900/80 border-zinc-800 text-zinc-500 cursor-default opacity-60' 
                                 : 'bg-zinc-900 border-zinc-800 text-zinc-100 hover:border-zinc-700 hover:bg-zinc-850 shadow-sm'
                     } active:scale-95">
-                        <span class="truncate leading-tight text-sm sm:text-base lg:text-lg whitespace-nowrap font-bold">${m.name || '미지정'}</span>
+                        <span class="truncate leading-tight text-sm sm:text-base lg:text-lg whitespace-nowrap font-bold">${esc(m.name || '미지정')}</span>
                         ${doneTag}
                     </button>
                 `;
@@ -5249,7 +5249,7 @@
                                     <div class="aspect-[4/3] rounded-xl ${cardTheme} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
                                         <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
                                             <span class="font-bold text-sm sm:text-base tracking-wide leading-snug break-keep">
-                                                ${m.name || '미지정'}
+                                                ${esc(m.name || '미지정')}
                                             </span>
                                             ${tagHtml}
                                         </div>
@@ -5355,6 +5355,12 @@
             });
         };
 
+        function esc(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
         function getChoseong(str) {
             if (!str) return '';
             const choseongs = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -5391,7 +5397,7 @@
             if (nonLeaderMembers.length === 0) {
                 container.innerHTML = `
                     <div class="p-8 text-center text-zinc-500 bg-[#1E1E22] rounded-xl border border-[#2E2E35] text-xs sm:text-sm">
-                        ${searchQuery ? `'${searchQuery}' 검색 결과가 없습니다.` : '표시할 멤버가 없습니다.'}
+                        ${searchQuery ? `'${esc(searchQuery)}' 검색 결과가 없습니다.` : '표시할 멤버가 없습니다.'}
                     </div>
                 `;
                 return;
@@ -5445,8 +5451,8 @@
                     <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1 sm:gap-2 w-full hover:border-zinc-700 overflow-hidden">
                         <!-- Col 1: Member Name -->
                         <div class="w-[58px] sm:w-[100px] shrink-0 truncate flex items-center gap-1">
-                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${m.name || '미지정'}">
-                                ${m.name || '미지정'}
+                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${esc(m.name || '미지정')}">
+                                ${esc(m.name || '미지정')}
                             </span>
                         </div>
 
