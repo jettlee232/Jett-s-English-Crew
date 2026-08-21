@@ -219,7 +219,7 @@
         }
 
         /* =========================================================================
-           ☀️ LIGHT THEME SYSTEM (Clean, Eye-Friendly Modern Slate Palette)
+           ☀️ LIGHT THEME SYSTEM (Vibrant Key Brand Colors & High Contrast)
            ========================================================================= */
         html.light-theme,
         html.light-theme body {
@@ -229,28 +229,34 @@
 
         /* Light Header & Navigation */
         html.light-theme header {
-            background-color: rgba(255, 255, 255, 0.94) !important;
+            background-color: rgba(255, 255, 255, 0.96) !important;
             border-color: #e2e8f0 !important;
-            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06) !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08) !important;
         }
 
         html.light-theme .tab-btn:not(.tab-btn-active) {
-            background-color: #f1f5f9 !important;
+            background-color: #ffffff !important;
             border-color: #e2e8f0 !important;
-            color: #64748b !important;
+            color: #475569 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
         }
         html.light-theme .tab-btn:not(.tab-btn-active):hover {
-            background-color: #e2e8f0 !important;
-            color: #0f172a !important;
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            border-color: #bfdbfe !important;
         }
         html.light-theme .tab-btn-active {
-            background: #2563eb !important;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: #ffffff !important;
-            border-color: #1d4ed8 !important;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+            border-color: #1e40af !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        }
+        html.light-theme .tab-btn-active span,
+        html.light-theme .tab-btn-active i {
+            color: #ffffff !important;
         }
 
-        /* Light Cards & Containers */
+        /* Light Cards & Main Containers */
         html.light-theme .bg-\[\#121216\],
         html.light-theme .bg-\[\#18181f\],
         html.light-theme .bg-\[\#15151a\],
@@ -260,7 +266,7 @@
         html.light-theme .table-card {
             background: #ffffff !important;
             border-color: #e2e8f0 !important;
-            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
         }
 
         /* Light Inner Sub-Cards & Rows */
@@ -276,21 +282,53 @@
         html.light-theme .bg-zinc-800\/50 {
             background-color: #f8fafc !important;
             border-color: #e2e8f0 !important;
+            color: #0f172a !important;
         }
 
         /* Light Text Overrides */
+        html.light-theme h1,
+        html.light-theme h2,
+        html.light-theme h3,
+        html.light-theme h4,
         html.light-theme .text-white,
         html.light-theme .text-zinc-100,
-        html.light-theme .text-zinc-200 {
+        html.light-theme .text-zinc-200,
+        html.light-theme #topicTitleDisplay,
+        html.light-theme #topicScheduleDisplay,
+        html.light-theme #topicLocationDisplay {
             color: #0f172a !important;
         }
         html.light-theme .text-zinc-300,
         html.light-theme .text-zinc-400 {
-            color: #475569 !important;
+            color: #334155 !important;
         }
         html.light-theme .text-zinc-500,
         html.light-theme .text-zinc-600 {
             color: #64748b !important;
+        }
+
+        /* Pure White Preservation for Solid Colored Elements */
+        html.light-theme .bg-blue-600,
+        html.light-theme .bg-blue-600 *,
+        html.light-theme .bg-orange-600,
+        html.light-theme .bg-orange-600 *,
+        html.light-theme .bg-orange-500,
+        html.light-theme .bg-orange-500 *,
+        html.light-theme .bg-emerald-600,
+        html.light-theme .bg-emerald-600 *,
+        html.light-theme .bg-rose-600,
+        html.light-theme .bg-rose-600 *,
+        html.light-theme .bg-red-600,
+        html.light-theme .bg-red-600 *,
+        html.light-theme .tab-btn-active,
+        html.light-theme .tab-btn-active *,
+        html.light-theme #topicRoundDisplay,
+        html.light-theme #topicRoundDisplay *,
+        html.light-theme #topicCarrotGatheringLink,
+        html.light-theme #topicCarrotGatheringLink *,
+        html.light-theme #topicDocsLink,
+        html.light-theme #topicDocsLink * {
+            color: #ffffff !important;
         }
 
         /* Light Borders */
@@ -303,27 +341,189 @@
             border-color: #e2e8f0 !important;
         }
 
-        /* Light Scrollbar */
-        html.light-theme ::-webkit-scrollbar-track {
-            background: #f8fafc;
+        /* 🪑 TAB 2: SEAT CARDS IN LIGHT THEME */
+        html.light-theme .seat-card-male {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+            border: 1.5px solid #93c5fd !important;
+            color: #1e3a8a !important;
+            box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
         }
-        html.light-theme ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+        html.light-theme .seat-card-male span {
+            color: #1e3a8a !important;
         }
-        html.light-theme ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        html.light-theme .seat-card-male:hover {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 6px 16px -2px rgba(59, 130, 246, 0.25) !important;
         }
 
-        /* Light Coin Slot Empty */
+        html.light-theme .seat-card-female {
+            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important;
+            border: 1.5px solid #fca5a5 !important;
+            color: #881337 !important;
+            box-shadow: 0 4px 12px -2px rgba(244, 63, 94, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+        }
+        html.light-theme .seat-card-female span {
+            color: #881337 !important;
+        }
+        html.light-theme .seat-card-female:hover {
+            border-color: #f43f5e !important;
+            box-shadow: 0 6px 16px -2px rgba(244, 63, 94, 0.25) !important;
+        }
+
+        /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
+        html.light-theme #topicDocsLink {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #ffffff !important;
+            border-color: #047857 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+        }
+
+        html.light-theme #topicLocationLink {
+            background-color: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
+        }
+        html.light-theme #topicLocationLink:hover {
+            background-color: #dbeafe !important;
+        }
+        html.light-theme #topicLocationLink i,
+        html.light-theme #topicLocationLink span {
+            color: #1d4ed8 !important;
+        }
+
+        /* Tab 1 Accordion details */
+        html.light-theme #timelineAccordionContent {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-zinc-900\/90 {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-blue-950\/80 {
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            border-color: #bfdbfe !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-amber-950\/80 {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border-color: #fde68a !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-rose-950\/80 {
+            background-color: #fff1f2 !important;
+            color: #be123c !important;
+            border-color: #fecdd3 !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-rose-950\/30 {
+            background-color: #fff1f2 !important;
+            border-color: #fecdd3 !important;
+            color: #e11d48 !important;
+        }
+        html.light-theme #timelineAccordionContent .bg-rose-950\/30 i {
+            color: #e11d48 !important;
+        }
+
+        /* 🥕 TAB 3: ATTENDANCE & BENTO GUIDE */
+        html.light-theme .bg-gradient-to-r.from-amber-950\/50 {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%) !important;
+            border: 1.5px solid #fdba74 !important;
+        }
+        html.light-theme .bg-gradient-to-r.from-amber-950\/50 span {
+            color: #c2410c !important;
+        }
+        html.light-theme #tab-content-3 .bg-blue-950 {
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            border-color: #bfdbfe !important;
+        }
+        html.light-theme #tab-content-3 .bg-rose-950 {
+            background-color: #fff1f2 !important;
+            color: #be123c !important;
+            border-color: #fecdd3 !important;
+        }
+        html.light-theme #tab-content-3 .bg-emerald-950 {
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+            border-color: #a7f3d0 !important;
+        }
+
+        html.light-theme .badge-att-new {
+            background-color: #ecfdf5 !important;
+            color: #059669 !important;
+            border-color: #6ee7b7 !important;
+            font-weight: 700 !important;
+        }
+        html.light-theme .badge-att-low {
+            background-color: #f1f5f9 !important;
+            color: #475569 !important;
+            border-color: #cbd5e1 !important;
+            font-weight: 600 !important;
+        }
+        html.light-theme .badge-att-mid {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+            border-color: #93c5fd !important;
+            font-weight: 700 !important;
+        }
+        html.light-theme .badge-att-high {
+            background-color: #fdf2f8 !important;
+            color: #db2777 !important;
+            border-color: #f472b6 !important;
+            font-weight: 800 !important;
+        }
+
         html.light-theme .coin-slot-empty {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-            color: #94a3b8;
+            background: #f1f5f9 !important;
+            border: 1.5px dashed #cbd5e1 !important;
+            color: #94a3b8 !important;
         }
 
-        /* Light Modals & Backdrops */
+        /* 📱 TAB 5: KIOSK IN LIGHT THEME */
+        html.light-theme #tab-content-5 .bg-orange-950\/60 {
+            background-color: #ea580c !important;
+            border-color: #c2410c !important;
+            color: #ffffff !important;
+        }
+        html.light-theme #tab-content-5 .bg-orange-950\/60 span,
+        html.light-theme #tab-content-5 .bg-orange-950\/60 i {
+            color: #ffffff !important;
+        }
+        html.light-theme #wakeLockBadge {
+            background-color: #059669 !important;
+            border-color: #047857 !important;
+            color: #ffffff !important;
+        }
+        html.light-theme #wakeLockBadge span {
+            color: #ffffff !important;
+        }
+        html.light-theme #todayMemberTiles {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-theme .kiosk-name-tile {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+        }
+        html.light-theme .kiosk-name-tile:hover {
+            border-color: #3b82f6 !important;
+            background-color: #f8fafc !important;
+            color: #2563eb !important;
+        }
+        html.light-theme .kiosk-name-tile.name-tile-selected {
+            background-color: #eff6ff !important;
+            border-color: #2563eb !important;
+            color: #1d4ed8 !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3), 0 8px 16px -2px rgba(37, 99, 235, 0.25) !important;
+        }
+
+        /* Light Modals & Form Controls */
         html.light-theme .bg-zinc-950,
-        html.light-theme .bg-zinc-950\/90 {
+        html.light-theme .bg-zinc-950\/90,
+        html.light-theme .bg-zinc-950\/80 {
             background-color: #ffffff !important;
             border-color: #e2e8f0 !important;
             color: #0f172a !important;
@@ -344,14 +544,15 @@
         html.light-theme #themeToggleBtn,
         html.light-theme #modeSelectBtn,
         html.light-theme button[title="리더 관리 설정"] {
-            background-color: #f1f5f9 !important;
-            border-color: #cbd5e1 !important;
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
             color: #475569 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
         }
         html.light-theme #themeToggleBtn:hover,
         html.light-theme #modeSelectBtn:hover,
         html.light-theme button[title="리더 관리 설정"]:hover {
-            background-color: #e2e8f0 !important;
+            background-color: #f1f5f9 !important;
             color: #0f172a !important;
         }
 
@@ -360,6 +561,9 @@
             background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%) !important;
             border-color: #f97316 !important;
             box-shadow: 0 4px 20px -4px rgba(249, 115, 22, 0.2) !important;
+        }
+        html.light-theme .rainbow-super-card span {
+            color: #0f172a !important;
         }
     </style>
 </head>
@@ -3904,13 +4108,13 @@
             const baseClass = "w-[50px] sm:w-[56px] text-center inline-flex items-center justify-center py-0.5 rounded text-[10px] sm:text-xs whitespace-nowrap shadow-sm";
 
             if (count <= 0) {
-                return `<span class="${baseClass} bg-emerald-950/80 text-emerald-300 border border-emerald-600/40 font-semibold">신규</span>`;
+                return `<span class="${baseClass} badge-att-new bg-emerald-950/80 text-emerald-300 border border-emerald-600/40 font-semibold">신규</span>`;
             } else if (count < 5) {
-                return `<span class="${baseClass} bg-zinc-800 text-zinc-300 border border-zinc-700/80 font-medium">${count}회차</span>`;
+                return `<span class="${baseClass} badge-att-low bg-zinc-800 text-zinc-300 border border-zinc-700/80 font-medium">${count}회차</span>`;
             } else if (count < 10) {
-                return `<span class="${baseClass} bg-blue-950/80 text-blue-300 border border-blue-700/50 font-semibold">${count}회차</span>`;
+                return `<span class="${baseClass} badge-att-mid bg-blue-950/80 text-blue-300 border border-blue-700/50 font-semibold">${count}회차</span>`;
             } else {
-                return `<span class="${baseClass} bg-rose-950/80 text-rose-300 border border-rose-600/40 font-bold">${count}회차</span>`;
+                return `<span class="${baseClass} badge-att-high bg-rose-950/80 text-rose-300 border border-rose-600/40 font-bold">${count}회차</span>`;
             }
         }
 
@@ -4280,14 +4484,14 @@
                 }
 
                 return `
-                    <button onclick="selectMember('${m.id}')" class="p-3 rounded-xl font-bold transition flex items-center justify-center min-h-[48px] sm:min-h-[58px] border ${
+                    <button onclick="selectMember('${m.id}')" class="kiosk-name-tile p-3 rounded-xl font-bold transition flex items-center justify-center min-h-[48px] sm:min-h-[58px] border ${
                         isSelected 
                             ? 'name-tile-selected' 
                             : isDone 
-                                ? 'bg-zinc-900/80 border-zinc-800 text-zinc-500 cursor-default' 
+                                ? 'bg-zinc-900/80 border-zinc-800 text-zinc-500 cursor-default opacity-60' 
                                 : 'bg-zinc-900 border-zinc-800 text-zinc-100 hover:border-zinc-700 hover:bg-zinc-850 shadow-sm'
                     } active:scale-95">
-                        <span class="truncate leading-tight text-sm sm:text-base lg:text-lg whitespace-nowrap">${m.name || '미지정'}</span>
+                        <span class="truncate leading-tight text-sm sm:text-base lg:text-lg whitespace-nowrap font-bold">${m.name || '미지정'}</span>
                         ${doneTag}
                     </button>
                 `;
@@ -4835,8 +5039,8 @@
                                 }
 
                                 const cardTheme = isMale 
-                                    ? 'bg-gradient-to-br from-blue-950/30 via-[#131722] to-[#0f1118] border-blue-500/30 hover:border-blue-400/60 text-blue-100'
-                                    : 'bg-gradient-to-br from-rose-950/30 via-[#1e1319] to-[#0f1118] border-rose-500/30 hover:border-rose-400/60 text-rose-100';
+                                    ? 'seat-card seat-card-male bg-gradient-to-br from-blue-950/30 via-[#131722] to-[#0f1118] border-blue-500/30 hover:border-blue-400/60 text-blue-100'
+                                    : 'seat-card seat-card-female bg-gradient-to-br from-rose-950/30 via-[#1e1319] to-[#0f1118] border-rose-500/30 hover:border-rose-400/60 text-rose-100';
 
                                 return `
                                     <div class="aspect-[4/3] rounded-xl ${cardTheme} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
