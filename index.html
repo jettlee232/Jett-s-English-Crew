@@ -3704,19 +3704,31 @@
                 playCoinSound();
                 if (e) triggerCoinBurst(e);
 
-                const docRef = doc(membersCollectionRef, selectedMemberId);
                 const newCoins = (member.coins || 0) + 1;
-                
-                await updateDoc(docRef, {
-                    coins: newCoins,
-                    checkedInOnTime: true,
-                    lastAction: '제시간 (+1당근)',
-                    updatedAt: new Date().toISOString()
-                });
+                const now = new Date().toISOString();
 
-                showToast(`🥕 ${member.name}님 제시간 도착! +1 당근 적립 완료`, "success");
+                // 로컬 먼저 반영한다 (다른 관리자 함수들과 동일한 패턴)
+                member.coins = newCoins;
+                member.checkedInOnTime = true;
+                member.lastAction = '제시간 (+1당근)';
+                member.updatedAt = now;
+                const memberName = member.name;
+                persistMembers([...membersData]);
+
+                showToast(`🥕 ${memberName}님 제시간 도착! +1 당근 적립 완료`, "success");
                 selectedMemberId = null;
                 renderUI();
+
+                try {
+                    await updateDoc(doc(membersCollectionRef, member.id), {
+                        coins: newCoins,
+                        checkedInOnTime: true,
+                        lastAction: '제시간 (+1당근)',
+                        updatedAt: now
+                    });
+                } catch (e) {
+                    console.warn("적립 동기화 실패 (로컬은 저장됨):", e);
+                }
             } catch (err) {
                 console.error(err);
                 showToast("적립 중 오류가 발생했습니다.", "error");
@@ -3746,19 +3758,31 @@
                 playCoinSound();
                 if (e) triggerCoinBurst(e);
 
-                const docRef = doc(membersCollectionRef, selectedMemberId);
                 const newCoins = (member.coins || 0) + 1;
-                
-                await updateDoc(docRef, {
-                    coins: newCoins,
-                    checkedInReview: true,
-                    lastAction: '후기 작성 (+1당근)',
-                    updatedAt: new Date().toISOString()
-                });
+                const now = new Date().toISOString();
 
-                showToast(`📝 ${member.name}님 후기 작성 완료! +1 당근 적립 완료`, "success");
+                // 로컬 먼저 반영한다
+                member.coins = newCoins;
+                member.checkedInReview = true;
+                member.lastAction = '후기 작성 (+1당근)';
+                member.updatedAt = now;
+                const memberName = member.name;
+                persistMembers([...membersData]);
+
+                showToast(`📝 ${memberName}님 후기 작성 완료! +1 당근 적립 완료`, "success");
                 selectedMemberId = null;
                 renderUI();
+
+                try {
+                    await updateDoc(doc(membersCollectionRef, member.id), {
+                        coins: newCoins,
+                        checkedInReview: true,
+                        lastAction: '후기 작성 (+1당근)',
+                        updatedAt: now
+                    });
+                } catch (e) {
+                    console.warn("적립 동기화 실패 (로컬은 저장됨):", e);
+                }
             } catch (err) {
                 console.error(err);
                 showToast("적립 중 오류가 발생했습니다.", "error");
@@ -3948,23 +3972,34 @@
                 msg: "오늘의 적립 완료 상태(제시간/후기)를 초기화하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>(누적 당근 수는 보존됩니다)</span>",
                 showOption: true,
                 onConfirm: async (shouldIncrementAttended) => {
-                    try {
-                        const promises = membersData.map(m => {
-                            const newTotal = (shouldIncrementAttended && m.isToday) ? (m.totalAttended || 1) + 1 : (m.totalAttended || 1);
-                            const updateObj = {
+                    const now = new Date().toISOString();
+                    const updates = [];
+                    membersData.forEach(m => {
+                        const newTotal = (shouldIncrementAttended && m.isToday) ? (m.totalAttended || 1) + 1 : (m.totalAttended || 1);
+                        m.checkedInOnTime = false;
+                        m.checkedInReview = false;
+                        m.totalAttended = newTotal;
+                        m.isNew = newTotal > 1 ? false : (m.isNew || false);
+                        m.updatedAt = now;
+                        updates.push({
+                            id: m.id,
+                            data: {
                                 checkedInOnTime: false,
                                 checkedInReview: false,
                                 totalAttended: newTotal,
-                                isNew: newTotal > 1 ? false : (m.isNew || false),
-                                updatedAt: new Date().toISOString()
-                            };
-                            return updateDoc(doc(membersCollectionRef, m.id), updateObj);
+                                isNew: m.isNew,
+                                updatedAt: now
+                            }
                         });
-                        await Promise.all(promises);
-                        showToast("🧹 금주 적립 상태가 초기화되었습니다!", "success");
+                    });
+                    persistMembers([...membersData]);
+                    renderUI();
+                    showToast("🧹 금주 적립 상태가 초기화되었습니다!", "success");
+
+                    try {
+                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
                     } catch (e) {
-                        console.error(e);
-                        showToast("초기화 처리 중 오류가 발생했습니다.", "error");
+                        console.warn("금주 적립 초기화 동기화 실패 (로컬은 저장됨):", e);
                     }
                 }
             });
@@ -4550,23 +4585,33 @@
         };
 
         window.selectTodayAttendeesAll = async function() {
+            const now = new Date().toISOString();
+            membersData.forEach(m => { m.isToday = true; m.updatedAt = now; });
+            persistMembers([...membersData]);
+            renderUI();
+            showToast("모든 회원이 오늘 참석으로 설정되었습니다.", "success");
+
             try {
-                const promises = membersData.map(m => updateDoc(doc(membersCollectionRef, m.id), { isToday: true, updatedAt: new Date().toISOString() }));
-                await Promise.all(promises);
-                showToast("모든 회원이 오늘 참석으로 설정되었습니다.", "success");
+                await Promise.all(membersData.map(m =>
+                    updateDoc(doc(membersCollectionRef, m.id), { isToday: true, updatedAt: now })));
             } catch (e) {
-                console.error(e);
+                console.warn("참석 일괄 설정 동기화 실패 (로컬은 저장됨):", e);
             }
         };
 
         window.resetTodayAttendees = async function() {
             selectedMemberId = null;
+            const now = new Date().toISOString();
+            membersData.forEach(m => { m.isToday = false; m.updatedAt = now; });
+            persistMembers([...membersData]);
+            renderUI();
+            showToast("모든 회원이 오늘 미참석으로 전환되었습니다.", "info");
+
             try {
-                const promises = membersData.map(m => updateDoc(doc(membersCollectionRef, m.id), { isToday: false, updatedAt: new Date().toISOString() }));
-                await Promise.all(promises);
-                showToast("모든 회원이 미참석으로 설정되었습니다.", "info");
+                await Promise.all(membersData.map(m =>
+                    updateDoc(doc(membersCollectionRef, m.id), { isToday: false, updatedAt: now })));
             } catch (e) {
-                console.error(e);
+                console.warn("참석 일괄 해제 동기화 실패 (로컬은 저장됨):", e);
             }
         };
 
