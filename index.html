@@ -3551,11 +3551,21 @@
             document.getElementById('pinChangeBox').classList.add('hidden');
         };
 
+        // AudioContext는 하나만 만들어 재사용한다 (iPad Safari는 동시 생성 개수 제한이 있다)
+        let sharedAudioCtx = null;
+        function getAudioCtx() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return null;
+            if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
+            // iOS는 사용자 제스처 밖에서 suspend 상태로 떨어진다
+            if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+            return sharedAudioCtx;
+        }
+
         function playClickSound() {
             try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
+                const ctx = getAudioCtx();
+                if (!ctx) return;
                 const now = ctx.currentTime;
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
@@ -3576,9 +3586,8 @@
 
         function playCoinSound() {
             try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
+                const ctx = getAudioCtx();
+                if (!ctx) return;
                 const now = ctx.currentTime;
                 
                 const osc1 = ctx.createOscillator();
@@ -3610,9 +3619,8 @@
 
         function playShuffleSound() {
             try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
+                const ctx = getAudioCtx();
+                if (!ctx) return;
                 const now = ctx.currentTime;
                 
                 for (let i = 0; i < 4; i++) {
