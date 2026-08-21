@@ -1792,16 +1792,15 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "demo-key",
-                authDomain: "demo.firebaseapp.com",
-                projectId: "demo-project",
-                storageBucket: "demo.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "1:123456789:web:demo"
-            };
+        // Firebase 웹 설정값은 공개되어도 되는 정보다. 실제 접근 제어는 Firestore 규칙이 담당한다.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL00lyWf-R4ZDUEzYtFVafyX1HMw8Ebmc",
+            authDomain: "jetts-english-crew-7c2c7.firebaseapp.com",
+            projectId: "jetts-english-crew-7c2c7",
+            storageBucket: "jetts-english-crew-7c2c7.firebasestorage.app",
+            messagingSenderId: "980305327503",
+            appId: "1:980305327503:web:a2eaedf9c8235e64bd47fa"
+        };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'seongbuk-english-study';
 
@@ -4109,6 +4108,9 @@
                     if (membersData.length === 0) {
                         seedInitialMembers();
                     } else {
+                        // 서버에서 받은 내용을 로컬에도 캐시한다.
+                        // (인터넷이 끊긴 채 앱을 열어도 마지막 상태가 남아 있어야 한다)
+                        localStorage.setItem('localMembersData', JSON.stringify(membersData));
                         if (selectedMemberId && !membersData.some(m => m.id === selectedMemberId && m.isToday)) {
                             selectedMemberId = null;
                         }
@@ -4160,6 +4162,16 @@
             }
         }
 
+        // 서버가 비어 있을 때만 호출된다. 로컬 명단을 서버로 올려 첫 동기화를 성립시킨다.
+        async function uploadMembersToServer(list) {
+            try {
+                await Promise.all(list.map(item => setDoc(doc(membersCollectionRef, item.id), item)));
+                console.log(`Firestore 초기 업로드 완료: ${list.length}명`);
+            } catch (e) {
+                console.warn("Firestore 업로드 실패 (로컬 데이터는 그대로 유지됨):", e);
+            }
+        }
+
         async function seedInitialMembers() {
             const targetAttendees = ["Jett", "표토르", "Sunny", "Richard", "Elle", "Jackie", "Lucy", "대니얼", "DY", "Jun", "Emilia", "나지E"];
             const localSaved = localStorage.getItem('localMembersData');
@@ -4179,6 +4191,8 @@
                         }
                         membersData = parsed;
                         renderUI();
+                        // 서버가 비어 있으니 이 기기의 명단을 올려 준다 (아이패드 데이터 유실 방지)
+                        uploadMembersToServer(parsed);
                         return;
                     }
                 } catch(e) {}
@@ -4194,14 +4208,7 @@
             localStorage.setItem('session_attendees_sync_0822_v4', 'true');
             persistMembers(membersData);
 
-            try {
-                for (const item of membersData) {
-                    const docRef = doc(membersCollectionRef, item.id);
-                    setDoc(docRef, item);
-                }
-            } catch (e) {
-                console.log("Firestore offline/seed note:", e);
-            }
+            uploadMembersToServer(membersData);
         }
 
         function getAttendanceBadge(totalAttended = 0) {
