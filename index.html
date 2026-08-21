@@ -350,7 +350,7 @@
             color: #1e3a8a !important;
             box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
         }
-        html.light-theme .seat-card-male span {
+        html.light-theme .seat-card-male span:not(.seat-badge-leader):not(.seat-badge-newbie) {
             color: #1e3a8a !important;
         }
         html.light-theme .seat-card-male:hover {
@@ -364,12 +364,26 @@
             color: #881337 !important;
             box-shadow: 0 4px 12px -2px rgba(244, 63, 94, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
         }
-        html.light-theme .seat-card-female span {
+        html.light-theme .seat-card-female span:not(.seat-badge-leader):not(.seat-badge-newbie) {
             color: #881337 !important;
         }
         html.light-theme .seat-card-female:hover {
             border-color: #f43f5e !important;
             box-shadow: 0 6px 16px -2px rgba(244, 63, 94, 0.25) !important;
+        }
+
+        /* Leader & Newbie Badges in Seat Cards */
+        .seat-badge-leader,
+        html.light-theme .seat-badge-leader {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 900 !important;
+            box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
+        }
+        html.light-theme .seat-badge-newbie {
+            background-color: #dcfce7 !important;
+            border: 1px solid #86efac !important;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.15) !important;
         }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
@@ -5032,9 +5046,9 @@
 
                                 let tagHtml = '';
                                 if (isLeader) {
-                                    tagHtml = `<span class="inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-blue-600 text-white font-black text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="리더">L</span>`;
+                                    tagHtml = `<span class="seat-badge-leader inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-blue-600 text-white font-black text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="리더">L</span>`;
                                 } else if (isNew) {
-                                    tagHtml = `<span class="inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="신규">🌱</span>`;
+                                    tagHtml = `<span class="seat-badge-newbie inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-[#dcfce7] text-zinc-900 border border-[#86efac] text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="신규">🌱</span>`;
                                 }
 
                                 const cardTheme = isMale 
