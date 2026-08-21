@@ -1354,7 +1354,7 @@
                     <span>리더 비밀번호(PIN) 변경하기</span>
                 </button>
                 <div id="pinChangeBox" class="hidden mt-2 p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                    <input id="newPinInput" type="password" maxlength="6" placeholder="새 비밀번호 입력" class="w-full bg-zinc-800 border border-zinc-700 text-white text-center rounded-lg py-2 text-xs sm:text-sm font-mono">
+                    <input id="newPinInput" type="password" maxlength="6" placeholder="새 비밀번호 (위 칸에 현재 PIN 입력 필요)" class="w-full bg-zinc-800 border border-zinc-700 text-white text-center rounded-lg py-2 text-xs sm:text-sm font-mono">
                     <button onclick="changeLeaderPin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs sm:text-sm transition whitespace-nowrap">
                         새 비밀번호 저장
                     </button>
@@ -3529,6 +3529,20 @@
                 showToast("비밀번호는 최소 4자리 이상이어야 합니다.", "warning");
                 return;
             }
+
+            // 기존 PIN을 먼저 확인한다 (같은 모달의 pinInput을 재사용)
+            const currentPinInput = document.getElementById('pinInput');
+            const currentPin = currentPinInput ? currentPinInput.value : '';
+            if (!currentPin) {
+                showToast("위쪽 칸에 현재 비밀번호를 먼저 입력해 주세요.", "warning");
+                return;
+            }
+            if (await hashPin(currentPin) !== leaderPinHash) {
+                showToast("현재 비밀번호가 올바르지 않습니다.", "error");
+                return;
+            }
+            if (currentPinInput) currentPinInput.value = '';
+
             leaderPinHash = await hashPin(newPin);
             localStorage.setItem('leaderPinHash', leaderPinHash);
             localStorage.removeItem('leaderPin');
