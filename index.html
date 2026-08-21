@@ -15,7 +15,7 @@
         (function() {
             try {
                 const savedTheme = localStorage.getItem('user_theme');
-                if (savedTheme === 'light') {
+                if (savedTheme !== 'dark') {
                     document.documentElement.classList.add('light-theme');
                 }
             } catch (e) {}
@@ -368,9 +368,12 @@
     <!-- Compact Sticky Header -->
     <header class="w-full max-w-full lg:max-w-7xl bg-[#121216]/90 backdrop-blur-md border-b border-[#23232b] sticky top-0 z-40 px-3 sm:px-6 pt-[calc(0.5rem+env(safe-area-inset-top,0px))] pb-2 sm:py-2.5 shadow-xl transition-all">
         <div class="relative flex items-center justify-between min-h-[44px] sm:min-h-[52px] mb-2 sm:mb-2.5">
-            <!-- Left Live Status Chip -->
-            <div class="w-8 sm:w-20 flex items-center">
-                <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 bg-zinc-800/60 border border-zinc-700/50 px-2.5 py-0.5 rounded-full">
+            <!-- Left: Theme Toggle & Live Status Chip -->
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px]">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-indigo-500 border border-zinc-700/70 shadow active:scale-95 transition shrink-0" title="화면 테마 전환 (라이트/다크)">
+                    <i id="themeToggleIcon" class="fa-solid fa-moon text-sm sm:text-base"></i>
+                </button>
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 bg-zinc-800/60 border border-zinc-700/50 px-2.5 py-1 rounded-full">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     LIVE
                 </span>
@@ -382,10 +385,7 @@
             </div>
 
             <!-- Top Right: Actions -->
-            <div class="flex items-center gap-1.5 sm:gap-2">
-                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="화면 테마 전환 (라이트/다크)">
-                    <i id="themeToggleIcon" class="fa-solid fa-sun text-sm sm:text-base"></i>
-                </button>
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
                 <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
                     <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
@@ -2892,7 +2892,7 @@
         // 🌓 화면 테마 제어 시스템 (Light / Dark Theme Controller)
         // ----------------------------------------------------
         function initTheme() {
-            const savedTheme = localStorage.getItem('user_theme') || 'dark';
+            const savedTheme = localStorage.getItem('user_theme') || 'light';
             applyTheme(savedTheme);
         }
 
