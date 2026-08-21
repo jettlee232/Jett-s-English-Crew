@@ -1549,31 +1549,37 @@
 
                         <div id="adminActionPanelBody" class="space-y-3 opacity-40 pointer-events-none transition-all">
                             <div class="space-y-1">
-                                <label class="text-xs font-bold text-blue-400 block whitespace-nowrap">오늘 스터디 참석 상태</label>
+                                <label class="text-xs font-bold text-blue-400 block whitespace-nowrap">오늘 스터디 참석 상태 전환</label>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <button onclick="panelSetToday(true)" class="bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-700/50 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                        오늘 참석
+                                    <button id="btnPanelToday" onclick="panelSetToday(true)" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                        <i class="fa-solid fa-circle-check text-xs"></i>
+                                        <span>오늘 참석</span>
                                     </button>
-                                    <button onclick="panelHandleNoShow('cancel')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                        사전취소(+2)
+                                    <button id="btnPanelCancel" onclick="panelHandleNoShow('cancel')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                        <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                                        <span>사전취소(+2)</span>
                                     </button>
-                                    <button onclick="panelHandleNoShow('noshow')" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                        무단 노쇼
+                                    <button id="btnPanelNoshow" onclick="panelHandleNoShow('noshow')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                        <i class="fa-solid fa-ban text-xs"></i>
+                                        <span>무단 노쇼</span>
                                     </button>
                                 </div>
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-xs font-bold text-orange-400 block whitespace-nowrap">당근 포인트 수동 처리</label>
+                                <label class="text-xs font-bold text-orange-400 block whitespace-nowrap">당근 포인트 즉시 적립/차감</label>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <button onclick="panelAdjustCoins(1, '수동 +1당근')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                        +1 당근
+                                    <button onclick="panelAdjustCoins(1, '수동 +1당근 적립')" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-zinc-100 border border-zinc-700 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">
+                                        <i class="fa-solid fa-plus text-emerald-400 text-xs"></i>
+                                        <span>+1 당근</span>
                                     </button>
-                                    <button onclick="panelAdjustCoins(-1, '수동 -1당근')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                        -1 당근
+                                    <button onclick="panelAdjustCoins(-1, '수동 -1당근 차감')" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-zinc-100 border border-zinc-700 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">
+                                        <i class="fa-solid fa-minus text-rose-400 text-xs"></i>
+                                        <span>-1 당근</span>
                                     </button>
-                                    <button onclick="panelAdjustCoins(-6, '무료 참가 사용 (-6당근)')" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-700/50 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap">
-                                        무료참가 (-6)
+                                    <button onclick="panelAdjustCoins(-6, '무료 참가 쿠폰 사용 (-6당근)')" class="bg-orange-950/80 hover:bg-orange-900 active:scale-95 text-orange-300 border border-orange-700/50 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">
+                                        <i class="fa-solid fa-gift text-orange-400 text-xs"></i>
+                                        <span>무료사용(-6)</span>
                                     </button>
                                 </div>
                             </div>
@@ -4270,13 +4276,24 @@
             }
 
             panelBody.classList.remove('opacity-40', 'pointer-events-none');
+
+            // Status Badge Formatting
+            let statusBadgeHtml = '';
+            if (member.isToday) {
+                statusBadgeHtml = '<span class="bg-blue-600 text-white border border-blue-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">📌 오늘 참석 중</span>';
+            } else if (member.lastAction && member.lastAction.includes('사전 취소')) {
+                statusBadgeHtml = '<span class="bg-amber-600 text-white border border-amber-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">📢 사전 취소됨</span>';
+            } else if (member.lastAction && member.lastAction.includes('무단 노쇼')) {
+                statusBadgeHtml = '<span class="bg-rose-600 text-white border border-rose-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">🚫 무단 노쇼</span>';
+            } else {
+                statusBadgeHtml = '<span class="bg-zinc-800 text-zinc-400 border border-zinc-700 font-bold px-2.5 py-0.5 rounded-full">⚪ 미참석</span>';
+            }
+
             headerTitle.innerHTML = `
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <span class="text-base sm:text-lg font-black text-white whitespace-nowrap">${member.name || '회원'} 님 선택됨</span>
                     <div class="flex items-center gap-1.5 text-xs sm:text-sm font-bold whitespace-nowrap">
-                        <span class="${member.isToday ? 'bg-blue-950 text-blue-300 border-blue-500/50' : 'bg-zinc-800 text-zinc-400 border-zinc-700'} border px-2.5 py-0.5 rounded-full">
-                            ${member.isToday ? '📌 오늘 참석' : '⚪ 미참석'}
-                        </span>
+                        ${statusBadgeHtml}
                         <span class="bg-orange-950 text-orange-300 border border-orange-500/50 px-2.5 py-0.5 rounded-full">
                             🥕 ${member.coins || 0}개
                         </span>
@@ -4287,6 +4304,36 @@
                 </div>
             `;
 
+            // Active button state styling
+            const btnToday = document.getElementById('btnPanelToday');
+            const btnCancel = document.getElementById('btnPanelCancel');
+            const btnNoshow = document.getElementById('btnPanelNoshow');
+
+            if (btnToday && btnCancel && btnNoshow) {
+                // Reset classes
+                btnToday.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
+                btnCancel.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
+                btnNoshow.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
+
+                if (member.isToday) {
+                    btnToday.className += "bg-blue-600 text-white font-bold shadow-lg ring-2 ring-blue-400 border-blue-500";
+                    btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
+                    btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
+                } else if (member.lastAction && member.lastAction.includes('사전 취소')) {
+                    btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    btnCancel.className += "bg-amber-600 text-white font-bold shadow-lg ring-2 ring-amber-400 border-amber-500";
+                    btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
+                } else if (member.lastAction && member.lastAction.includes('무단 노쇼')) {
+                    btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
+                    btnNoshow.className += "bg-rose-600 text-white font-bold shadow-lg ring-2 ring-rose-400 border-rose-500";
+                } else {
+                    btnToday.className += "bg-zinc-800 hover:bg-blue-600 hover:text-white text-zinc-300 border border-zinc-700";
+                    btnCancel.className += "bg-zinc-800 hover:bg-amber-600 hover:text-white text-zinc-300 border border-zinc-700";
+                    btnNoshow.className += "bg-zinc-800 hover:bg-rose-600 hover:text-white text-zinc-300 border border-zinc-700";
+                }
+            }
+
             document.getElementById('panelEditName').value = member.name || '';
             document.getElementById('panelEditGender').value = member.gender || 'F';
             document.getElementById('panelEditAge').value = member.ageGroup || '30대';
@@ -4296,68 +4343,108 @@
 
         window.panelSetToday = async function(isToday) {
             if (!selectedAdminMemberId) return;
+            const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
+            if (idx === -1) return;
+
+            membersData[idx].isToday = isToday;
+            membersData[idx].lastAction = isToday ? '오늘 참석 등록' : '참석 제외';
+            membersData[idx].updatedAt = new Date().toISOString();
+
+            persistMembers([...membersData]);
+            loadAdminActionPanel();
+            renderAdminMemberList();
+            renderUI();
+
+            showToast(isToday ? `📌 ${membersData[idx].name}님 오늘 참석으로 등록되었습니다.` : `⚪ ${membersData[idx].name}님 참석 제외되었습니다.`, "success");
+
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, { isToday, updatedAt: new Date().toISOString() });
-                showToast("오늘 참석 상태가 전환되었습니다.", "success");
+                await updateDoc(docRef, { isToday, lastAction: membersData[idx].lastAction, updatedAt: membersData[idx].updatedAt });
             } catch (e) {
-                console.error(e);
+                console.warn(e);
             }
         };
 
         window.panelHandleNoShow = async function(type) {
             if (!selectedAdminMemberId) return;
-            const member = membersData.find(m => m.id === selectedAdminMemberId);
-            if (!member) return;
+            const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
+            if (idx === -1) return;
+
+            const member = membersData[idx];
+
+            if (type === 'cancel') {
+                const newCoins = (member.coins || 0) + 2;
+                member.coins = newCoins;
+                member.isToday = false;
+                member.lastAction = '사전 취소 (+2당근)';
+                member.updatedAt = new Date().toISOString();
+
+                persistMembers([...membersData]);
+                loadAdminActionPanel();
+                renderAdminMemberList();
+                renderUI();
+
+                showToast(`📢 ${member.name}님 사전 취소 완료 (+2당근 적립 & 참석 제외, 현재 ${newCoins}당근)`, "info");
+            } else if (type === 'noshow') {
+                member.isToday = false;
+                member.lastAction = '무단 노쇼 (0당근)';
+                member.updatedAt = new Date().toISOString();
+
+                persistMembers([...membersData]);
+                loadAdminActionPanel();
+                renderAdminMemberList();
+                renderUI();
+
+                showToast(`🚫 ${member.name}님 무단 노쇼 처리 완료 (오늘 참석 제외)`, "warning");
+            }
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                if (type === 'cancel') {
-                    const newCoins = (member.coins || 0) + 2;
-                    await updateDoc(docRef, {
-                        coins: newCoins,
-                        isToday: false,
-                        lastAction: '사전 취소 (+2당근)',
-                        updatedAt: new Date().toISOString()
-                    });
-                    showToast(`📢 ${member.name}님 사전 취소 처리 완료 (+2당근 적립 & 참석 제외)`, "info");
-                } else if (type === 'noshow') {
-                    await updateDoc(docRef, {
-                        isToday: false,
-                        lastAction: '무단 노쇼 (0당근)',
-                        updatedAt: new Date().toISOString()
-                    });
-                    showToast(`🚫 ${member.name}님 무단 노쇼 처리 (오늘 참석 제외)`, "warning");
-                }
+                await updateDoc(docRef, {
+                    coins: member.coins,
+                    isToday: member.isToday,
+                    lastAction: member.lastAction,
+                    updatedAt: member.updatedAt
+                });
             } catch (e) {
-                console.error(e);
+                console.warn(e);
             }
         };
 
         window.panelAdjustCoins = async function(amount, actionLabel) {
             if (!selectedAdminMemberId) return;
-            const member = membersData.find(m => m.id === selectedAdminMemberId);
-            if (!member) return;
+            const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
+            if (idx === -1) return;
+
+            const member = membersData[idx];
 
             if (amount === -6 && (member.coins || 0) < 6) {
                 showToast(`${member.name}님은 당근이 부족합니다. (현재 ${member.coins || 0}개)`, "warning");
                 return;
             }
 
+            const currentCoins = member.coins || 0;
+            const newCoins = Math.max(0, currentCoins + amount);
+            member.coins = newCoins;
+            member.lastAction = actionLabel;
+            member.updatedAt = new Date().toISOString();
+
+            persistMembers([...membersData]);
+            loadAdminActionPanel();
+            renderAdminMemberList();
+            renderUI();
+
+            showToast(`${member.name}님: ${actionLabel} 처리 완료 (현재 ${newCoins}당근)`, "success");
+
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                const currentCoins = member.coins || 0;
-                const newCoins = Math.max(0, currentCoins + amount);
-                
                 await updateDoc(docRef, {
                     coins: newCoins,
                     lastAction: actionLabel,
-                    updatedAt: new Date().toISOString()
+                    updatedAt: member.updatedAt
                 });
-
-                showToast(`${member.name}님: ${actionLabel} 처리 완료 (현재 ${newCoins}당근)`, "success");
             } catch (e) {
-                console.error(e);
+                console.warn(e);
             }
         };
 
@@ -4385,12 +4472,17 @@
                     updatedAt: new Date().toISOString()
                 };
                 persistMembers([...membersData]);
-                showToast(`'${name}' 회원의 정보가 수정되었습니다!`, "success");
+                loadAdminActionPanel();
+                renderAdminMemberList();
+                renderUI();
+                showToast(`'${name}' 회원의 정보가 저장되었습니다!`, "success");
 
                 try {
                     const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                    updateDoc(docRef, membersData[idx]);
-                } catch (e) {}
+                    await updateDoc(docRef, membersData[idx]);
+                } catch (e) {
+                    console.warn(e);
+                }
             }
         };
 
