@@ -3861,7 +3861,7 @@
             let csvContent = "\uFEFF이름,성별,연령대,당근수,총참석회차,신규여부\n";
             membersData.forEach(m => {
                 const isNewStr = (m.isNew || m.totalAttended === 1) ? 'Y' : 'N';
-                csvContent += `"${m.name || ''}","${m.gender || 'F'}","${m.ageGroup || '30대'}",${m.coins || 0},${m.totalAttended || 1},"${isNewStr}"\n`;
+                csvContent += `"${m.name || ''}","${m.gender || 'F'}","${m.ageGroup || '30대'}",${m.coins || 0},${m.totalAttended ?? 0},"${isNewStr}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -3932,7 +3932,7 @@
                         const gender = (cols[1] === 'M' || cols[1] === '남' || cols[1] === '남성') ? 'M' : 'F';
                         const ageGroup = cols[2] || '30대';
                         const coins = parseInt(cols[3]) || 0;
-                        const totalAttended = parseInt(cols[4]) || 1;
+                        const totalAttended = Number.isFinite(parseInt(cols[4])) ? parseInt(cols[4]) : 0;
                         const isNew = (cols[5] === 'Y' || cols[5] === 'y') && totalAttended === 1;
 
                         if (!name) continue;
@@ -3947,7 +3947,7 @@
                             const docRef = doc(membersCollectionRef, crypto.randomUUID());
                             await setDoc(docRef, {
                                 name, gender, ageGroup, coins, totalAttended, isNew,
-                                isToday: true,
+                                isToday: false,
                                 lastAction: 'CSV 일괄등록',
                                 createdAt: new Date().toISOString(),
                                 updatedAt: new Date().toISOString()
