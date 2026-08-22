@@ -465,6 +465,20 @@
             border: 2px dashed #d97706 !important;
             background: #fffbeb !important;
         }
+        html.light-theme #seatMoveGuideBar .seat-guide-box {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+            border-color: #f59e0b !important;
+        }
+        html.light-theme #seatMoveGuideBar .seat-guide-box span {
+            color: #92400e !important;
+        }
+        html.light-theme #seatMoveGuideBar .seat-guide-box .member-name-chip {
+            background-color: #d97706 !important;
+            color: #ffffff !important;
+        }
+        html.light-theme #seatMoveGuideBar .seat-guide-box .member-name-chip * {
+            color: #ffffff !important;
+        }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
@@ -5443,26 +5457,34 @@
                     guideBar.className = "block transition-all duration-200";
                     if (!selectedSeatMemberId) {
                         guideBar.innerHTML = `
-                            <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm text-amber-200 flex items-center justify-between gap-2 shadow-sm">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm sm:text-base animate-pulse">✋</span>
-                                    <span class="font-semibold text-amber-300">자리 이동 모드:</span>
-                                    <span class="text-zinc-300">옮길 회원을 먼저 탭하세요.</span>
+                            <div class="seat-guide-box bg-gradient-to-r from-amber-950/40 via-[#18181e] to-zinc-900/90 border border-amber-500/30 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 shadow-md overflow-hidden whitespace-nowrap">
+                                <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 truncate">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-[11px] sm:text-xs shrink-0">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping shrink-0"></span>
+                                        자리 이동 모드
+                                    </span>
+                                    <span class="text-xs sm:text-sm text-zinc-300 font-medium truncate">
+                                        옮길 회원을 먼저 탭하세요.
+                                    </span>
                                 </div>
-                                <button onclick="toggleSeatMoveMode()" class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 whitespace-nowrap">
-                                    모드 종료 ✕
+                                <button type="button" onclick="toggleSeatMoveMode()" class="shrink-0 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition active:scale-95 whitespace-nowrap shadow-sm">
+                                    종료 ✕
                                 </button>
                             </div>
                         `;
                     } else {
                         guideBar.innerHTML = `
-                            <div class="bg-gradient-to-r from-amber-950/80 via-orange-950/70 to-amber-950/80 border border-amber-400 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm text-amber-100 flex items-center justify-between gap-2 shadow-lg ring-1 ring-amber-400/40">
-                                <div class="flex items-center gap-2 flex-wrap min-w-0">
-                                    <span class="text-sm sm:text-base animate-bounce">👉</span>
-                                    <span class="font-bold text-white bg-amber-600 px-2 py-0.5 rounded-md shadow-sm">[${esc(selectedMemberName)}]</span>
-                                    <span class="text-amber-200 font-medium">선택됨 ➔ 이동할 대상 테이블(T1, T2...) 또는 T버튼을 탭하세요!</span>
+                            <div class="seat-guide-box bg-gradient-to-r from-amber-950/80 via-[#221614] to-zinc-900/95 border border-amber-400/80 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 shadow-lg ring-1 ring-amber-400/30 overflow-hidden whitespace-nowrap">
+                                <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 truncate">
+                                    <span class="member-name-chip inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500 text-zinc-950 font-black text-xs sm:text-sm shadow-sm shrink-0">
+                                        <i class="fa-solid fa-user text-[10px]"></i>
+                                        ${esc(selectedMemberName)}
+                                    </span>
+                                    <span class="text-xs sm:text-sm text-amber-200 font-medium truncate">
+                                        이동할 테이블(T1, T2...)을 탭하세요!
+                                    </span>
                                 </div>
-                                <button onclick="seatTapMember(null)" class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-300 border border-amber-500/50 whitespace-nowrap shadow-sm">
+                                <button type="button" onclick="seatTapMember(null)" class="shrink-0 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-lg bg-amber-950/90 hover:bg-amber-900 text-amber-300 hover:text-white border border-amber-500/60 transition active:scale-95 whitespace-nowrap shadow-sm">
                                     선택 취소 ✕
                                 </button>
                             </div>
