@@ -1575,7 +1575,7 @@
                         <div id="adminActionPanelBody" class="space-y-3 opacity-40 pointer-events-none transition-all">
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-blue-400 block whitespace-nowrap">오늘 스터디 참석 상태 전환</label>
-                                <div class="grid grid-cols-3 gap-2">
+                                <div class="grid grid-cols-2 gap-2">
                                     <button id="btnPanelToday" onclick="panelSetToday(true)" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
                                         <i class="fa-solid fa-circle-check text-xs"></i>
                                         <span>오늘 참석</span>
@@ -1587,6 +1587,10 @@
                                     <button id="btnPanelNoshow" onclick="panelHandleNoShow('noshow')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
                                         <i class="fa-solid fa-ban text-xs"></i>
                                         <span>무단 노쇼</span>
+                                    </button>
+                                    <button id="btnPanelLeftEarly" onclick="panelHandleNoShow('leftearly')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                        <i class="fa-solid fa-person-walking-arrow-right text-xs"></i>
+                                        <span>조기 퇴장</span>
                                     </button>
                                 </div>
                             </div>
@@ -4012,6 +4016,7 @@
                         const newTotal = (shouldIncrementAttended && m.isToday) ? (m.totalAttended || 1) + 1 : (m.totalAttended || 1);
                         m.checkedInOnTime = false;
                         m.checkedInReview = false;
+                        m.leftEarly = false;
                         m.totalAttended = newTotal;
                         m.isNew = newTotal > 1 ? false : (m.isNew || false);
                         m.updatedAt = now;
@@ -4020,6 +4025,7 @@
                             data: {
                                 checkedInOnTime: false,
                                 checkedInReview: false,
+                                leftEarly: false,
                                 totalAttended: newTotal,
                                 isNew: m.isNew,
                                 updatedAt: now
@@ -4375,7 +4381,9 @@
 
             // Status Badge Formatting
             let statusBadgeHtml = '';
-            if (member.isToday) {
+            if (member.leftEarly) {
+                statusBadgeHtml = '<span class="bg-violet-600 text-white border border-violet-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">🚶 조기 퇴장</span>';
+            } else if (member.isToday) {
                 statusBadgeHtml = '<span class="bg-blue-600 text-white border border-blue-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">📌 오늘 참석 중</span>';
             } else if (member.lastAction && member.lastAction.includes('사전 취소')) {
                 statusBadgeHtml = '<span class="bg-amber-600 text-white border border-amber-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">📢 사전 취소됨</span>';
@@ -4404,29 +4412,41 @@
             const btnToday = document.getElementById('btnPanelToday');
             const btnCancel = document.getElementById('btnPanelCancel');
             const btnNoshow = document.getElementById('btnPanelNoshow');
+            const btnLeftEarly = document.getElementById('btnPanelLeftEarly');
 
             if (btnToday && btnCancel && btnNoshow) {
                 // Reset classes
-                btnToday.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
-                btnCancel.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
-                btnNoshow.className = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
+                const baseClass = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
+                btnToday.className = baseClass;
+                btnCancel.className = baseClass;
+                btnNoshow.className = baseClass;
+                if (btnLeftEarly) btnLeftEarly.className = baseClass;
 
-                if (member.isToday) {
+                if (member.leftEarly) {
+                    btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
+                    btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
+                    if (btnLeftEarly) btnLeftEarly.className += "bg-violet-600 text-white font-bold shadow-lg ring-2 ring-violet-400 border-violet-500";
+                } else if (member.isToday) {
                     btnToday.className += "bg-blue-600 text-white font-bold shadow-lg ring-2 ring-blue-400 border-blue-500";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
+                    if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else if (member.lastAction && member.lastAction.includes('사전 취소')) {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-amber-600 text-white font-bold shadow-lg ring-2 ring-amber-400 border-amber-500";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
+                    if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else if (member.lastAction && member.lastAction.includes('무단 노쇼')) {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-rose-600 text-white font-bold shadow-lg ring-2 ring-rose-400 border-rose-500";
+                    if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-600 hover:text-white text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-600 hover:text-white text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-600 hover:text-white text-zinc-300 border border-zinc-700";
+                    if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-600 hover:text-white text-zinc-300 border border-zinc-700";
                 }
             }
 
@@ -4443,6 +4463,9 @@
             if (idx === -1) return;
 
             membersData[idx].isToday = isToday;
+            if (isToday) {
+                membersData[idx].leftEarly = false;
+            }
             membersData[idx].lastAction = isToday ? '오늘 참석 등록' : '참석 제외';
             membersData[idx].updatedAt = new Date().toISOString();
 
@@ -4455,7 +4478,12 @@
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, { isToday, lastAction: membersData[idx].lastAction, updatedAt: membersData[idx].updatedAt });
+                await updateDoc(docRef, {
+                    isToday,
+                    leftEarly: membersData[idx].leftEarly || false,
+                    lastAction: membersData[idx].lastAction,
+                    updatedAt: membersData[idx].updatedAt
+                });
             } catch (e) {
                 console.warn(e);
             }
@@ -4472,6 +4500,7 @@
                 const newCoins = (member.coins || 0) + 2;
                 member.coins = newCoins;
                 member.isToday = false;
+                member.leftEarly = false;
                 member.lastAction = '사전 취소 (+2당근)';
                 member.updatedAt = new Date().toISOString();
 
@@ -4483,6 +4512,7 @@
                 showToast(`📢 ${member.name}님 사전 취소 완료 (+2당근 적립 & 참석 제외, 현재 ${newCoins}당근)`, "info");
             } else if (type === 'noshow') {
                 member.isToday = false;
+                member.leftEarly = false;
                 member.lastAction = '무단 노쇼 (0당근)';
                 member.updatedAt = new Date().toISOString();
 
@@ -4492,16 +4522,33 @@
                 renderUI();
 
                 showToast(`🚫 ${member.name}님 무단 노쇼 처리 완료 (오늘 참석 제외)`, "warning");
+            } else if (type === 'leftearly') {
+                member.leftEarly = true;
+                member.lastAction = '조기 퇴장';
+                member.lastAttendedAt = new Date().toISOString();   // 기능 3: 유효기간 갱신
+                member.updatedAt = new Date().toISOString();
+
+                persistMembers([...membersData]);
+                loadAdminActionPanel();
+                renderAdminMemberList();
+                renderUI();
+
+                showToast(`🚶 ${member.name}님 조기 퇴장 처리 완료 (출석은 인정, 2부 자리에서 제외)`, "info");
             }
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, {
+                const updatePayload = {
                     coins: member.coins,
                     isToday: member.isToday,
+                    leftEarly: member.leftEarly || false,
                     lastAction: member.lastAction,
                     updatedAt: member.updatedAt
-                });
+                };
+                if (member.lastAttendedAt) {
+                    updatePayload.lastAttendedAt = member.lastAttendedAt;
+                }
+                await updateDoc(docRef, updatePayload);
             } catch (e) {
                 console.warn(e);
             }
@@ -5140,7 +5187,7 @@
             const container = document.getElementById('seatingGrid');
             if (!container) return;
 
-            const todayMembers = membersData.filter(m => m.isToday);
+            const todayMembers = membersData.filter(m => m.isToday && !m.leftEarly);
             const totalCount = todayMembers.length;
 
             if (totalCount === 0) {
