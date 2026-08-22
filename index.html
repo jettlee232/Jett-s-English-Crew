@@ -417,6 +417,55 @@
             box-shadow: 0 1px 3px rgba(16, 185, 129, 0.15) !important;
         }
 
+        /* ✋ 자리 수동 이동 모드 시각 효과 */
+        .seat-move-selected {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            border: 2.5px solid #fef08a !important;
+            color: #ffffff !important;
+            transform: scale(1.08) !important;
+            box-shadow: 0 0 22px rgba(245, 158, 11, 0.7), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+            z-index: 20 !important;
+            animation: seatPulseGlow 1.5s infinite ease-in-out;
+        }
+        .seat-move-selected * {
+            color: #ffffff !important;
+        }
+        @keyframes seatPulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 16px rgba(245, 158, 11, 0.5), 0 0 0 2px rgba(254, 240, 138, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 26px rgba(245, 158, 11, 0.9), 0 0 0 4px rgba(254, 240, 138, 1);
+            }
+        }
+        .seat-move-dimmed {
+            opacity: 0.28 !important;
+            filter: grayscale(70%) !important;
+            transform: scale(0.96) !important;
+            transition: all 0.2s ease !important;
+        }
+        .table-target-highlight {
+            border: 2px dashed #f59e0b !important;
+            background: rgba(245, 158, 11, 0.08) !important;
+        }
+        .table-target-highlight:hover {
+            background: rgba(245, 158, 11, 0.15) !important;
+            border-color: #fbbf24 !important;
+        }
+
+        html.light-theme .seat-move-selected {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            border: 2.5px solid #b45309 !important;
+            color: #ffffff !important;
+        }
+        html.light-theme .seat-move-selected * {
+            color: #ffffff !important;
+        }
+        html.light-theme .table-target-highlight {
+            border: 2px dashed #d97706 !important;
+            background: #fffbeb !important;
+        }
+
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
@@ -886,6 +935,9 @@
                         <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
                     </div>
                 </div>
+
+                <!-- Seat Move Mode Active Helper Bar -->
+                <div id="seatMoveGuideBar" class="hidden"></div>
 
                 <!-- Dynamic Seating Grid -->
                 <div id="seatingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
@@ -5381,6 +5433,47 @@
                 }
             }
 
+            // Update Seat Move Helper Guide Bar
+            const selectedMember = selectedSeatMemberId ? membersData.find(m => m.id === selectedSeatMemberId) : null;
+            const selectedMemberName = selectedMember ? (selectedMember.name || '선택된 회원') : '';
+
+            const guideBar = document.getElementById('seatMoveGuideBar');
+            if (guideBar) {
+                if (isSeatMoveMode) {
+                    guideBar.className = "block transition-all duration-200";
+                    if (!selectedSeatMemberId) {
+                        guideBar.innerHTML = `
+                            <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm text-amber-200 flex items-center justify-between gap-2 shadow-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm sm:text-base animate-pulse">✋</span>
+                                    <span class="font-semibold text-amber-300">자리 이동 모드:</span>
+                                    <span class="text-zinc-300">옮길 회원을 먼저 탭하세요.</span>
+                                </div>
+                                <button onclick="toggleSeatMoveMode()" class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 whitespace-nowrap">
+                                    모드 종료 ✕
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        guideBar.innerHTML = `
+                            <div class="bg-gradient-to-r from-amber-950/80 via-orange-950/70 to-amber-950/80 border border-amber-400 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm text-amber-100 flex items-center justify-between gap-2 shadow-lg ring-1 ring-amber-400/40">
+                                <div class="flex items-center gap-2 flex-wrap min-w-0">
+                                    <span class="text-sm sm:text-base animate-bounce">👉</span>
+                                    <span class="font-bold text-white bg-amber-600 px-2 py-0.5 rounded-md shadow-sm">[${esc(selectedMemberName)}]</span>
+                                    <span class="text-amber-200 font-medium">선택됨 ➔ 이동할 대상 테이블(T1, T2...) 또는 T버튼을 탭하세요!</span>
+                                </div>
+                                <button onclick="seatTapMember(null)" class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-300 border border-amber-500/50 whitespace-nowrap shadow-sm">
+                                    선택 취소 ✕
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    guideBar.className = "hidden";
+                    guideBar.innerHTML = "";
+                }
+            }
+
             // Update Seating Criteria Badge
             const criteriaBadge = document.getElementById('seatingCriteriaBadge');
             if (criteriaBadge) {
@@ -5416,22 +5509,55 @@
                     }
                 }
 
+                const isCurrentTableOfSelected = selectedSeatMemberId && members.some(m => m.id === selectedSeatMemberId);
+                const isTargetTable = selectedSeatMemberId && !isCurrentTableOfSelected;
+
                 const tableClickHandler = isSeatMoveMode ? `onclick="seatTapTable(${idx})"` : '';
-                const tableCursor = isSeatMoveMode ? 'cursor-pointer hover:border-amber-500/60 transition-colors' : '';
+                let tableHighlightClass = '';
+                if (isTargetTable) {
+                    tableHighlightClass = 'table-target-highlight border-2 border-dashed border-amber-400/90 bg-amber-950/15 shadow-lg shadow-amber-500/10 cursor-pointer';
+                } else if (isSeatMoveMode) {
+                    tableHighlightClass = 'cursor-pointer hover:border-amber-500/50 transition-colors';
+                }
+
+                let tBadgeHtml = '';
+                if (isTargetTable) {
+                    tBadgeHtml = `
+                        <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-md ring-2 ring-amber-300 animate-bounce cursor-pointer shrink-0" title="이 테이블(T${tableNo})로 이동">
+                            T${tableNo}
+                        </button>
+                    `;
+                } else {
+                    tBadgeHtml = `
+                        <button type="button" ${isSeatMoveMode ? `onclick="event.stopPropagation(); seatTapTable(${idx})"` : ''} class="w-8 h-8 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm whitespace-nowrap ${isSeatMoveMode ? 'cursor-pointer hover:ring-2 hover:ring-amber-400' : ''}">
+                            T${tableNo}
+                        </button>
+                    `;
+                }
+
+                let moveTargetBadge = '';
+                if (isTargetTable) {
+                    moveTargetBadge = `
+                        <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-[11px] sm:text-xs px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1 cursor-pointer animate-pulse whitespace-nowrap">
+                            <i class="fa-solid fa-arrow-down text-[10px]"></i> T${tableNo} 이동
+                        </button>
+                    `;
+                } else if (isCurrentTableOfSelected) {
+                    moveTargetBadge = `<span class="text-[10px] sm:text-xs font-semibold text-zinc-400 bg-zinc-800/80 border border-zinc-700 px-2 py-0.5 rounded-full whitespace-nowrap">현재 위치</span>`;
+                }
 
                 return `
-                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden ${tableCursor}">
+                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
                         <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-8 h-8 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm whitespace-nowrap">
-                                    T${tableNo}
-                                </span>
+                                ${tBadgeHtml}
                                 <div>
                                     <h3 class="font-bold text-sm sm:text-base text-white whitespace-nowrap">${tableNo}번 테이블</h3>
                                     <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 및 신규 우선' : `그룹 ${tableNo}`}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
+                                ${moveTargetBadge}
                                 ${freshnessBadge}
                                 <span class="text-xs font-semibold text-zinc-300 bg-zinc-800/80 border border-zinc-700/80 px-2.5 py-0.5 rounded-full whitespace-nowrap">
                                     ${capacity}명
@@ -5441,8 +5567,8 @@
 
                         <div class="grid grid-cols-2 gap-2 sm:gap-2.5 min-h-[70px]">
                             ${members.length === 0 ? `
-                                <div class="col-span-2 py-6 text-center text-xs text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
-                                    비어있는 테이블 ${isSeatMoveMode ? '(탭하여 이동)' : ''}
+                                <div class="col-span-2 py-6 text-center text-xs ${isTargetTable ? 'text-amber-300 font-bold bg-amber-950/30 border-amber-400/50' : 'text-zinc-500'} border border-dashed border-zinc-800 rounded-xl">
+                                    비어있는 테이블 ${isTargetTable ? '👉 (탭하여 여기에 배치)' : (isSeatMoveMode ? '(탭하여 이동)' : '')}
                                 </div>
                             ` : members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
@@ -5461,18 +5587,32 @@
                                     : 'seat-card seat-card-female bg-gradient-to-br from-rose-950/30 via-[#1e1319] to-[#0f1118] border-rose-500/30 hover:border-rose-400/60 text-rose-100';
 
                                 const isSelected = isSeatMoveMode && selectedSeatMemberId === m.id;
+                                const isDimmed = isSeatMoveMode && selectedSeatMemberId && selectedSeatMemberId !== m.id;
+
+                                let memberVisualClass = '';
+                                if (isSelected) {
+                                    memberVisualClass = 'seat-move-selected';
+                                } else if (isDimmed) {
+                                    memberVisualClass = 'seat-move-dimmed';
+                                } else if (isSeatMoveMode) {
+                                    memberVisualClass = 'cursor-pointer hover:border-amber-400 hover:scale-[1.03] transition-all';
+                                }
+
                                 const memberClickHandler = isSeatMoveMode ? `onclick="event.stopPropagation(); seatTapMember('${m.id}')"` : '';
-                                const memberSelectionClass = isSelected ? 'ring-2 ring-amber-400 scale-105 shadow-lg shadow-amber-500/20 z-10' : '';
-                                const memberCursorClass = isSeatMoveMode ? 'cursor-pointer' : '';
 
                                 return `
-                                    <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberSelectionClass} ${memberCursorClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
+                                    <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none">
                                         <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
                                             <span class="font-bold text-sm sm:text-base tracking-wide leading-snug break-keep">
                                                 ${esc(m.name || '미지정')}
                                             </span>
                                             ${tagHtml}
                                         </div>
+                                        ${isSelected ? `
+                                            <span class="mt-1 inline-flex items-center gap-0.5 bg-black/50 text-amber-200 border border-amber-300/60 font-bold text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded shadow-sm">
+                                                ✓ 선택됨
+                                            </span>
+                                        ` : ''}
                                     </div>
                                 `;
                             }).join('')}
@@ -5508,8 +5648,11 @@
 
         window.seatTapMember = function(memberId) {
             if (!isSeatMoveMode) return;
-            // 같은 사람을 다시 누르면 선택 해제, 아니면 선택
-            selectedSeatMemberId = (selectedSeatMemberId === memberId) ? null : memberId;
+            if (!memberId) {
+                selectedSeatMemberId = null;
+            } else {
+                selectedSeatMemberId = (selectedSeatMemberId === memberId) ? null : memberId;
+            }
             renderSeatingPlan(isPart2Shuffle);
         };
 
@@ -5533,7 +5676,7 @@
 
             selectedSeatMemberId = null;
             renderSeatingPlan(isPart2Shuffle);
-            showToast(`${moved.name}님을 ${tableIdx + 1}번 테이블로 옮겼습니다.`, "success");
+            showToast(`✨ ${moved.name}님을 ${tableIdx + 1}번 테이블(T${tableIdx + 1})로 이동했습니다.`, "success");
         };
 
         window.requestShuffleWithPin = function() {
