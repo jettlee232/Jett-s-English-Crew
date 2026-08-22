@@ -5615,15 +5615,17 @@
                                 const isDimmed = isSeatMoveMode && selectedSeatMemberId && selectedSeatMemberId !== m.id;
 
                                 let memberVisualClass = '';
+                                let memberClickHandler = '';
                                 if (isSelected) {
-                                    memberVisualClass = 'seat-move-selected';
+                                    memberVisualClass = 'seat-move-selected cursor-pointer';
+                                    memberClickHandler = `onclick="event.stopPropagation(); seatTapMember(null)" title="선택 취소"`;
                                 } else if (isDimmed) {
-                                    memberVisualClass = 'seat-move-dimmed';
+                                    memberVisualClass = 'seat-move-dimmed pointer-events-none select-none';
+                                    memberClickHandler = '';
                                 } else if (isSeatMoveMode) {
                                     memberVisualClass = 'cursor-pointer hover:border-amber-400 hover:scale-[1.03] transition-all';
+                                    memberClickHandler = `onclick="event.stopPropagation(); seatTapMember('${m.id}')" title="이 회원 선택"`;
                                 }
-
-                                const memberClickHandler = isSeatMoveMode ? `onclick="event.stopPropagation(); seatTapMember('${m.id}')"` : '';
 
                                 return `
                                     <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none">
