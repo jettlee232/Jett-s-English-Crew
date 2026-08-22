@@ -5481,7 +5481,7 @@
                                         ${esc(selectedMemberName)}
                                     </span>
                                     <span class="text-xs sm:text-sm text-amber-200 font-medium truncate">
-                                        이동할 테이블(T1, T2...)을 탭하세요!
+                                        이동할 테이블의 [T1, T2...] 번호 버튼을 탭하세요!
                                     </span>
                                 </div>
                                 <button type="button" onclick="seatTapMember(null)" class="shrink-0 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-lg bg-amber-950/90 hover:bg-amber-900 text-amber-300 hover:text-white border border-amber-500/60 transition active:scale-95 whitespace-nowrap shadow-sm">
@@ -5534,26 +5534,23 @@
                 const isCurrentTableOfSelected = selectedSeatMemberId && members.some(m => m.id === selectedSeatMemberId);
                 const isTargetTable = selectedSeatMemberId && !isCurrentTableOfSelected;
 
-                const tableClickHandler = isSeatMoveMode ? `onclick="seatTapTable(${idx})"` : '';
                 let tableHighlightClass = '';
                 if (isTargetTable) {
-                    tableHighlightClass = 'table-target-highlight border-2 border-dashed border-amber-400/90 bg-amber-950/15 shadow-lg shadow-amber-500/10 cursor-pointer';
-                } else if (isSeatMoveMode) {
-                    tableHighlightClass = 'cursor-pointer hover:border-amber-500/50 transition-colors';
+                    tableHighlightClass = 'table-target-highlight border-2 border-dashed border-amber-400/90 bg-amber-950/15 shadow-lg shadow-amber-500/10';
                 }
 
                 let tBadgeHtml = '';
                 if (isTargetTable) {
                     tBadgeHtml = `
-                        <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-md ring-2 ring-amber-300 animate-bounce cursor-pointer shrink-0" title="이 테이블(T${tableNo})로 이동">
+                        <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-lg ring-2 ring-amber-300 animate-bounce cursor-pointer shrink-0" title="이 테이블(T${tableNo})로 이동">
                             T${tableNo}
                         </button>
                     `;
                 } else {
                     tBadgeHtml = `
-                        <button type="button" ${isSeatMoveMode ? `onclick="event.stopPropagation(); seatTapTable(${idx})"` : ''} class="w-8 h-8 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm whitespace-nowrap ${isSeatMoveMode ? 'cursor-pointer hover:ring-2 hover:ring-amber-400' : ''}">
+                        <span class="w-8 h-8 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm whitespace-nowrap">
                             T${tableNo}
-                        </button>
+                        </span>
                     `;
                 }
 
@@ -5561,7 +5558,7 @@
                 if (isTargetTable) {
                     moveTargetBadge = `
                         <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-[11px] sm:text-xs px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1 cursor-pointer animate-pulse whitespace-nowrap">
-                            <i class="fa-solid fa-arrow-down text-[10px]"></i> T${tableNo} 이동
+                            <i class="fa-solid fa-arrow-down text-[10px]"></i> T${tableNo}로 이동
                         </button>
                     `;
                 } else if (isCurrentTableOfSelected) {
@@ -5569,7 +5566,7 @@
                 }
 
                 return `
-                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
+                    <div class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
                         <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
                             <div class="flex items-center gap-2.5">
                                 ${tBadgeHtml}
@@ -5589,9 +5586,15 @@
 
                         <div class="grid grid-cols-2 gap-2 sm:gap-2.5 min-h-[70px]">
                             ${members.length === 0 ? `
-                                <div class="col-span-2 py-6 text-center text-xs ${isTargetTable ? 'text-amber-300 font-bold bg-amber-950/30 border-amber-400/50' : 'text-zinc-500'} border border-dashed border-zinc-800 rounded-xl">
-                                    비어있는 테이블 ${isTargetTable ? '👉 (탭하여 여기에 배치)' : (isSeatMoveMode ? '(탭하여 이동)' : '')}
-                                </div>
+                                ${isTargetTable ? `
+                                    <button type="button" onclick="event.stopPropagation(); seatTapTable(${idx})" class="col-span-2 py-6 text-center text-xs text-amber-300 font-bold bg-amber-950/30 hover:bg-amber-900/40 border border-dashed border-amber-400/50 rounded-xl transition cursor-pointer">
+                                        👉 T${tableNo} 버튼 또는 여기를 탭하여 배치
+                                    </button>
+                                ` : `
+                                    <div class="col-span-2 py-6 text-center text-xs text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                                        비어있는 테이블
+                                    </div>
+                                `}
                             ` : members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
                                 const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
