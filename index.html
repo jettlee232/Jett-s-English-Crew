@@ -484,6 +484,11 @@
             color: #be123c !important;
             border-color: #fecdd3 !important;
         }
+        html.light-theme .badge-expiry {
+            background-color: #fff1f2 !important;
+            color: #be123c !important;
+            border-color: #fecdd3 !important;
+        }
         html.light-theme #tab-content-3 .bg-emerald-950 {
             background-color: #ecfdf5 !important;
             color: #047857 !important;
@@ -2968,6 +2973,10 @@
         let isSeatMoveMode = false;
         let selectedSeatMemberId = null;
 
+        const COIN_EXPIRY_DAYS = 30;   // 당근 유효기간
+        const COIN_WARN_DAYS = 7;      // 만료 며칠 전부터 경고를 띄울지
+        let coinExpiryChecked = false;
+
         const DEFAULT_PIN_HASH = "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e"; // SHA-256 for '2323'
         let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
 
@@ -3748,6 +3757,7 @@
                 // 로컬 먼저 반영한다 (다른 관리자 함수들과 동일한 패턴)
                 member.coins = newCoins;
                 member.checkedInOnTime = true;
+                member.lastAttendedAt = now;
                 member.lastAction = '제시간 (+1당근)';
                 member.updatedAt = now;
                 const memberName = member.name;
@@ -3761,6 +3771,7 @@
                     await updateDoc(doc(membersCollectionRef, member.id), {
                         coins: newCoins,
                         checkedInOnTime: true,
+                        lastAttendedAt: now,
                         lastAction: '제시간 (+1당근)',
                         updatedAt: now
                     });
@@ -3802,6 +3813,7 @@
                 // 로컬 먼저 반영한다
                 member.coins = newCoins;
                 member.checkedInReview = true;
+                member.lastAttendedAt = now;
                 member.lastAction = '후기 작성 (+1당근)';
                 member.updatedAt = now;
                 const memberName = member.name;
@@ -3815,6 +3827,7 @@
                     await updateDoc(doc(membersCollectionRef, member.id), {
                         coins: newCoins,
                         checkedInReview: true,
+                        lastAttendedAt: now,
                         lastAction: '후기 작성 (+1당근)',
                         updatedAt: now
                     });
@@ -4019,17 +4032,24 @@
                         m.leftEarly = false;
                         m.totalAttended = newTotal;
                         m.isNew = newTotal > 1 ? false : (m.isNew || false);
+                        if (shouldIncrementAttended && m.isToday) {
+                            m.lastAttendedAt = now;
+                        }
                         m.updatedAt = now;
+                        const updateObj = {
+                            checkedInOnTime: false,
+                            checkedInReview: false,
+                            leftEarly: false,
+                            totalAttended: newTotal,
+                            isNew: m.isNew,
+                            updatedAt: now
+                        };
+                        if (shouldIncrementAttended && m.isToday) {
+                            updateObj.lastAttendedAt = now;
+                        }
                         updates.push({
                             id: m.id,
-                            data: {
-                                checkedInOnTime: false,
-                                checkedInReview: false,
-                                leftEarly: false,
-                                totalAttended: newTotal,
-                                isNew: m.isNew,
-                                updatedAt: now
-                            }
+                            data: updateObj
                         });
                     });
                     persistMembers([...membersData]);
@@ -4127,10 +4147,22 @@
                             selectedMemberId = null;
                         }
                         renderUI();
+
+                        if (!coinExpiryChecked && membersData.length > 0) {
+                            coinExpiryChecked = true;
+                            backfillLastAttended().then(() => expireStaleCoins());
+                        }
                     }
                 }, (error) => {
                     console.error("Firestore error:", error);
-                    if (membersData.length === 0) seedInitialMembers();
+                    if (membersData.length === 0) {
+                        seedInitialMembers();
+                    } else {
+                        if (!coinExpiryChecked && membersData.length > 0) {
+                            coinExpiryChecked = true;
+                            backfillLastAttended().then(() => expireStaleCoins());
+                        }
+                    }
                 });
 
                 // Load local cached table sessions
@@ -4214,6 +4246,7 @@
                 id: `mem-${idx + 1}-${crypto.randomUUID().slice(0, 8)}`,
                 ...item,
                 isToday: targetAttendees.includes(item.name),
+                lastAttendedAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             }));
@@ -4221,6 +4254,65 @@
             persistMembers(membersData);
 
             uploadMembersToServer(membersData);
+
+            if (!coinExpiryChecked && membersData.length > 0) {
+                coinExpiryChecked = true;
+                backfillLastAttended().then(() => expireStaleCoins());
+            }
+        }
+
+        // ponytail: 아이패드 로컬 시계 기준으로 판정한다. 기기 날짜가 크게 틀어지면
+        // 오작동하므로, 정확도가 중요해지면 서버 타임스탬프로 옮길 것.
+        async function expireStaleCoins() {
+            const now = Date.now();
+            const limitMs = COIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+            const expired = [];
+
+            for (const m of membersData) {
+                if ((m.coins || 0) <= 0) continue;          // 당근 없으면 대상 아님
+                if (!m.lastAttendedAt) continue;            // 기준일 없으면 건너뛴다 (3-4 참조)
+                const elapsed = now - new Date(m.lastAttendedAt).getTime();
+                if (!Number.isFinite(elapsed) || elapsed <= limitMs) continue;
+
+                m.coinsBeforeExpiry = m.coins;              // 복구용 기록
+                m.coinsExpiredAt = new Date().toISOString();
+                m.coins = 0;
+                m.lastAction = '당근 유효기간 만료';
+                m.updatedAt = new Date().toISOString();
+                expired.push(m);
+            }
+
+            if (expired.length === 0) return;
+
+            persistMembers([...membersData]);
+            renderUI();
+            showToast(`⏳ ${expired.length}명의 당근이 유효기간 만료로 소멸되었습니다.`, "warning");
+
+            try {
+                await Promise.all(expired.map(m => updateDoc(doc(membersCollectionRef, m.id), {
+                    coins: 0,
+                    coinsBeforeExpiry: m.coinsBeforeExpiry,
+                    coinsExpiredAt: m.coinsExpiredAt,
+                    lastAction: m.lastAction,
+                    updatedAt: m.updatedAt
+                })));
+            } catch (e) {
+                console.warn("만료 동기화 실패 (로컬은 반영됨):", e);
+            }
+        }
+
+        async function backfillLastAttended() {
+            const targets = membersData.filter(m => !m.lastAttendedAt);
+            if (targets.length === 0) return;
+            const now = new Date().toISOString();
+            targets.forEach(m => { m.lastAttendedAt = now; });
+            persistMembers([...membersData]);
+            try {
+                await Promise.all(targets.map(m =>
+                    updateDoc(doc(membersCollectionRef, m.id), { lastAttendedAt: now })));
+            } catch (e) {
+                console.warn("기준일 초기화 동기화 실패:", e);
+            }
         }
 
         function getAttendanceBadge(totalAttended = 0) {
@@ -4462,12 +4554,14 @@
             const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
             if (idx === -1) return;
 
+            const now = new Date().toISOString();
             membersData[idx].isToday = isToday;
             if (isToday) {
                 membersData[idx].leftEarly = false;
+                membersData[idx].lastAttendedAt = now;
             }
             membersData[idx].lastAction = isToday ? '오늘 참석 등록' : '참석 제외';
-            membersData[idx].updatedAt = new Date().toISOString();
+            membersData[idx].updatedAt = now;
 
             persistMembers([...membersData]);
             loadAdminActionPanel();
@@ -4478,12 +4572,16 @@
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, {
+                const updatePayload = {
                     isToday,
                     leftEarly: membersData[idx].leftEarly || false,
                     lastAction: membersData[idx].lastAction,
-                    updatedAt: membersData[idx].updatedAt
-                });
+                    updatedAt: now
+                };
+                if (isToday) {
+                    updatePayload.lastAttendedAt = now;
+                }
+                await updateDoc(docRef, updatePayload);
             } catch (e) {
                 console.warn(e);
             }
@@ -4675,14 +4773,14 @@
 
         window.selectTodayAttendeesAll = async function() {
             const now = new Date().toISOString();
-            membersData.forEach(m => { m.isToday = true; m.updatedAt = now; });
+            membersData.forEach(m => { m.isToday = true; m.leftEarly = false; m.lastAttendedAt = now; m.updatedAt = now; });
             persistMembers([...membersData]);
             renderUI();
             showToast("모든 회원이 오늘 참석으로 설정되었습니다.", "success");
 
             try {
                 await Promise.all(membersData.map(m =>
-                    updateDoc(doc(membersCollectionRef, m.id), { isToday: true, updatedAt: now })));
+                    updateDoc(doc(membersCollectionRef, m.id), { isToday: true, leftEarly: false, lastAttendedAt: now, updatedAt: now })));
             } catch (e) {
                 console.warn("참석 일괄 설정 동기화 실패 (로컬은 저장됨):", e);
             }
@@ -5598,6 +5696,13 @@
                     }
                 }
 
+                const daysLeft = m.lastAttendedAt
+                    ? COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(m.lastAttendedAt).getTime()) / 86400000)
+                    : null;
+                const expiryBadge = ((m.coins || 0) > 0 && daysLeft !== null && daysLeft <= COIN_WARN_DAYS)
+                    ? `<span class="badge-expiry text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/40 whitespace-nowrap mr-1 shrink-0" title="출석하면 갱신됩니다">⏳ ${daysLeft <= 0 ? '소멸 임박' : `D-${daysLeft}`}</span>`
+                    : '';
+
                 return `
                     <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1 sm:gap-2 w-full hover:border-zinc-700 overflow-hidden">
                         <!-- Col 1: Member Name -->
@@ -5619,6 +5724,7 @@
 
                         <!-- Col 3: Carrot Coin Slots & Score -->
                         <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
+                            ${expiryBadge}
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
