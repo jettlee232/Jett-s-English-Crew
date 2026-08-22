@@ -5481,7 +5481,7 @@
                                         ${esc(selectedMemberName)}
                                     </span>
                                     <span class="text-xs sm:text-sm text-amber-200 font-medium truncate">
-                                        이동할 테이블의 [T1, T2...] 번호 버튼을 탭하세요!
+                                        이동할 테이블(T1, T2... 번호 또는 테이블)을 탭하세요!
                                     </span>
                                 </div>
                                 <button type="button" onclick="seatTapMember(null)" class="shrink-0 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-lg bg-amber-950/90 hover:bg-amber-900 text-amber-300 hover:text-white border border-amber-500/60 transition active:scale-95 whitespace-nowrap shadow-sm">
@@ -5535,8 +5535,10 @@
                 const isTargetTable = selectedSeatMemberId && !isCurrentTableOfSelected;
 
                 let tableHighlightClass = '';
+                let tableClickHandler = '';
                 if (isTargetTable) {
-                    tableHighlightClass = 'table-target-highlight border-2 border-dashed border-amber-400/90 bg-amber-950/15 shadow-lg shadow-amber-500/10';
+                    tableHighlightClass = 'table-target-highlight border-2 border-dashed border-amber-400/90 bg-amber-950/15 shadow-lg shadow-amber-500/10 cursor-pointer';
+                    tableClickHandler = `onclick="seatTapTable(${idx})"`;
                 }
 
                 let tBadgeHtml = '';
@@ -5566,7 +5568,7 @@
                 }
 
                 return `
-                    <div class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
+                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
                         <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
                             <div class="flex items-center gap-2.5">
                                 ${tBadgeHtml}
