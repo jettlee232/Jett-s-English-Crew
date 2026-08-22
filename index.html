@@ -853,6 +853,10 @@
                             <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="1부 배치 복원">
                                 <i class="fa-solid fa-rotate-left text-[11px]"></i>
                             </button>
+
+                            <button id="btnSeatMoveToggle" onclick="toggleSeatMoveMode()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="자리 수동 이동">
+                                <i class="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
+                            </button>
                             
                             <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="2부 셔플">
                                 <i class="fa-solid fa-shuffle text-[11px]"></i>
@@ -2957,6 +2961,8 @@
         let seatingSnapshotSig = '';
         let isPart2Shuffle = false;
         let showLeaderFreshness = false;
+        let isSeatMoveMode = false;
+        let selectedSeatMemberId = null;
 
         const DEFAULT_PIN_HASH = "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e"; // SHA-256 for '2323'
         let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
@@ -5201,6 +5207,18 @@
                 }
             }
 
+            // Update Seat Move Toggle Button
+            const moveToggleBtn = document.getElementById('btnSeatMoveToggle');
+            if (moveToggleBtn) {
+                if (isSeatMoveMode) {
+                    moveToggleBtn.className = "flex items-center justify-center w-7 h-7 rounded-lg bg-amber-600 text-white font-bold ring-2 ring-amber-400 shadow-sm transition active:scale-95";
+                    moveToggleBtn.title = "자리 이동 모드 켜짐 (탭하여 끄기)";
+                } else {
+                    moveToggleBtn.className = "flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95";
+                    moveToggleBtn.title = "자리 수동 이동";
+                }
+            }
+
             // Update Seating Criteria Badge
             const criteriaBadge = document.getElementById('seatingCriteriaBadge');
             if (criteriaBadge) {
@@ -5236,8 +5254,11 @@
                     }
                 }
 
+                const tableClickHandler = isSeatMoveMode ? `onclick="seatTapTable(${idx})"` : '';
+                const tableCursor = isSeatMoveMode ? 'cursor-pointer hover:border-amber-500/60 transition-colors' : '';
+
                 return `
-                    <div class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden">
+                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden ${tableCursor}">
                         <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-8 h-8 rounded-xl ${hasLeader ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'} font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm whitespace-nowrap">
@@ -5256,8 +5277,12 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-                            ${members.map(m => {
+                        <div class="grid grid-cols-2 gap-2 sm:gap-2.5 min-h-[70px]">
+                            ${members.length === 0 ? `
+                                <div class="col-span-2 py-6 text-center text-xs text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                                    비어있는 테이블 ${isSeatMoveMode ? '(탭하여 이동)' : ''}
+                                </div>
+                            ` : members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
                                 const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
                                 const isMale = m.gender === 'M';
@@ -5273,8 +5298,13 @@
                                     ? 'seat-card seat-card-male bg-gradient-to-br from-blue-950/30 via-[#131722] to-[#0f1118] border-blue-500/30 hover:border-blue-400/60 text-blue-100'
                                     : 'seat-card seat-card-female bg-gradient-to-br from-rose-950/30 via-[#1e1319] to-[#0f1118] border-rose-500/30 hover:border-rose-400/60 text-rose-100';
 
+                                const isSelected = isSeatMoveMode && selectedSeatMemberId === m.id;
+                                const memberClickHandler = isSeatMoveMode ? `onclick="event.stopPropagation(); seatTapMember('${m.id}')"` : '';
+                                const memberSelectionClass = isSelected ? 'ring-2 ring-amber-400 scale-105 shadow-lg shadow-amber-500/20 z-10' : '';
+                                const memberCursorClass = isSeatMoveMode ? 'cursor-pointer' : '';
+
                                 return `
-                                    <div class="aspect-[4/3] rounded-xl ${cardTheme} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
+                                    <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberSelectionClass} ${memberCursorClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 hover:scale-[1.02] relative select-none">
                                         <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
                                             <span class="font-bold text-sm sm:text-base tracking-wide leading-snug break-keep">
                                                 ${esc(m.name || '미지정')}
@@ -5296,6 +5326,52 @@
                 renderSeatingPlan(isPart2Shuffle);
                 showToast(showLeaderFreshness ? "👁️ 리더 전용 신선도 지수가 표시됩니다." : "🔒 신선도 지수가 숨김 처리되었습니다.", "info");
             });
+        };
+
+        window.toggleSeatMoveMode = function() {
+            if (isSeatMoveMode) {
+                isSeatMoveMode = false;
+                selectedSeatMemberId = null;
+                renderSeatingPlan(isPart2Shuffle);
+                showToast("🔒 자리 이동 모드가 종료되었습니다.", "info");
+            } else {
+                openCustomPinModal("🔑 자리 이동 모드", () => {
+                    isSeatMoveMode = true;
+                    selectedSeatMemberId = null;
+                    renderSeatingPlan(isPart2Shuffle);
+                    showToast("✋ 자리 이동 모드: 옮길 멤버 ➔ 이동할 테이블 순으로 탭하세요.", "info");
+                });
+            }
+        };
+
+        window.seatTapMember = function(memberId) {
+            if (!isSeatMoveMode) return;
+            // 같은 사람을 다시 누르면 선택 해제, 아니면 선택
+            selectedSeatMemberId = (selectedSeatMemberId === memberId) ? null : memberId;
+            renderSeatingPlan(isPart2Shuffle);
+        };
+
+        window.seatTapTable = function(tableIdx) {
+            if (!isSeatMoveMode || !selectedSeatMemberId) return;
+
+            // 현재 배치에서 그 사람을 찾아 빼고, 목표 테이블에 넣는다
+            let moved = null;
+            for (const tbl of currentSeatingTables) {
+                const i = tbl.findIndex(m => m.id === selectedSeatMemberId);
+                if (i !== -1) { moved = tbl.splice(i, 1)[0]; break; }
+            }
+            if (!moved) { selectedSeatMemberId = null; return; }
+
+            // 이미 그 테이블에 있었으면 되돌린다 (제자리 탭)
+            currentSeatingTables[tableIdx].push(moved);
+
+            // ⭐ 스냅샷에도 반영해야 화면 갱신 시 되돌아가지 않는다
+            const snap = JSON.parse(JSON.stringify(currentSeatingTables));
+            if (isPart2Shuffle) part2SeatingSnapshot = snap; else part1SeatingSnapshot = snap;
+
+            selectedSeatMemberId = null;
+            renderSeatingPlan(isPart2Shuffle);
+            showToast(`${moved.name}님을 ${tableIdx + 1}번 테이블로 옮겼습니다.`, "success");
         };
 
         window.requestShuffleWithPin = function() {
