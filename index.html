@@ -511,6 +511,15 @@
         html.light-theme #btnLeaderLock * {
             color: #c2410c !important;
         }
+        html.light-theme #toast {
+            background-color: rgba(255, 255, 255, 0.96) !important;
+            color: #09090b !important;
+            border-color: #e4e4e7 !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2) !important;
+        }
+        html.light-theme #toast #toastMsg {
+            color: #09090b !important;
+        }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
@@ -1912,10 +1921,10 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#18181f] text-white border border-zinc-700/80 px-5 py-3 rounded-2xl shadow-2xl hidden z-50 flex items-center gap-3 min-w-[280px]">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-blue-400 text-lg"></i>
-        <span id="toastMsg" class="text-xs sm:text-sm font-medium whitespace-nowrap">처리되었습니다.</span>
+    <!-- Toast Notification (Top Center Floating Capsule) -->
+    <div id="toast" class="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 bg-[#121216]/95 backdrop-blur-md text-white border border-zinc-700/80 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full shadow-2xl hidden z-50 flex items-center gap-2.5 min-w-fit max-w-[92vw] pointer-events-none transition-all duration-300 transform">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-blue-400 text-base sm:text-lg shrink-0"></i>
+        <span id="toastMsg" class="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">처리되었습니다.</span>
     </div>
 
 <script type="module">
@@ -3965,7 +3974,7 @@
                 if (callback) callback();
                 return;
             }
-            showToast("🔒 리더 전용 기능입니다. 상단의 열쇠(🔑) 버튼으로 먼저 인증해 주세요.", "warning");
+            showToast("🔒 리더 전용 기능입니다 (🔑 상단 인증 필요)", "warning");
         }
 
         window.handleLeaderAdminMasterClick = function() {
@@ -6069,6 +6078,7 @@
             }
         };
 
+        let toastTimer = null;
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMsg');
@@ -6079,19 +6089,22 @@
             toastMsg.innerText = message;
 
             if (type === 'success') {
-                toastIcon.className = 'fa-solid fa-circle-check text-blue-400 text-xl';
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base sm:text-lg shrink-0';
             } else if (type === 'warning') {
-                toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-xl';
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-base sm:text-lg shrink-0';
             } else if (type === 'error') {
-                toastIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-xl';
+                toastIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-base sm:text-lg shrink-0';
             } else {
-                toastIcon.className = 'fa-solid fa-circle-info text-pink-400 text-xl';
+                toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-base sm:text-lg shrink-0';
             }
 
+            if (toastTimer) clearTimeout(toastTimer);
+
             toast.classList.remove('hidden');
-            setTimeout(() => {
+            toastTimer = setTimeout(() => {
                 toast.classList.add('hidden');
-            }, 3000);
+                toastTimer = null;
+            }, 2500);
         }
 
         window.toggleModal = function(modalId) {
