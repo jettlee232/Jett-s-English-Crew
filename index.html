@@ -4692,32 +4692,33 @@
 
             let filtered = [...membersData];
 
-            // 1. 직접 검색어가 있는 경우: 초성, 자모 분해(중간 타이핑 포함) 및 영/한 호환 실시간 검색
+            // 1. 직접 검색어가 있는 경우: 상단 필터(자음/알파벳, 참석/미참석/당근왕)와 상관없이 전체 회원 대상 실시간 검색
             if (query) {
                 filtered = filtered.filter(m => matchMemberSearch(m.name, query));
-            } else if (activeConsonantFilter !== 'all') {
-                // 2. 검색어가 없을 때만 자음/알파벳 필터 적용
-                if (activeConsonantFilter === 'ㄱ-ㅎ') {
-                    filtered = filtered.filter(m => {
-                        if (!m.name) return false;
-                        const code = m.name.charCodeAt(0);
-                        return (code >= 44032 && code <= 55203) || (code >= 12593 && code <= 12643);
-                    });
-                } else {
-                    filtered = filtered.filter(m => {
-                        if (!m.name) return false;
-                        return m.name.charAt(0).toUpperCase() === activeConsonantFilter;
-                    });
+            } else {
+                // 2. 검색어가 없을 때만 상단 자음/알파벳 및 참석 상태 필터 적용
+                if (activeConsonantFilter !== 'all') {
+                    if (activeConsonantFilter === 'ㄱ-ㅎ') {
+                        filtered = filtered.filter(m => {
+                            if (!m.name) return false;
+                            const code = m.name.charCodeAt(0);
+                            return (code >= 44032 && code <= 55203) || (code >= 12593 && code <= 12643);
+                        });
+                    } else {
+                        filtered = filtered.filter(m => {
+                            if (!m.name) return false;
+                            return m.name.charAt(0).toUpperCase() === activeConsonantFilter;
+                        });
+                    }
                 }
-            }
 
-            // 3. 참석 상태 필터
-            if (activeStatusFilter === 'today') {
-                filtered = filtered.filter(m => m.isToday);
-            } else if (activeStatusFilter === 'absent') {
-                filtered = filtered.filter(m => !m.isToday);
-            } else if (activeStatusFilter === 'king') {
-                filtered = filtered.filter(m => (m.coins || 0) >= 6);
+                if (activeStatusFilter === 'today') {
+                    filtered = filtered.filter(m => m.isToday);
+                } else if (activeStatusFilter === 'absent') {
+                    filtered = filtered.filter(m => !m.isToday);
+                } else if (activeStatusFilter === 'king') {
+                    filtered = filtered.filter(m => (m.coins || 0) >= 6);
+                }
             }
 
             filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
@@ -4754,6 +4755,8 @@
                 `;
             }).join('');
         }
+
+        window.renderAdminMemberList = renderAdminMemberList;
 
         window.clearAdminSearch = function() {
             const input = document.getElementById('adminMemberSearchInput');
