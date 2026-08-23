@@ -3957,12 +3957,7 @@
                 if (callback) callback();
                 return;
             }
-            openCustomPinModal(title || "🔑 리더 관리자 인증", () => {
-                isLeaderAuthenticated = true;
-                updateLeaderAuthUI();
-                showToast("👑 리더 인증 완료! 설정 아이콘(⚙️)으로 전환되었습니다.", "success");
-                if (callback) callback();
-            });
+            showToast("🔒 리더 전용 기능입니다. 상단의 열쇠(🔑) 버튼으로 먼저 인증해 주세요.", "warning");
         }
 
         window.handleLeaderAdminMasterClick = function() {
@@ -3970,21 +3965,16 @@
                 toggleModal('adminModal');
                 switchAdminTab(1);
             } else {
-                requireLeaderAuth("🔑 리더 관리자 모드 활성화", () => {
-                    // 인증 완료 후 옵션 모달을 바로 띄우지 않고 메인 페이지 유지 (아이콘만 ⚙️로 전환)
+                openCustomPinModal("🔑 리더 관리자 인증", () => {
+                    isLeaderAuthenticated = true;
+                    updateLeaderAuthUI();
+                    showToast("👑 리더 인증 완료! 설정 아이콘(⚙️)으로 전환되었습니다.", "success");
                 });
             }
         };
 
         window.requestAdminAccess = window.handleLeaderAdminMasterClick;
-
-        window.toggleLeaderAuthMaster = function() {
-            if (isLeaderAuthenticated) {
-                lockLeaderAuth();
-            } else {
-                requireLeaderAuth("🔑 리더 관리자 모드 활성화", () => {});
-            }
-        };
+        window.toggleLeaderAuthMaster = window.handleLeaderAdminMasterClick;
 
         window.lockLeaderAuth = function() {
             isLeaderAuthenticated = false;
