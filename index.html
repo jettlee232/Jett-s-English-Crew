@@ -1523,8 +1523,8 @@
                     <span>2. 회원 관리</span>
                 </button>
                 <button id="admin-tab-btn-3" onclick="switchAdminTab(3)" class="admin-tab-btn py-2 rounded-lg text-center text-zinc-400 hover:text-white transition flex items-center justify-center gap-1 whitespace-nowrap">
-                    <i class="fa-solid fa-database text-xs"></i>
-                    <span>3. 백업/리셋</span>
+                    <i class="fa-solid fa-carrot text-xs text-orange-400"></i>
+                    <span>3. 백업/당근관리</span>
                 </button>
             </div>
 
@@ -1798,6 +1798,50 @@
                             <p class="text-xs text-zinc-500 mt-0.5 whitespace-nowrap">클릭하거나 CSV 파일을 끌어오세요</p>
                             <input type="file" id="csvFileInput" accept=".csv" onchange="importMembersCSV(event)" class="hidden">
                         </label>
+                    </div>
+                </div>
+
+                <!-- Carrot Points Bulk Management & Event Card -->
+                <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-1">
+                        <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+                            <i class="fa-solid fa-carrot text-orange-400 text-base"></i>
+                            <span>당근 포인트 일괄 관리 (이벤트 / 정산)</span>
+                        </label>
+                        <span class="text-[11px] text-zinc-500 font-medium">전체 회원 대상</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+                        이벤트 참여 보상으로 모든 회원에게 당근을 일괄 지급하거나, 시즌 종료/정산 시 일괄 초기화합니다.
+                    </p>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="grid grid-cols-3 gap-2 pt-0.5">
+                        <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/70 hover:bg-orange-900/90 text-orange-300 border border-orange-600/50 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 지급">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>전체 +1 당근</span>
+                        </button>
+                        <button onclick="bulkAdjustMemberCoins(2)" class="bg-amber-950/70 hover:bg-amber-900/90 text-amber-300 border border-amber-600/50 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +2개 지급">
+                            <i class="fa-solid fa-gift text-xs"></i>
+                            <span>전체 +2 당근</span>
+                        </button>
+                        <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 차감">
+                            <i class="fa-solid fa-minus text-xs"></i>
+                            <span>전체 -1 당근</span>
+                        </button>
+                    </div>
+
+                    <!-- Custom Number Input & Full Reset -->
+                    <div class="flex flex-col sm:flex-row gap-2 pt-1 border-t border-zinc-800/80">
+                        <div class="flex flex-1 gap-1.5">
+                            <input id="bulkCoinCustomInput" type="number" placeholder="직접 입력 (+/- 숫자)" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3 py-2 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder:text-zinc-600">
+                            <button onclick="customBulkAdjustCoins()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold py-2 px-3 rounded-xl text-xs sm:text-sm transition whitespace-nowrap active:scale-95 cursor-pointer">
+                                일괄 적용
+                            </button>
+                        </div>
+                        <button onclick="openResetAllCoinsModal()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 font-bold py-2 px-3 rounded-xl text-xs sm:text-sm transition whitespace-nowrap active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>전체 0개 초기화</span>
+                        </button>
                     </div>
                 </div>
 
@@ -4239,6 +4283,82 @@
             });
         };
 
+        window.openResetAllCoinsModal = function() {
+            openConfirmModal({
+                title: "🥕 전체 당근 포인트 초기화",
+                msg: "등록된 <strong>모든 회원의 당근 보유 수를 0개로 초기화</strong>하시겠습니까?<br><span class='text-xs text-zinc-500'>* 총 참석 회차 및 개인 정보는 안전하게 보존됩니다.</span>",
+                showOption: false,
+                onConfirm: async () => {
+                    const now = new Date().toISOString();
+                    const updates = [];
+                    membersData.forEach(m => {
+                        m.coins = 0;
+                        m.updatedAt = now;
+                        updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
+                    });
+                    persistMembers([...membersData]);
+                    renderUI();
+                    showToast("🥕 모든 회원의 당근이 0개로 초기화되었습니다.", "success");
+
+                    try {
+                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                    } catch (e) {
+                        console.warn("당근 일괄 초기화 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                    }
+                }
+            });
+        };
+
+        window.bulkAdjustMemberCoins = function(delta) {
+            const deltaNum = parseInt(delta, 10);
+            if (isNaN(deltaNum) || deltaNum === 0) {
+                showToast("변경할 당근 수량을 올바르게 입력해주세요.", "warning");
+                return;
+            }
+
+            const actionName = deltaNum > 0 ? `+${deltaNum}개 일괄 지급` : `${deltaNum}개 일괄 차감`;
+            const confirmMsg = deltaNum > 0 
+                ? `🎉 이벤트: 등록된 <strong>모든 회원에게 당근 ${deltaNum}개를 일괄 지급</strong>하시겠습니까?`
+                : `⚠️ 등록된 <strong>모든 회원의 당근을 ${Math.abs(deltaNum)}개씩 일괄 차감</strong>하시겠습니까?<br><span class='text-xs text-zinc-500'>* 차감 시 당근은 0개 미만(음수)으로 내려가지 않습니다.</span>`;
+
+            openConfirmModal({
+                title: `🥕 전체 당근 ${actionName}`,
+                msg: confirmMsg,
+                showOption: false,
+                onConfirm: async () => {
+                    const now = new Date().toISOString();
+                    const updates = [];
+                    membersData.forEach(m => {
+                        const cur = parseInt(m.coins, 10) || 0;
+                        const updatedCoins = Math.max(0, cur + deltaNum);
+                        m.coins = updatedCoins;
+                        m.updatedAt = now;
+                        updates.push({ id: m.id, data: { coins: updatedCoins, updatedAt: now } });
+                    });
+                    persistMembers([...membersData]);
+                    renderUI();
+                    showToast(`🥕 모든 회원에게 당근 ${actionName} 완료!`, "success");
+
+                    try {
+                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                    } catch (e) {
+                        console.warn("당근 일괄 조정 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                    }
+                }
+            });
+        };
+
+        window.customBulkAdjustCoins = function() {
+            const input = document.getElementById('bulkCoinCustomInput');
+            const val = input ? parseInt(input.value, 10) : 0;
+            if (!val || isNaN(val)) {
+                showToast("지급 또는 차감할 수량(숫자)을 입력해주세요.", "warning");
+                return;
+            }
+            bulkAdjustMemberCoins(val);
+            if (input) input.value = '';
+        };
+
         async function initApp() {
             try {
                 // 인증 실패가 나머지 초기화(테마/탭/리스너)를 막지 않도록 격리한다
@@ -4400,6 +4520,13 @@
                 try {
                     const parsed = JSON.parse(localSaved);
                     if (Array.isArray(parsed) && parsed.length >= 50) {
+                        if (!localStorage.getItem('carrot_points_reset_0823_v1')) {
+                            parsed.forEach(m => {
+                                m.coins = 0;
+                            });
+                            localStorage.setItem('carrot_points_reset_0823_v1', 'true');
+                            localStorage.setItem('localMembersData', JSON.stringify(parsed));
+                        }
                         if (!syncKey) {
                             parsed.forEach(m => {
                                 if (m.name === '으니') m.name = 'Elle';
