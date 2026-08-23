@@ -536,6 +536,16 @@
             border-color: #52525b !important;
         }
 
+        /* 🥕 Active Reward Mode Button Icons -> Always White */
+        #btnModeOntime.bg-blue-600 i,
+        #btnModeReview.bg-pink-600 i,
+        #btnModeLocked.bg-zinc-800 i,
+        html.light-theme #btnModeOntime.bg-blue-600 i,
+        html.light-theme #btnModeReview.bg-pink-600 i,
+        html.light-theme #btnModeLocked.bg-zinc-800 i {
+            color: #ffffff !important;
+        }
+
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
@@ -1446,15 +1456,15 @@
                         </span>
                         <div class="grid grid-cols-3 gap-1.5 flex-1 min-w-[280px]">
                             <button id="btnModeOntime" onclick="setLeaderMode('ontime')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-blue-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="제시간 도착 적립 모드 켜기">
-                                <i class="fa-solid fa-stopwatch text-xs sm:text-sm text-blue-400"></i>
+                                <i id="iconModeOntime" class="fa-solid fa-stopwatch text-xs sm:text-sm text-blue-400"></i>
                                 <span>1. 제시간 도착</span>
                             </button>
                             <button id="btnModeReview" onclick="setLeaderMode('review')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-pink-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="후기 작성 적립 모드 켜기">
-                                <i class="fa-solid fa-pen-nib text-xs sm:text-sm text-pink-400"></i>
+                                <i id="iconModeReview" class="fa-solid fa-pen-nib text-xs sm:text-sm text-pink-400"></i>
                                 <span>2. 후기 작성</span>
                             </button>
                             <button id="btnModeLocked" onclick="setLeaderMode('locked')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="적립 잠금 / 마감">
-                                <i class="fa-solid fa-lock text-xs sm:text-sm text-zinc-400"></i>
+                                <i id="iconModeLocked" class="fa-solid fa-lock text-xs sm:text-sm text-zinc-400"></i>
                                 <span>3. 적립 잠금</span>
                             </button>
                         </div>
@@ -3623,24 +3633,35 @@
             const btnReview = document.getElementById('btnModeReview');
             const btnLocked = document.getElementById('btnModeLocked');
 
+            const iconOntime = document.getElementById('iconModeOntime');
+            const iconReview = document.getElementById('iconModeReview');
+            const iconLocked = document.getElementById('iconModeLocked');
+
             const defaultBtnClass = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer";
 
             if (btnOntime) btnOntime.className = defaultBtnClass;
             if (btnReview) btnReview.className = defaultBtnClass;
             if (btnLocked) btnLocked.className = defaultBtnClass;
 
+            if (iconOntime) iconOntime.className = "fa-solid fa-stopwatch text-xs sm:text-sm text-blue-400";
+            if (iconReview) iconReview.className = "fa-solid fa-pen-nib text-xs sm:text-sm text-pink-400";
+            if (iconLocked) iconLocked.className = "fa-solid fa-lock text-xs sm:text-sm text-zinc-400";
+
             if (activeMode === 'ontime') {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping";
                 if (statusLabel) statusLabel.innerText = "⏰ 제시간 도착 당근 적립 모드";
                 if (btnOntime) btnOntime.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-blue-600 text-white border border-blue-400 shadow-md ring-2 ring-blue-400/40 cursor-pointer";
+                if (iconOntime) iconOntime.className = "fa-solid fa-stopwatch text-xs sm:text-sm text-white";
             } else if (activeMode === 'review') {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-pink-400 animate-ping";
                 if (statusLabel) statusLabel.innerText = "📝 후기 작성 당근 적립 모드";
                 if (btnReview) btnReview.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-pink-600 text-white border border-pink-400 shadow-md ring-2 ring-pink-400/40 cursor-pointer";
+                if (iconReview) iconReview.className = "fa-solid fa-pen-nib text-xs sm:text-sm text-white";
             } else {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-zinc-500";
                 if (statusLabel) statusLabel.innerText = "현재 모드: 잠금/마감";
                 if (btnLocked) btnLocked.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-800 text-zinc-200 border border-zinc-600 shadow-md ring-2 ring-zinc-500/30 cursor-pointer";
+                if (iconLocked) iconLocked.className = "fa-solid fa-lock text-xs sm:text-sm text-white";
             }
 
             renderStep2Button();
