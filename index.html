@@ -480,6 +480,26 @@
             color: #ffffff !important;
         }
 
+        /* 👑 리더 관리자 모드 버튼 */
+        #leaderAuthBtn.leader-active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            color: #09090b !important;
+            border-color: #fef08a !important;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.5) !important;
+        }
+        #leaderAuthBtn.leader-active * {
+            color: #09090b !important;
+            font-weight: 800 !important;
+        }
+        html.light-theme #leaderAuthBtn.leader-active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            color: #ffffff !important;
+            border-color: #b45309 !important;
+        }
+        html.light-theme #leaderAuthBtn.leader-active * {
+            color: #ffffff !important;
+        }
+
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
@@ -705,6 +725,10 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
+                <button id="leaderAuthBtn" onclick="toggleLeaderAuthMaster()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition text-[11px] sm:text-xs font-semibold whitespace-nowrap cursor-pointer" title="리더 관리자 모드 (비밀번호 인증)">
+                    <i id="leaderAuthIcon" class="fa-solid fa-key text-[10px] sm:text-xs"></i>
+                    <span id="leaderAuthText" class="hidden sm:inline">리더인증</span>
+                </button>
                 <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
                     <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
@@ -3430,7 +3454,7 @@
         })();
 
         window.requestAdminAccess = function() {
-            openCustomPinModal("🔑 리더 관리 메뉴 비밀번호 확인", () => {
+            requireLeaderAuth("🔑 리더 관리 메뉴 비밀번호 확인", () => {
                 toggleModal('adminModal');
                 switchAdminTab(1);
             });
@@ -3923,6 +3947,59 @@
             }
         };
 
+        let isLeaderAuthenticated = false;
+
+        function requireLeaderAuth(title, callback) {
+            if (isLeaderAuthenticated) {
+                if (callback) callback();
+                return;
+            }
+            openCustomPinModal(title || "🔑 리더 관리자 인증", () => {
+                isLeaderAuthenticated = true;
+                updateLeaderAuthUI();
+                showToast("👑 리더 모드가 활성화되었습니다. 모든 기능이 즉시 사용 가능합니다.", "success");
+                if (callback) callback();
+            });
+        }
+
+        window.toggleLeaderAuthMaster = function() {
+            if (isLeaderAuthenticated) {
+                lockLeaderAuth();
+            } else {
+                requireLeaderAuth("🔑 리더 관리자 모드 활성화", () => {});
+            }
+        };
+
+        window.lockLeaderAuth = function() {
+            isLeaderAuthenticated = false;
+            if (isSeatMoveMode) {
+                isSeatMoveMode = false;
+                selectedSeatMemberId = null;
+                renderSeatingPlan(isPart2Shuffle);
+            }
+            updateLeaderAuthUI();
+            showToast("🔒 리더 모드가 잠겼습니다.", "info");
+        };
+
+        function updateLeaderAuthUI() {
+            const btn = document.getElementById('leaderAuthBtn');
+            const icon = document.getElementById('leaderAuthIcon');
+            const text = document.getElementById('leaderAuthText');
+            if (!btn) return;
+
+            if (isLeaderAuthenticated) {
+                btn.className = "flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold border border-amber-300 shadow-md ring-2 ring-amber-400/40 active:scale-95 transition text-[11px] sm:text-xs whitespace-nowrap leader-active cursor-pointer";
+                btn.title = "리더 모드 켜짐 (탭하여 잠금)";
+                if (icon) icon.className = "fa-solid fa-crown text-[10px] sm:text-xs text-amber-950";
+                if (text) text.innerHTML = "리더ON <span class='text-[10px] font-normal text-amber-950'>🔒</span>";
+            } else {
+                btn.className = "flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition text-[11px] sm:text-xs font-semibold whitespace-nowrap cursor-pointer";
+                btn.title = "리더 관리자 모드 (비밀번호 인증)";
+                if (icon) icon.className = "fa-solid fa-key text-[10px] sm:text-xs";
+                if (text) text.innerText = "리더인증";
+            }
+        }
+
         function openCustomPinModal(title, callback) {
             customPinCallback = callback;
             const modal = document.getElementById('customPinModal');
@@ -3950,6 +4027,8 @@
             if (enteredHash === leaderPinHash) {
                 const cb = customPinCallback;
                 closeCustomPinModal();
+                isLeaderAuthenticated = true;
+                updateLeaderAuthUI();
                 if (cb) cb();
             } else {
                 showToast("비밀번호가 올바르지 않습니다.", "error");
@@ -5652,7 +5731,7 @@
         }
 
         window.toggleLeaderFreshnessWithPin = function() {
-            openCustomPinModal("🔑 리더 전용 신선도 지수 확인", () => {
+            requireLeaderAuth("🔑 리더 전용 신선도 지수 확인", () => {
                 showLeaderFreshness = !showLeaderFreshness;
                 renderSeatingPlan(isPart2Shuffle);
                 showToast(showLeaderFreshness ? "👁️ 리더 전용 신선도 지수가 표시됩니다." : "🔒 신선도 지수가 숨김 처리되었습니다.", "info");
@@ -5666,7 +5745,7 @@
                 renderSeatingPlan(isPart2Shuffle);
                 showToast("🔒 자리 이동 모드가 종료되었습니다.", "info");
             } else {
-                openCustomPinModal("🔑 자리 이동 모드", () => {
+                requireLeaderAuth("🔑 자리 이동 모드", () => {
                     isSeatMoveMode = true;
                     selectedSeatMemberId = null;
                     renderSeatingPlan(isPart2Shuffle);
@@ -5709,7 +5788,7 @@
         };
 
         window.requestShuffleWithPin = function() {
-            openCustomPinModal("🔑 2부 테이블 셔플 비밀번호 확인", () => {
+            requireLeaderAuth("🔑 2부 테이블 셔플 비밀번호 확인", () => {
                 playShuffleSound();
                 renderSeatingPlan(true, true);
                 showToast("🔀 비슷한 세대끼리 모은 2부 배치가 완료되었습니다!", "info");
@@ -5727,7 +5806,7 @@
                 return;
             }
 
-            openCustomPinModal("🔑 오늘 테이블 확정 & 만남 이력 저장", async () => {
+            requireLeaderAuth("🔑 오늘 테이블 확정 & 만남 이력 저장", async () => {
                 const sessionDocId = crypto.randomUUID();
                 const newSession = {
                     id: sessionDocId,
@@ -5767,7 +5846,7 @@
         };
 
         window.openClearHistoryModal = function() {
-            openCustomPinModal("🔑 만남 이력 전체 초기화 비밀번호 확인", () => {
+            requireLeaderAuth("🔑 만남 이력 전체 초기화 비밀번호 확인", () => {
                 openConfirmModal({
                     title: "⚠️ 만남 이력 전체 초기화",
                     msg: `현재까지 누적된 ${tableSessionsData.length}회의 모든 테이블 만남 이력을 영구 삭제하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>(회원 정보나 당근 포인트는 보존됩니다)</span>`,
