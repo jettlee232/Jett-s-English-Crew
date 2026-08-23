@@ -502,6 +502,15 @@
         html.light-theme #btnLeaderAdminMaster.leader-active * {
             color: #d97706 !important;
         }
+        html.light-theme #btnLeaderLock {
+            background-color: #fff7ed !important;
+            color: #c2410c !important;
+            border-color: #f97316 !important;
+            box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2) !important;
+        }
+        html.light-theme #btnLeaderLock * {
+            color: #c2410c !important;
+        }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
@@ -730,6 +739,9 @@
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
                 <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
                     <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
+                </button>
+                <button id="btnLeaderLock" onclick="lockLeaderAuth()" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-amber-950/70 hover:bg-amber-900/80 text-amber-300 border border-amber-500/50 shadow-md ring-1 ring-amber-400/30 active:scale-95 transition cursor-pointer" title="리더 모드 잠그기 (🔒)">
+                    <i class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
                 <button id="btnLeaderAdminMaster" onclick="handleLeaderAdminMasterClick()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer" title="리더 관리자 인증 (🔑)">
                     <i id="iconLeaderAdminMaster" class="fa-solid fa-key text-xs sm:text-sm"></i>
@@ -1512,10 +1524,6 @@
                     <span>리더 스터디 관리 메뉴</span>
                 </h3>
                 <div class="flex items-center gap-2">
-                    <button onclick="lockLeaderAuth(); toggleModal('adminModal');" class="text-xs font-semibold text-zinc-300 hover:text-white bg-zinc-850 hover:bg-zinc-750 border border-zinc-700 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm" title="리더 모드 잠그기">
-                        <i class="fa-solid fa-lock text-xs text-amber-400"></i>
-                        <span class="whitespace-nowrap">리더 잠금</span>
-                    </button>
                     <button onclick="toggleModal('adminModal'); toggleIpadLockModal();" class="text-xs font-semibold text-amber-300 hover:text-white bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm">
                         <i class="fa-solid fa-sliders text-amber-400 text-xs"></i>
                         <span class="whitespace-nowrap">적립 모드 설정</span>
@@ -3990,16 +3998,28 @@
         function updateLeaderAuthUI() {
             const btn = document.getElementById('btnLeaderAdminMaster');
             const icon = document.getElementById('iconLeaderAdminMaster');
-            if (!btn) return;
+            const lockBtn = document.getElementById('btnLeaderLock');
 
             if (isLeaderAuthenticated) {
-                btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/90 text-amber-400 hover:text-amber-300 border border-amber-500/50 shadow-md ring-2 ring-amber-400/30 active:scale-95 transition cursor-pointer leader-active";
-                btn.title = "리더 관리 설정 (⚙️) - 탭하여 열기";
+                if (btn) {
+                    btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/90 text-amber-400 hover:text-amber-300 border border-amber-500/50 shadow-md ring-2 ring-amber-400/30 active:scale-95 transition cursor-pointer leader-active";
+                    btn.title = "리더 관리 설정 (⚙️) - 탭하여 열기";
+                }
                 if (icon) icon.className = "fa-solid fa-gear text-sm sm:text-base";
+                if (lockBtn) {
+                    lockBtn.classList.remove('hidden');
+                    lockBtn.classList.add('flex');
+                }
             } else {
-                btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer";
-                btn.title = "리더 관리자 인증 (🔑)";
+                if (btn) {
+                    btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer";
+                    btn.title = "리더 관리자 인증 (🔑)";
+                }
                 if (icon) icon.className = "fa-solid fa-key text-xs sm:text-sm";
+                if (lockBtn) {
+                    lockBtn.classList.remove('flex');
+                    lockBtn.classList.add('hidden');
+                }
             }
         }
 
