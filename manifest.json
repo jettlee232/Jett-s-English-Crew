@@ -1,0 +1,17 @@
+{
+  "name": "성북구 중상급 영어회화",
+  "short_name": "영어회화",
+  "description": "성북구 중상급 영어회화 올인원 스마트 Kiosk",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#09090c",
+  "theme_color": "#09090c",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
