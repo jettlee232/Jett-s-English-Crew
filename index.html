@@ -746,9 +746,6 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
-                <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
-                    <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
-                </button>
                 <button id="btnLeaderLock" onclick="lockLeaderAuth()" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-amber-950/70 hover:bg-amber-900/80 text-amber-300 border border-amber-500/50 shadow-md ring-1 ring-amber-400/30 active:scale-95 transition cursor-pointer" title="리더 모드 잠그기 (🔒)">
                     <i class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
@@ -758,8 +755,8 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs (Single Row: 일정, 자리, 출석, 공지, 적립) -->
-        <nav class="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-1.5 pt-0.5">
+        <!-- Navigation Tabs (Dynamic 4 or 5 columns) -->
+        <nav id="mainNavBar" class="grid grid-cols-4 gap-1 sm:gap-1.5 pt-0.5">
             <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn tab-btn-active py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800/80 hover:text-zinc-200">
                 <i class="fa-solid fa-calendar-check text-xs sm:text-sm"></i>
                 <span class="text-xs sm:text-sm font-bold whitespace-nowrap">일정</span>
@@ -776,7 +773,7 @@
                 <i class="fa-solid fa-bullhorn text-xs sm:text-sm"></i>
                 <span class="text-xs sm:text-sm font-bold whitespace-nowrap">공지</span>
             </button>
-            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition hidden sm:flex items-center justify-center gap-1 sm:gap-1.5 bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800/80 hover:text-zinc-200">
+            <button id="tab-btn-5" onclick="switchTab(5)" class="tab-btn py-2 sm:py-2.5 px-1 sm:px-2 rounded-xl transition hidden items-center justify-center gap-1 sm:gap-1.5 bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800/80 hover:text-zinc-200">
                 <i class="fa-solid fa-carrot text-orange-400 text-xs sm:text-sm"></i>
                 <span class="text-xs sm:text-sm font-bold whitespace-nowrap">적립</span>
             </button>
@@ -966,21 +963,21 @@
                             <span>스마트 테이블 배치도</span>
                         </h2>
 
-                        <!-- Discreet Action Buttons for Leader (Blends into background) -->
-                        <div class="flex items-center gap-0.5 opacity-30 hover:opacity-100 transition-opacity">
-                            <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="1부 배치 복원">
+                        <!-- Discreet Action Buttons for Leader (Visible only in Leader Mode) -->
+                        <div id="leaderSeatingActions" class="hidden items-center gap-0.5 opacity-90 hover:opacity-100 transition-opacity">
+                            <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition active:scale-95" title="1부 배치 복원">
                                 <i class="fa-solid fa-rotate-left text-[11px]"></i>
                             </button>
 
-                            <button id="btnSeatMoveToggle" onclick="toggleSeatMoveMode()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="자리 수동 이동">
+                            <button id="btnSeatMoveToggle" onclick="toggleSeatMoveMode()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-amber-300 transition active:scale-95" title="자리 수동 이동">
                                 <i class="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
                             </button>
                             
-                            <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="2부 셔플">
+                            <button onclick="requestShuffleWithPin()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-blue-300 transition active:scale-95" title="2부 셔플">
                                 <i class="fa-solid fa-shuffle text-[11px]"></i>
                             </button>
 
-                            <button onclick="requestSaveSeatingHistory()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-300 transition active:scale-95" title="이력 저장">
+                            <button onclick="requestSaveSeatingHistory()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-emerald-300 transition active:scale-95" title="이력 저장">
                                 <i class="fa-solid fa-floppy-disk text-[11px]"></i>
                             </button>
                         </div>
@@ -4000,6 +3997,9 @@
                 selectedSeatMemberId = null;
                 renderSeatingPlan(isPart2Shuffle);
             }
+            if (currentTab === 5) {
+                switchTab(1);
+            }
             updateLeaderAuthUI();
             showToast("🔒 리더 모드가 잠겼습니다. (🔑 열쇠로 전환)", "info");
         };
@@ -4008,6 +4008,9 @@
             const btn = document.getElementById('btnLeaderAdminMaster');
             const icon = document.getElementById('iconLeaderAdminMaster');
             const lockBtn = document.getElementById('btnLeaderLock');
+            const seatingActions = document.getElementById('leaderSeatingActions');
+            const tab5Btn = document.getElementById('tab-btn-5');
+            const navEl = document.getElementById('mainNavBar');
 
             if (isLeaderAuthenticated) {
                 if (btn) {
@@ -4019,6 +4022,17 @@
                     lockBtn.classList.remove('hidden');
                     lockBtn.classList.add('flex');
                 }
+                if (seatingActions) {
+                    seatingActions.classList.remove('hidden');
+                    seatingActions.classList.add('flex');
+                }
+                if (tab5Btn) {
+                    tab5Btn.classList.remove('hidden');
+                    tab5Btn.classList.add('flex');
+                }
+                if (navEl) {
+                    navEl.className = "grid grid-cols-5 gap-1 sm:gap-1.5 pt-0.5";
+                }
             } else {
                 if (btn) {
                     btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer";
@@ -4028,6 +4042,17 @@
                 if (lockBtn) {
                     lockBtn.classList.remove('flex');
                     lockBtn.classList.add('hidden');
+                }
+                if (seatingActions) {
+                    seatingActions.classList.remove('flex');
+                    seatingActions.classList.add('hidden');
+                }
+                if (tab5Btn) {
+                    tab5Btn.classList.remove('flex');
+                    tab5Btn.classList.add('hidden');
+                }
+                if (navEl) {
+                    navEl.className = "grid grid-cols-4 gap-1 sm:gap-1.5 pt-0.5";
                 }
             }
         }
@@ -4275,6 +4300,7 @@
                 initTheme();
                 switchTab(getTabFromUrl(), false);
                 updateLockUIState();
+                updateLeaderAuthUI();
 
                 const customPinInput = document.getElementById('customPinPromptInput');
                 if (customPinInput) {
