@@ -1668,14 +1668,11 @@
                                 <span>전체 당근:</span>
                             </span>
                             <div class="flex items-center gap-1 shrink-0">
-                                <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-600/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 일괄 지급">
+                                <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-600/50 py-1 px-2.5 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 일괄 지급">
                                     <i class="fa-solid fa-plus text-[10px]"></i> 1당근
                                 </button>
-                                <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 일괄 차감">
+                                <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-1 px-2.5 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 일괄 차감">
                                     <i class="fa-solid fa-minus text-[10px]"></i> 1당근
-                                </button>
-                                <button onclick="openResetAllCoinsModal()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 0개로 초기화">
-                                    <i class="fa-solid fa-rotate-left text-[10px]"></i> 0개 리셋
                                 </button>
                             </div>
                         </div>
@@ -1855,6 +1852,21 @@
                     <button onclick="openWeeklyResetModal()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold py-2.5 rounded-xl text-xs sm:text-sm transition shadow flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap">
                         <i class="fa-solid fa-broom text-zinc-400"></i>
                         <span>금주 적립 상태 리셋</span>
+                    </button>
+                </div>
+
+                <!-- Safe Full Carrot Reset Card (Requires PIN) -->
+                <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <label class="block font-bold text-rose-400 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+                        <i class="fa-solid fa-rotate-left text-rose-400 text-base"></i>
+                        <span>모든 회원 당근 포인트 일괄 초기화 (0개 리셋)</span>
+                    </label>
+                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+                        새 시즌 시작 또는 정산 시 모든 회원의 당근 보유 수를 0개로 일괄 리셋합니다. (실행 시 리더 비밀번호 확인 필요)
+                    </p>
+                    <button onclick="openResetAllCoinsModal()" class="w-full bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 font-bold py-2.5 rounded-xl text-xs sm:text-sm transition whitespace-nowrap active:scale-95 flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span>비밀번호 확인 후 전체 당근 0개로 리셋</span>
                     </button>
                 </div>
 
@@ -4259,28 +4271,30 @@
         };
 
         window.openResetAllCoinsModal = function() {
-            openConfirmModal({
-                title: "🥕 전체 당근 포인트 초기화",
-                msg: "등록된 <strong>모든 회원의 당근 보유 수를 0개로 초기화</strong>하시겠습니까?<br><span class='text-xs text-zinc-500'>* 총 참석 회차 및 개인 정보는 안전하게 보존됩니다.</span>",
-                showOption: false,
-                onConfirm: async () => {
-                    const now = new Date().toISOString();
-                    const updates = [];
-                    membersData.forEach(m => {
-                        m.coins = 0;
-                        m.updatedAt = now;
-                        updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
-                    });
-                    persistMembers([...membersData]);
-                    renderUI();
-                    showToast("🥕 모든 회원의 당근이 0개로 초기화되었습니다.", "success");
+            openCustomPinModal("🔒 전체 당근 0개 초기화 (비밀번호 확인)", () => {
+                openConfirmModal({
+                    title: "🥕 전체 당근 0개 초기화 실행",
+                    msg: "등록된 <strong>모든 회원의 당근 보유 수를 0개로 완전히 초기화</strong>하시겠습니까?<br><span class='text-xs text-rose-400 font-semibold'>* 이 작업은 되돌릴 수 없습니다. (회원 정보 및 참석 회차는 보존)</span>",
+                    showOption: false,
+                    onConfirm: async () => {
+                        const now = new Date().toISOString();
+                        const updates = [];
+                        membersData.forEach(m => {
+                            m.coins = 0;
+                            m.updatedAt = now;
+                            updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
+                        });
+                        persistMembers([...membersData]);
+                        renderUI();
+                        showToast("🥕 모든 회원의 당근이 0개로 초기화되었습니다.", "success");
 
-                    try {
-                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
-                    } catch (e) {
-                        console.warn("당근 일괄 초기화 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                        try {
+                            await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                        } catch (e) {
+                            console.warn("당근 일괄 초기화 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                        }
                     }
-                }
+                });
             });
         };
 
