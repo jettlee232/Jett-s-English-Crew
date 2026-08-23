@@ -3221,20 +3221,6 @@
             }
         };
 
-        window.toggleFeeAccordion = function() {
-            const content = document.getElementById('feeAccordionContent');
-            const icon = document.getElementById('feeAccordionIcon');
-            if (content && icon) {
-                if (content.classList.contains('hidden')) {
-                    content.classList.remove('hidden');
-                    icon.className = "fa-solid fa-chevron-up text-amber-400 text-xs transition-transform duration-300";
-                } else {
-                    content.classList.add('hidden');
-                    icon.className = "fa-solid fa-chevron-down text-zinc-400 text-xs transition-transform duration-300";
-                }
-            }
-        };
-
         window.toggleCurriculumAccordion = function() {
             const content = document.getElementById('curriculumAccordionContent');
             const icon = document.getElementById('curriculumAccordionIcon');
@@ -3528,20 +3514,6 @@
             return (match && match[2].length === 11) ? match[2] : url;
         }
 
-        window.onTopicDatePicked = function() {
-            const picker = document.getElementById('editTopicDatePicker');
-            const preview = document.getElementById('topicDatePreviewText');
-            if (!picker || !picker.value) return;
-
-            const [year, month, day] = picker.value.split('-').map(Number);
-            const dateObj = new Date(year, month - 1, day);
-            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-            const dayName = dayNames[dateObj.getDay()];
-
-            const formatted = `${month}월 ${day}일 (${dayName}) 10:00 - 11:50`;
-            if (preview) preview.innerText = `선택: ${formatted}`;
-        };
-
         function updateTopicUI() {
             const schEl = document.getElementById('topicScheduleDisplay');
             const locEl = document.getElementById('topicLocationDisplay');
@@ -3565,54 +3537,45 @@
 
             if (thumbEl) thumbEl.src = finalThumbUrl;
 
-            const preview = document.getElementById('topicDatePreviewText');
-            if (preview) preview.innerText = topicData.schedule ? `현재: ${topicData.schedule}` : '';
+            const inSch = document.getElementById('inputTopicSchedule');
+            const inRound = document.getElementById('inputTopicRound');
+            const inLoc = document.getElementById('inputTopicLocation');
+            const inLocLink = document.getElementById('inputTopicLocationLink');
+            const inTitle = document.getElementById('inputTopicTitle');
+            const inYt = document.getElementById('inputTopicYoutube');
+            const inDocs = document.getElementById('inputTopicDocs');
+            const inCarrot = document.getElementById('inputTopicCarrotLink');
 
-            const editLoc = document.getElementById('editTopicLocation');
-            const editLocUrl = document.getElementById('editTopicLocationUrl');
-            const editTitle = document.getElementById('editTopicTitle');
-            const editYt = document.getElementById('editTopicYoutubeUrl');
-            const editThumb = document.getElementById('editTopicCustomThumbnail');
-            const editDocs = document.getElementById('editTopicDocsUrl');
-            const editCarrot = document.getElementById('editTopicCarrotGatheringUrl');
-
-            if (editLoc) editLoc.value = topicData.location || '';
-            if (editLocUrl) editLocUrl.value = topicData.locationUrl || '';
-            if (editTitle) editTitle.value = topicData.title || '';
-            if (editYt) editYt.value = topicData.youtubeUrl || '';
-            if (editThumb) editThumb.value = topicData.customThumbnailUrl || '';
-            if (editDocs) editDocs.value = topicData.docsUrl || '';
-            if (editCarrot) editCarrot.value = topicData.carrotGatheringUrl || '';
+            if (inSch) inSch.value = topicData.schedule || '';
+            if (inRound) inRound.value = topicData.round || '';
+            if (inLoc) inLoc.value = topicData.location || '';
+            if (inLocLink) inLocLink.value = topicData.locationUrl || '';
+            if (inTitle) inTitle.value = topicData.title || '';
+            if (inYt) inYt.value = topicData.youtubeUrl || '';
+            if (inDocs) inDocs.value = topicData.docsUrl || '';
+            if (inCarrot) inCarrot.value = topicData.carrotGatheringUrl || '';
         }
 
         window.saveTopicSettings = async function() {
-            const picker = document.getElementById('editTopicDatePicker');
-            const editLoc = document.getElementById('editTopicLocation');
-            const editLocUrl = document.getElementById('editTopicLocationUrl');
-            const editTitle = document.getElementById('editTopicTitle');
-            const editYt = document.getElementById('editTopicYoutubeUrl');
-            const editThumb = document.getElementById('editTopicCustomThumbnail');
-            const editDocs = document.getElementById('editTopicDocsUrl');
-            const editCarrot = document.getElementById('editTopicCarrotGatheringUrl');
-
-            let formattedSchedule = topicData.schedule;
-            if (picker && picker.value) {
-                const [year, month, day] = picker.value.split('-').map(Number);
-                const dateObj = new Date(year, month - 1, day);
-                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                const dayName = dayNames[dateObj.getDay()];
-                formattedSchedule = `${month}월 ${day}일 (${dayName}) 10:00 - 11:50`;
-            }
+            const schInput = document.getElementById('inputTopicSchedule');
+            const roundInput = document.getElementById('inputTopicRound');
+            const locInput = document.getElementById('inputTopicLocation');
+            const locLinkInput = document.getElementById('inputTopicLocationLink');
+            const titleInput = document.getElementById('inputTopicTitle');
+            const ytInput = document.getElementById('inputTopicYoutube');
+            const docsInput = document.getElementById('inputTopicDocs');
+            const carrotInput = document.getElementById('inputTopicCarrotLink');
 
             const newObj = {
-                schedule: formattedSchedule,
-                location: editLoc ? editLoc.value.trim() : topicData.location,
-                locationUrl: editLocUrl ? editLocUrl.value.trim() : topicData.locationUrl,
-                title: editTitle ? editTitle.value.trim() : topicData.title,
-                youtubeUrl: editYt ? editYt.value.trim() : topicData.youtubeUrl,
-                customThumbnailUrl: editThumb ? editThumb.value.trim() : topicData.customThumbnailUrl,
-                docsUrl: editDocs ? editDocs.value.trim() : topicData.docsUrl,
-                carrotGatheringUrl: editCarrot ? editCarrot.value.trim() : topicData.carrotGatheringUrl,
+                ...topicData,
+                schedule: schInput ? schInput.value.trim() : (topicData.schedule || ""),
+                round: roundInput ? roundInput.value.trim() : (topicData.round || ""),
+                location: locInput ? locInput.value.trim() : (topicData.location || ""),
+                locationUrl: locLinkInput ? locLinkInput.value.trim() : (topicData.locationUrl || ""),
+                title: titleInput ? titleInput.value.trim() : (topicData.title || ""),
+                youtubeUrl: ytInput ? ytInput.value.trim() : (topicData.youtubeUrl || ""),
+                docsUrl: docsInput ? docsInput.value.trim() : (topicData.docsUrl || ""),
+                carrotGatheringUrl: carrotInput ? carrotInput.value.trim() : (topicData.carrotGatheringUrl || ""),
                 updatedAt: new Date().toISOString()
             };
 
@@ -4383,13 +4346,6 @@
                 if (customPinInput) {
                     customPinInput.addEventListener('keyup', (e) => {
                         if (e.key === 'Enter') confirmCustomPinModal();
-                    });
-                }
-
-                const lockPinInput = document.getElementById('pinInput');
-                if (lockPinInput) {
-                    lockPinInput.addEventListener('keyup', (e) => {
-                        if (e.key === 'Enter') setLeaderMode('ontime');
                     });
                 }
 
