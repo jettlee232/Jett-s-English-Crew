@@ -1654,9 +1654,12 @@
                     <div id="consonantFilterBar" class="flex flex-wrap gap-1 text-xs font-semibold bg-zinc-950 p-2 rounded-lg border border-zinc-800 overflow-x-auto whitespace-nowrap">
                     </div>
 
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
-                        <input id="adminMemberSearchInput" type="text" oninput="renderAdminMemberList()" placeholder="이름/초성 직접 입력 검색..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs sm:text-sm rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs pointer-events-none"></i>
+                        <input id="adminMemberSearchInput" type="text" oninput="renderAdminMemberList()" onkeyup="renderAdminMemberList()" oncompositionupdate="renderAdminMemberList()" oncompositionend="renderAdminMemberList()" placeholder="이름/초성 실시간 검색..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs sm:text-sm rounded-xl pl-9 pr-8 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <button id="btnAdminSearchClear" onclick="clearAdminSearch()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs hidden cursor-pointer" title="검색어 지우기">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -4678,13 +4681,18 @@
             const listContainer = document.getElementById('adminFilteredMembersList');
             const countSpan = document.getElementById('filteredMemberCount');
             const searchInput = document.getElementById('adminMemberSearchInput');
+            const clearBtn = document.getElementById('btnAdminSearchClear');
             const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            if (clearBtn) {
+                clearBtn.classList.toggle('hidden', !query);
+            }
 
             if (!listContainer) return;
 
             let filtered = [...membersData];
 
-            // 1. 직접 검색어가 있는 경우: 초성 및 부분 문자열 전체 검색 (알파벳 필터 우선 우회)
+            // 1. 직접 검색어가 있는 경우: 초성 및 부분 문자열 실시간 검색 (알파벳 필터 우선 우회)
             if (query) {
                 filtered = filtered.filter(m => {
                     if (!m.name) return false;
@@ -4751,6 +4759,15 @@
                 `;
             }).join('');
         }
+
+        window.clearAdminSearch = function() {
+            const input = document.getElementById('adminMemberSearchInput');
+            if (input) {
+                input.value = '';
+                renderAdminMemberList();
+                input.focus();
+            }
+        };
 
         window.selectAdminMember = function(id) {
             selectedAdminMemberId = id;
