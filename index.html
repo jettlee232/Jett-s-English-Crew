@@ -1523,8 +1523,8 @@
                     <span>2. 회원 관리</span>
                 </button>
                 <button id="admin-tab-btn-3" onclick="switchAdminTab(3)" class="admin-tab-btn py-2 rounded-lg text-center text-zinc-400 hover:text-white transition flex items-center justify-center gap-1 whitespace-nowrap">
-                    <i class="fa-solid fa-carrot text-xs text-orange-400"></i>
-                    <span>3. 백업/당근관리</span>
+                    <i class="fa-solid fa-database text-xs"></i>
+                    <span>3. 백업/리셋</span>
                 </button>
             </div>
 
@@ -1658,6 +1658,25 @@
                                 <button onclick="selectTodayAttendeesAll()" class="text-blue-400 hover:underline">전체선택</button>
                                 <span>|</span>
                                 <button onclick="resetTodayAttendees()" class="text-zinc-500 hover:text-rose-400">전체해제</button>
+                            </div>
+                        </div>
+
+                        <!-- 🥕 당근 포인트 일괄 관리 바 (회원 목록 위 컴팩트 바) -->
+                        <div class="bg-zinc-950/90 p-2 rounded-lg border border-zinc-800 flex items-center justify-between gap-1.5 flex-wrap">
+                            <span class="text-[11px] font-bold text-orange-400 flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                <i class="fa-solid fa-carrot text-xs"></i>
+                                <span>전체 당근:</span>
+                            </span>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-600/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 일괄 지급">
+                                    <i class="fa-solid fa-plus text-[10px]"></i> 1당근
+                                </button>
+                                <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 일괄 차감">
+                                    <i class="fa-solid fa-minus text-[10px]"></i> 1당근
+                                </button>
+                                <button onclick="openResetAllCoinsModal()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 0개로 초기화">
+                                    <i class="fa-solid fa-rotate-left text-[10px]"></i> 0개 리셋
+                                </button>
                             </div>
                         </div>
 
@@ -1798,35 +1817,6 @@
                             <p class="text-xs text-zinc-500 mt-0.5 whitespace-nowrap">클릭하거나 CSV 파일을 끌어오세요</p>
                             <input type="file" id="csvFileInput" accept=".csv" onchange="importMembersCSV(event)" class="hidden">
                         </label>
-                    </div>
-                </div>
-
-                <!-- Carrot Points Bulk Management Card -->
-                <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
-                    <div class="flex items-center justify-between flex-wrap gap-1">
-                        <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
-                            <i class="fa-solid fa-carrot text-orange-400 text-base"></i>
-                            <span>당근 포인트 일괄 관리 (이벤트 / 정산)</span>
-                        </label>
-                        <span class="text-[11px] text-zinc-500 font-medium">전체 회원 대상</span>
-                    </div>
-                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
-                        이벤트 참여 보상으로 모든 회원에게 당근을 일괄 지급/차감하거나, 0개로 일괄 초기화합니다.
-                    </p>
-
-                    <div class="grid grid-cols-3 gap-2 pt-0.5">
-                        <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/70 hover:bg-orange-900/90 text-orange-300 border border-orange-600/50 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 지급">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                            <span>전체 +1 당근</span>
-                        </button>
-                        <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 차감">
-                            <i class="fa-solid fa-minus text-xs"></i>
-                            <span>전체 -1 당근</span>
-                        </button>
-                        <button onclick="openResetAllCoinsModal()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/50 font-bold py-2.5 px-2 rounded-xl text-xs sm:text-sm transition whitespace-nowrap active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer" title="모든 회원의 당근 0개로 초기화">
-                            <i class="fa-solid fa-rotate-left text-xs"></i>
-                            <span>전체 0개 초기화</span>
-                        </button>
                     </div>
                 </div>
 
