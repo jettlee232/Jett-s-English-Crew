@@ -3470,13 +3470,6 @@
             }, { passive: true });
         })();
 
-        window.requestAdminAccess = function() {
-            requireLeaderAuth("🔑 리더 관리 메뉴 비밀번호 확인", () => {
-                toggleModal('adminModal');
-                switchAdminTab(1);
-            });
-        };
-
         function extractYoutubeId(url) {
             if (!url) return "-61qDRPG3to";
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -3631,7 +3624,7 @@
             const pin = pinInput ? pinInput.value : '';
             const enteredHash = await hashPin(pin);
             
-            if (enteredHash !== leaderPinHash) {
+            if (!isLeaderAuthenticated && enteredHash !== leaderPinHash) {
                 showToast("비밀번호를 바르게 입력해주세요.", "error");
                 return;
             }
@@ -3667,7 +3660,7 @@
             const pin = pinInput ? pinInput.value : '';
             const enteredHash = await hashPin(pin);
 
-            if (enteredHash === leaderPinHash) {
+            if (isLeaderAuthenticated || enteredHash === leaderPinHash) {
                 activeMode = mode;
                 localStorage.setItem('activeMode', activeMode);
                 updateLockUIState();
@@ -3997,7 +3990,7 @@
                 selectedSeatMemberId = null;
                 renderSeatingPlan(isPart2Shuffle);
             }
-            if (currentTab === 5) {
+            if (typeof activeTab !== 'undefined' && activeTab === 5) {
                 switchTab(1);
             }
             updateLeaderAuthUI();
