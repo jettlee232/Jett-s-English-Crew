@@ -512,13 +512,13 @@
             color: #c2410c !important;
         }
         html.light-theme #toast {
-            background-color: rgba(255, 255, 255, 0.96) !important;
-            color: #09090b !important;
-            border-color: #e4e4e7 !important;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2) !important;
+            background-color: rgba(255, 255, 255, 0.72) !important;
+            color: #18181b !important;
+            border-color: rgba(228, 228, 231, 0.85) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
         }
         html.light-theme #toast #toastMsg {
-            color: #09090b !important;
+            color: #18181b !important;
         }
         html.light-theme #btnModeOntime.bg-blue-600 {
             background-color: #2563eb !important;
@@ -1925,10 +1925,10 @@
         </div>
     </div>
 
-    <!-- Toast Notification (Top Center Floating Capsule) -->
-    <div id="toast" class="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 bg-[#121216]/95 backdrop-blur-md text-white border border-zinc-700/80 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full shadow-2xl hidden z-50 flex items-center gap-2.5 min-w-fit max-w-[92vw] pointer-events-none transition-all duration-300 transform">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-blue-400 text-base sm:text-lg shrink-0"></i>
-        <span id="toastMsg" class="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">처리되었습니다.</span>
+    <!-- Toast Notification (Top Center Semi-Transparent Slim Capsule) -->
+    <div id="toast" class="fixed top-3.5 sm:top-4 left-1/2 -translate-x-1/2 bg-zinc-900/60 backdrop-blur-md text-white/95 border border-white/10 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg opacity-0 -translate-y-2 pointer-events-none z-50 flex items-center gap-2 max-w-[90vw] transition-all duration-200 ease-out">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xs sm:text-sm shrink-0"></i>
+        <span id="toastMsg" class="text-[11px] sm:text-xs font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis"></span>
     </div>
 
 <script type="module">
@@ -6070,22 +6070,25 @@
             toastMsg.innerText = message;
 
             if (type === 'success') {
-                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base sm:text-lg shrink-0';
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-xs sm:text-sm shrink-0';
             } else if (type === 'warning') {
-                toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-base sm:text-lg shrink-0';
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-xs sm:text-sm shrink-0';
             } else if (type === 'error') {
-                toastIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-base sm:text-lg shrink-0';
+                toastIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-xs sm:text-sm shrink-0';
             } else {
-                toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-base sm:text-lg shrink-0';
+                toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-xs sm:text-sm shrink-0';
             }
 
             if (toastTimer) clearTimeout(toastTimer);
 
-            toast.classList.remove('hidden');
+            toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
             toastTimer = setTimeout(() => {
-                toast.classList.add('hidden');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
                 toastTimer = null;
-            }, 2500);
+            }, 2000);
         }
 
         window.toggleModal = function(modalId) {
