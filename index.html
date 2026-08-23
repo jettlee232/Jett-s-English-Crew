@@ -520,6 +520,21 @@
         html.light-theme #toast #toastMsg {
             color: #09090b !important;
         }
+        html.light-theme #btnModeOntime.bg-blue-600 {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #3b82f6 !important;
+        }
+        html.light-theme #btnModeReview.bg-pink-600 {
+            background-color: #db2777 !important;
+            color: #ffffff !important;
+            border-color: #ec4899 !important;
+        }
+        html.light-theme #btnModeLocked.bg-zinc-800 {
+            background-color: #3f3f46 !important;
+            color: #ffffff !important;
+            border-color: #52525b !important;
+        }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
         html.light-theme #topicDocsLink {
@@ -1400,30 +1415,49 @@
             </div>
         </section>
 
-        <!-- TAB 5: 출석 / 적립 (아이패드 전용) -->
+        <!-- TAB 5: 출석 / 적립 -->
         <section id="tab-content-5" class="tab-content space-y-4 sm:space-y-5 hidden">
-            <!-- Mobile Warning Banner (Only visible on mobile) -->
-            <div class="sm:hidden bg-amber-950/60 border border-amber-500/40 rounded-xl p-3 text-center flex items-center justify-center gap-2 text-amber-200 text-xs font-medium shadow-sm">
-                <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm shrink-0"></i>
-                <span class="whitespace-nowrap">현장 키오스크(아이패드) 전용 페이지입니다.</span>
-            </div>
-
             <div class="bg-[#121216] border border-[#23232b] rounded-2xl p-3.5 sm:p-6 lg:p-8 shadow-2xl space-y-4 sm:space-y-6">
-                <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 flex-wrap gap-2">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-xs sm:text-sm font-bold text-orange-400 bg-orange-950/60 border border-orange-800/50 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap">
-                            <i class="fa-solid fa-tablet-screen-button"></i>
-                            <span>현장 셀프 키오스크</span>
-                        </span>
-                        <!-- Screen Wake Lock Status Badge (TAB 5 Only) -->
-                        <span id="wakeLockBadge" class="text-[11px] sm:text-xs font-semibold text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap shadow-sm hidden">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span>화면 켜짐 유지 중</span>
-                        </span>
+                <!-- Tab 5 Header: Status & Direct Leader Mode Switcher Bar -->
+                <div class="space-y-3 border-b border-zinc-800/80 pb-3 sm:pb-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs sm:text-sm font-bold text-orange-400 bg-orange-950/60 border border-orange-800/50 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap">
+                                <i class="fa-solid fa-tablet-screen-button"></i>
+                                <span>현장 셀프 키오스크</span>
+                            </span>
+                            <!-- Screen Wake Lock Status Badge (TAB 5 Only) -->
+                            <span id="wakeLockBadge" class="text-[11px] sm:text-xs font-semibold text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap shadow-sm hidden">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>화면 켜짐 유지 중</span>
+                            </span>
+                        </div>
+                        <div id="statusBadge" class="bg-zinc-900 text-zinc-300 text-xs sm:text-sm font-semibold px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-zinc-800 flex items-center gap-2 whitespace-nowrap">
+                            <span id="statusPulse" class="w-2 h-2 rounded-full bg-zinc-500"></span>
+                            <span id="statusLabel" class="whitespace-nowrap">현재 모드: 잠금/마감</span>
+                        </div>
                     </div>
-                    <div id="statusBadge" class="bg-zinc-900 text-zinc-300 text-xs sm:text-sm font-semibold px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-zinc-800 flex items-center gap-2 whitespace-nowrap">
-                        <span id="statusPulse" class="w-2 h-2 rounded-full bg-zinc-500"></span>
-                        <span id="statusLabel" class="whitespace-nowrap">현재 모드: 잠금/마감</span>
+
+                    <!-- Leader Direct Mode Switcher Bar (3 Pill Buttons) -->
+                    <div class="bg-zinc-950/90 border border-zinc-800 p-2 sm:p-2.5 rounded-2xl flex items-center justify-between gap-1.5 sm:gap-2 flex-wrap shadow-inner">
+                        <span class="text-xs font-bold text-zinc-400 pl-1.5 flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-sliders text-amber-400"></i>
+                            <span>적립 모드 전환:</span>
+                        </span>
+                        <div class="grid grid-cols-3 gap-1.5 flex-1 min-w-[280px]">
+                            <button id="btnModeOntime" onclick="setLeaderMode('ontime')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-blue-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="제시간 도착 적립 모드 켜기">
+                                <i class="fa-solid fa-stopwatch text-xs sm:text-sm text-blue-400"></i>
+                                <span>1. 제시간 도착</span>
+                            </button>
+                            <button id="btnModeReview" onclick="setLeaderMode('review')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-pink-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="후기 작성 적립 모드 켜기">
+                                <i class="fa-solid fa-pen-nib text-xs sm:text-sm text-pink-400"></i>
+                                <span>2. 후기 작성</span>
+                            </button>
+                            <button id="btnModeLocked" onclick="setLeaderMode('locked')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="적립 잠금 / 마감">
+                                <i class="fa-solid fa-lock text-xs sm:text-sm text-zinc-400"></i>
+                                <span>3. 적립 잠금</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1465,62 +1499,6 @@
 
     </main>
 
-    <!-- Leader Mode & PIN Selection Modal -->
-    <div id="ipadLockModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#121216] border border-[#23232b] w-full max-w-sm rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4">
-            <div class="text-center">
-                <div class="w-11 h-11 rounded-xl bg-blue-950 text-blue-400 border border-blue-800/50 flex items-center justify-center text-lg mx-auto mb-2">
-                    <i class="fa-solid fa-sliders"></i>
-                </div>
-                <h3 class="font-bold text-base text-white">리더 전용 적립 모드 설정</h3>
-                <p class="text-xs text-zinc-400 mt-1">비밀번호 입력 후 동작시킬 적립 모드를 선택하세요.</p>
-            </div>
-
-            <div class="space-y-2">
-                <input id="pinInput" type="password" maxlength="6" placeholder="비밀번호 입력" class="w-full bg-zinc-900 border border-zinc-700 text-white text-center rounded-xl py-2.5 font-mono text-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="grid grid-cols-1 gap-2 pt-1">
-                <button onclick="setLeaderMode('ontime')" class="bg-blue-950/80 hover:bg-blue-900/80 text-blue-300 border border-blue-700/50 p-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-stopwatch text-blue-400 text-base"></i>
-                    <span>제시간 도착 모드 켜기</span>
-                </button>
-                <button onclick="setLeaderMode('review')" class="bg-rose-950/80 hover:bg-rose-900/80 text-rose-300 border border-rose-700/50 p-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-pen-nib text-rose-400 text-base"></i>
-                    <span>스터디 후기 작성 모드 켜기</span>
-                </button>
-                <button onclick="setLeaderMode('locked')" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 p-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-lock text-zinc-400"></i>
-                    <span>적립 잠금/마감</span>
-                </button>
-            </div>
-
-            <div class="border-t border-zinc-800/80 pt-3">
-                <button id="kioskToggleBtn" onclick="toggleDeviceKioskRegistration()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-amber-300 border border-amber-500/40 p-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition whitespace-nowrap">
-                    <i id="kioskToggleIcon" class="fa-solid fa-tablet-screen-button"></i>
-                    <span id="kioskToggleText">이 기기를 현장 Kiosk(아이패드)로 등록</span>
-                </button>
-            </div>
-
-            <div class="border-t border-zinc-800/80 pt-3">
-                <button onclick="document.getElementById('pinChangeBox').classList.toggle('hidden')" class="text-xs text-zinc-400 hover:text-blue-400 w-full text-center flex items-center justify-center gap-1.5 font-medium whitespace-nowrap">
-                    <i class="fa-solid fa-key text-amber-400"></i>
-                    <span>리더 비밀번호(PIN) 변경하기</span>
-                </button>
-                <div id="pinChangeBox" class="hidden mt-2 p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                    <input id="newPinInput" type="password" maxlength="6" placeholder="새 비밀번호 (위 칸에 현재 PIN 입력 필요)" class="w-full bg-zinc-800 border border-zinc-700 text-white text-center rounded-lg py-2 text-xs sm:text-sm font-mono">
-                    <button onclick="changeLeaderPin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs sm:text-sm transition whitespace-nowrap">
-                        새 비밀번호 저장
-                    </button>
-                </div>
-            </div>
-
-            <div class="pt-1">
-                <button onclick="toggleIpadLockModal()" class="w-full bg-zinc-900 text-zinc-400 hover:text-white text-xs sm:text-sm font-medium py-2 rounded-xl border border-zinc-800 whitespace-nowrap">닫기</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Leader Operations Admin Modal -->
     <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="bg-[#121216] border border-[#23232b] w-full max-w-5xl rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
@@ -1529,15 +1507,9 @@
                     <i class="fa-solid fa-user-gear text-blue-400"></i>
                     <span>리더 스터디 관리 메뉴</span>
                 </h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="toggleModal('adminModal'); toggleIpadLockModal();" class="text-xs font-semibold text-amber-300 hover:text-white bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm">
-                        <i class="fa-solid fa-sliders text-amber-400 text-xs"></i>
-                        <span class="whitespace-nowrap">적립 모드 설정</span>
-                    </button>
-                    <button onclick="toggleModal('adminModal')" class="text-zinc-400 hover:text-white p-1">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
-                </div>
+                <button onclick="toggleModal('adminModal')" class="text-zinc-400 hover:text-white p-1" title="닫기">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
 
             <!-- 3 Sub-Tabs Bar -->
@@ -1865,6 +1837,41 @@
                         <i class="fa-solid fa-broom text-zinc-400"></i>
                         <span>금주 적립 상태 리셋</span>
                     </button>
+                </div>
+
+                <!-- Kiosk Device Setting Card -->
+                <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+                            <i class="fa-solid fa-tablet-screen-button text-orange-400 text-base"></i>
+                            <span>현장 셀프 키오스크 기기 등록</span>
+                        </label>
+                        <span class="text-[11px] text-zinc-500 font-medium">아이패드/태블릿 모드</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+                        이 기기를 스터디 현장 전용 출석체크 태블릿(키오스크)으로 등록하거나 해제합니다.
+                    </p>
+                    <button id="kioskToggleBtn" onclick="toggleDeviceKioskRegistration()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 p-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition whitespace-nowrap active:scale-95 shadow-sm">
+                        <i id="kioskToggleIcon" class="fa-solid fa-tablet-screen-button"></i>
+                        <span id="kioskToggleText">이 기기를 현장 Kiosk로 등록</span>
+                    </button>
+                </div>
+
+                <!-- Leader PIN Change Card -->
+                <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+                        <i class="fa-solid fa-key text-amber-400 text-base"></i>
+                        <span>리더 마스터 비밀번호(PIN) 변경</span>
+                    </label>
+                    <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+                        리더 전용 기능 및 관리자 설정 접속에 사용되는 4~6자리 비밀번호를 안전하게 변경합니다.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2 pt-0.5">
+                        <input id="adminNewPinInput" type="password" maxlength="6" placeholder="새 4~6자리 비밀번호 입력" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3.5 py-2 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button onclick="changeLeaderPinFromAdmin()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition whitespace-nowrap shadow-sm active:scale-95">
+                            비밀번호 변경
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3581,54 +3588,62 @@
         function updateLockUIState() {
             const statusPulse = document.getElementById('statusPulse');
             const statusLabel = document.getElementById('statusLabel');
-            const modeSelectText = document.getElementById('modeSelectText');
-            const modeSelectIcon = document.getElementById('modeSelectIcon');
+            const btnOntime = document.getElementById('btnModeOntime');
+            const btnReview = document.getElementById('btnModeReview');
+            const btnLocked = document.getElementById('btnModeLocked');
+
+            const defaultBtnClass = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer";
+
+            if (btnOntime) btnOntime.className = defaultBtnClass;
+            if (btnReview) btnReview.className = defaultBtnClass;
+            if (btnLocked) btnLocked.className = defaultBtnClass;
 
             if (activeMode === 'ontime') {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping";
                 if (statusLabel) statusLabel.innerText = "⏰ 제시간 도착 당근 적립 모드";
-                if (modeSelectText) modeSelectText.innerText = "제시간 적립";
-                if (modeSelectIcon) modeSelectIcon.className = "fa-solid fa-stopwatch text-blue-400";
+                if (btnOntime) btnOntime.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-blue-600 text-white border border-blue-400 shadow-md ring-2 ring-blue-400/40 cursor-pointer";
             } else if (activeMode === 'review') {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-pink-400 animate-ping";
                 if (statusLabel) statusLabel.innerText = "📝 후기 작성 당근 적립 모드";
-                if (modeSelectText) modeSelectText.innerText = "후기 적립";
-                if (modeSelectIcon) modeSelectIcon.className = "fa-solid fa-pen-nib text-pink-400";
+                if (btnReview) btnReview.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-pink-600 text-white border border-pink-400 shadow-md ring-2 ring-pink-400/40 cursor-pointer";
             } else {
                 if (statusPulse) statusPulse.className = "w-2.5 h-2.5 rounded-full bg-zinc-500";
                 if (statusLabel) statusLabel.innerText = "현재 모드: 잠금/마감";
-                if (modeSelectText) modeSelectText.innerText = "적립 설정";
-                if (modeSelectIcon) modeSelectIcon.className = "fa-solid fa-lock text-amber-400";
+                if (btnLocked) btnLocked.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-800 text-zinc-200 border border-zinc-600 shadow-md ring-2 ring-zinc-500/30 cursor-pointer";
             }
 
-            updateKioskToggleUI();
             renderStep2Button();
         }
+
+        window.setLeaderMode = function(mode) {
+            activeMode = mode;
+            localStorage.setItem('activeMode', activeMode);
+            updateLockUIState();
+            
+            const labels = {
+                'ontime': '⏰ 제시간 도착 적립 모드가 켜졌습니다.',
+                'review': '📝 후기 작성 적립 모드가 켜졌습니다.',
+                'locked': '🔒 적립 모드가 잠금/마감되었습니다.'
+            };
+            showToast(labels[mode] || "적립 모드가 변경되었습니다.", "info");
+            renderTodayMemberTiles();
+        };
 
         function updateKioskToggleUI() {
             const kioskToggleText = document.getElementById('kioskToggleText');
             const kioskToggleBtn = document.getElementById('kioskToggleBtn');
             if (kioskToggleText && kioskToggleBtn) {
                 if (isKioskRegistered) {
-                    kioskToggleText.innerText = "📱 Kiosk 등록됨 (해제하기)";
-                    kioskToggleBtn.className = "w-full bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/50 p-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition whitespace-nowrap";
+                    kioskToggleText.innerText = "📱 현장 Kiosk 등록됨 (해제하려면 탭)";
+                    kioskToggleBtn.className = "w-full bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/50 p-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition whitespace-nowrap active:scale-95 shadow-sm cursor-pointer";
                 } else {
                     kioskToggleText.innerText = "📱 이 기기를 현장 Kiosk로 등록";
-                    kioskToggleBtn.className = "w-full bg-zinc-900 hover:bg-zinc-800 text-amber-300 border border-amber-500/40 p-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition whitespace-nowrap";
+                    kioskToggleBtn.className = "w-full bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 p-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition whitespace-nowrap active:scale-95 shadow-sm cursor-pointer";
                 }
             }
         }
 
-        window.toggleDeviceKioskRegistration = async function() {
-            const pinInput = document.getElementById('pinInput');
-            const pin = pinInput ? pinInput.value : '';
-            const enteredHash = await hashPin(pin);
-            
-            if (!isLeaderAuthenticated && enteredHash !== leaderPinHash) {
-                showToast("비밀번호를 바르게 입력해주세요.", "error");
-                return;
-            }
-
+        window.toggleDeviceKioskRegistration = function() {
             isKioskRegistered = !isKioskRegistered;
             localStorage.setItem('isKioskDevice', isKioskRegistered ? 'true' : 'false');
             updateKioskToggleUI();
@@ -3641,70 +3656,17 @@
             }
         };
 
-        window.toggleIpadLockModal = function() {
-            const modal = document.getElementById('ipadLockModal');
-            if (modal) {
-                modal.classList.toggle('hidden');
-                if (!modal.classList.contains('hidden')) {
-                    const pinInput = document.getElementById('pinInput');
-                    if (pinInput) {
-                        pinInput.value = '';
-                        pinInput.focus();
-                    }
-                }
-            }
-        };
-
-        window.setLeaderMode = async function(mode) {
-            const pinInput = document.getElementById('pinInput');
-            const pin = pinInput ? pinInput.value : '';
-            const enteredHash = await hashPin(pin);
-
-            if (isLeaderAuthenticated || enteredHash === leaderPinHash) {
-                activeMode = mode;
-                localStorage.setItem('activeMode', activeMode);
-                updateLockUIState();
-                window.toggleIpadLockModal();
-                
-                const labels = {
-                    'ontime': '⏰ 제시간 도착 적립 모드가 켜졌습니다.',
-                    'review': '📝 후기 작성 적립 모드가 켜졌습니다.',
-                    'locked': '🔒 적립 모드가 잠금/마감되었습니다.'
-                };
-                showToast(labels[mode], "info");
-                renderTodayMemberTiles();
-            } else {
-                showToast("비밀번호가 올바르지 않습니다.", "error");
-            }
-        };
-
-        window.changeLeaderPin = async function() {
-            const newPinInput = document.getElementById('newPinInput');
-            const newPin = newPinInput ? newPinInput.value.trim() : '';
+        window.changeLeaderPinFromAdmin = async function() {
+            const input = document.getElementById('adminNewPinInput');
+            const newPin = input ? input.value.trim() : '';
             if (newPin.length < 4) {
                 showToast("비밀번호는 최소 4자리 이상이어야 합니다.", "warning");
                 return;
             }
-
-            // 기존 PIN을 먼저 확인한다 (같은 모달의 pinInput을 재사용)
-            const currentPinInput = document.getElementById('pinInput');
-            const currentPin = currentPinInput ? currentPinInput.value : '';
-            if (!currentPin) {
-                showToast("위쪽 칸에 현재 비밀번호를 먼저 입력해 주세요.", "warning");
-                return;
-            }
-            if (await hashPin(currentPin) !== leaderPinHash) {
-                showToast("현재 비밀번호가 올바르지 않습니다.", "error");
-                return;
-            }
-            if (currentPinInput) currentPinInput.value = '';
-
             leaderPinHash = await hashPin(newPin);
             localStorage.setItem('leaderPinHash', leaderPinHash);
-            localStorage.removeItem('leaderPin');
-            showToast("🔑 리더 비밀번호가 안전하게 암호화되어 변경되었습니다!", "success");
-            if (newPinInput) newPinInput.value = '';
-            document.getElementById('pinChangeBox').classList.add('hidden');
+            showToast("🔑 리더 비밀번호가 안전하게 변경되었습니다!", "success");
+            if (input) input.value = '';
         };
 
         // AudioContext는 하나만 만들어 재사용한다 (iPad Safari는 동시 생성 개수 제한이 있다)
