@@ -484,23 +484,23 @@
         }
 
         /* 👑 리더 관리자 모드 버튼 */
-        #leaderAuthBtn.leader-active {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-            color: #09090b !important;
-            border-color: #fef08a !important;
-            box-shadow: 0 0 14px rgba(245, 158, 11, 0.5) !important;
+        #btnLeaderAdminMaster.leader-active {
+            color: #fbbf24 !important;
+            border-color: #f59e0b !important;
+            background: rgba(245, 158, 11, 0.15) !important;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.35) !important;
         }
-        #leaderAuthBtn.leader-active * {
-            color: #09090b !important;
-            font-weight: 800 !important;
+        #btnLeaderAdminMaster.leader-active * {
+            color: #fbbf24 !important;
         }
-        html.light-theme #leaderAuthBtn.leader-active {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-            color: #ffffff !important;
-            border-color: #b45309 !important;
+        html.light-theme #btnLeaderAdminMaster.leader-active {
+            background-color: #fffbeb !important;
+            color: #d97706 !important;
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
         }
-        html.light-theme #leaderAuthBtn.leader-active * {
-            color: #ffffff !important;
+        html.light-theme #btnLeaderAdminMaster.leader-active * {
+            color: #d97706 !important;
         }
 
         /* 📋 TAB 1: KEY ACTIONS & CTA BUTTONS */
@@ -728,15 +728,11 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
-                <button id="leaderAuthBtn" onclick="toggleLeaderAuthMaster()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition text-[11px] sm:text-xs font-semibold whitespace-nowrap cursor-pointer" title="리더 관리자 모드 (비밀번호 인증)">
-                    <i id="leaderAuthIcon" class="fa-solid fa-key text-[10px] sm:text-xs"></i>
-                    <span id="leaderAuthText" class="hidden sm:inline">리더인증</span>
-                </button>
                 <button id="modeSelectBtn" onclick="toggleIpadLockModal()" class="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition" title="키오스크 적립 설정">
                     <i id="modeSelectIcon" class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
-                <button onclick="requestAdminAccess()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-blue-400 border border-zinc-700/70 shadow active:scale-95 transition" title="리더 관리 설정">
-                    <i class="fa-solid fa-gear text-sm sm:text-base"></i>
+                <button id="btnLeaderAdminMaster" onclick="handleLeaderAdminMasterClick()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer" title="리더 관리자 인증 (🔑)">
+                    <i id="iconLeaderAdminMaster" class="fa-solid fa-key text-xs sm:text-sm"></i>
                 </button>
             </div>
         </div>
@@ -1516,6 +1512,10 @@
                     <span>리더 스터디 관리 메뉴</span>
                 </h3>
                 <div class="flex items-center gap-2">
+                    <button onclick="lockLeaderAuth(); toggleModal('adminModal');" class="text-xs font-semibold text-zinc-300 hover:text-white bg-zinc-850 hover:bg-zinc-750 border border-zinc-700 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm" title="리더 모드 잠그기">
+                        <i class="fa-solid fa-lock text-xs text-amber-400"></i>
+                        <span class="whitespace-nowrap">리더 잠금</span>
+                    </button>
                     <button onclick="toggleModal('adminModal'); toggleIpadLockModal();" class="text-xs font-semibold text-amber-300 hover:text-white bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm">
                         <i class="fa-solid fa-sliders text-amber-400 text-xs"></i>
                         <span class="whitespace-nowrap">적립 모드 설정</span>
@@ -3960,10 +3960,24 @@
             openCustomPinModal(title || "🔑 리더 관리자 인증", () => {
                 isLeaderAuthenticated = true;
                 updateLeaderAuthUI();
-                showToast("👑 리더 모드가 활성화되었습니다. 모든 기능이 즉시 사용 가능합니다.", "success");
+                showToast("👑 리더 인증 완료! 설정 아이콘(⚙️)으로 전환되었습니다.", "success");
                 if (callback) callback();
             });
         }
+
+        window.handleLeaderAdminMasterClick = function() {
+            if (isLeaderAuthenticated) {
+                toggleModal('adminModal');
+                switchAdminTab(1);
+            } else {
+                requireLeaderAuth("🔑 리더 관리 메뉴 비밀번호 확인", () => {
+                    toggleModal('adminModal');
+                    switchAdminTab(1);
+                });
+            }
+        };
+
+        window.requestAdminAccess = window.handleLeaderAdminMasterClick;
 
         window.toggleLeaderAuthMaster = function() {
             if (isLeaderAuthenticated) {
@@ -3981,25 +3995,22 @@
                 renderSeatingPlan(isPart2Shuffle);
             }
             updateLeaderAuthUI();
-            showToast("🔒 리더 모드가 잠겼습니다.", "info");
+            showToast("🔒 리더 모드가 잠겼습니다. (🔑 열쇠로 전환)", "info");
         };
 
         function updateLeaderAuthUI() {
-            const btn = document.getElementById('leaderAuthBtn');
-            const icon = document.getElementById('leaderAuthIcon');
-            const text = document.getElementById('leaderAuthText');
+            const btn = document.getElementById('btnLeaderAdminMaster');
+            const icon = document.getElementById('iconLeaderAdminMaster');
             if (!btn) return;
 
             if (isLeaderAuthenticated) {
-                btn.className = "flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold border border-amber-300 shadow-md ring-2 ring-amber-400/40 active:scale-95 transition text-[11px] sm:text-xs whitespace-nowrap leader-active cursor-pointer";
-                btn.title = "리더 모드 켜짐 (탭하여 잠금)";
-                if (icon) icon.className = "fa-solid fa-crown text-[10px] sm:text-xs text-amber-950";
-                if (text) text.innerHTML = "리더ON <span class='text-[10px] font-normal text-amber-950'>🔒</span>";
+                btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/90 text-amber-400 hover:text-amber-300 border border-amber-500/50 shadow-md ring-2 ring-amber-400/30 active:scale-95 transition cursor-pointer leader-active";
+                btn.title = "리더 관리 설정 (⚙️) - 탭하여 열기";
+                if (icon) icon.className = "fa-solid fa-gear text-sm sm:text-base";
             } else {
-                btn.className = "flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition text-[11px] sm:text-xs font-semibold whitespace-nowrap cursor-pointer";
-                btn.title = "리더 관리자 모드 (비밀번호 인증)";
-                if (icon) icon.className = "fa-solid fa-key text-[10px] sm:text-xs";
-                if (text) text.innerText = "리더인증";
+                btn.className = "w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700/70 shadow active:scale-95 transition cursor-pointer";
+                btn.title = "리더 관리자 인증 (🔑)";
+                if (icon) icon.className = "fa-solid fa-key text-xs sm:text-sm";
             }
         }
 
