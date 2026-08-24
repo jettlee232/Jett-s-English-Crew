@@ -3242,6 +3242,7 @@
         }
         let membersData = [];
         let tableSessionsData = [];
+        let membersSnapshotArrived = false;
         let currentSeatingTables = [];
         let part1SeatingSnapshot = null;
         let part2SeatingSnapshot = null;
@@ -4500,6 +4501,7 @@
                 }, (err) => console.warn(err));
 
                 onSnapshot(membersCollectionRef, (snapshot) => {
+                    membersSnapshotArrived = true;
                     const list = [];
 
                     snapshot.forEach((docSnap) => {
@@ -4527,7 +4529,7 @@
                     }
                 }, (error) => {
                     console.error("Firestore error:", error);
-                    if (membersData.length === 0) {
+                    if (!membersSnapshotArrived && membersData.length === 0) {
                         seedInitialMembers();
                     } else {
                         if (!coinExpiryChecked && membersData.length > 0) {
@@ -4567,14 +4569,16 @@
                 }, (err) => console.error("Table sessions error:", err));
 
                 setTimeout(() => {
-                    if (membersData.length === 0) {
+                    if (!membersSnapshotArrived && membersData.length === 0) {
                         seedInitialMembers();
                     }
-                }, 1200);
+                }, 5000);
 
             } catch (err) {
                 console.error("Auth error:", err);
-                seedInitialMembers();
+                if (!membersSnapshotArrived && membersData.length === 0) {
+                    seedInitialMembers();
+                }
             }
         }
 
