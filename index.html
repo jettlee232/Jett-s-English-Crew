@@ -4501,7 +4501,10 @@
                 }, (err) => console.warn(err));
 
                 onSnapshot(membersCollectionRef, (snapshot) => {
-                    membersSnapshotArrived = true;
+                    // Firestore는 서버에 못 닿으면 fromCache=true 인 빈 스냅샷을 먼저 던진다.
+                    // 그걸 "서버가 비었다"로 믿으면 신규 기기에서 시드가 서버를 덮어쓴다.
+                    const fromServer = !snapshot.metadata.fromCache;
+                    if (fromServer) membersSnapshotArrived = true;
                     const list = [];
 
                     snapshot.forEach((docSnap) => {
@@ -4512,7 +4515,8 @@
                     membersData = list;
                     
                     if (membersData.length === 0) {
-                        seedInitialMembers();
+                        // 서버가 실제로 응답한 빈 컬렉션일 때만 시드/업로드가 정당하다
+                        seedInitialMembers(fromServer);
                     } else {
                         // 서버에서 받은 내용을 로컬에도 캐시한다.
                         // (인터넷이 끊긴 채 앱을 열어도 마지막 상태가 남아 있어야 한다)
@@ -4572,7 +4576,7 @@
                     if (!membersSnapshotArrived && membersData.length === 0) {
                         seedInitialMembers();
                     }
-                }, 5000);
+                }, 1200);
 
             } catch (err) {
                 console.error("Auth error:", err);
@@ -4592,31 +4596,26 @@
             }
         }
 
-        async function seedInitialMembers() {
+        async function seedInitialMembers(allowUpload = false) {
             const targetAttendees = ["Jett", "표토르", "Sunny", "Richard", "Elle", "Jackie", "Lucy", "대니얼", "DY", "Jun", "Emilia", "나지E"];
             const localSaved = localStorage.getItem('localMembersData');
-            const syncKey = localStorage.getItem('session_attendees_sync_0822_v4');
 
             if (localSaved) {
                 try {
                     let parsed = JSON.parse(localSaved);
                     if (Array.isArray(parsed) && parsed.length >= 50) {
-                        if (!syncKey) {
-                            parsed.forEach(m => {
-                                if (m.name === '으니') m.name = 'Elle';
-                                m.isToday = targetAttendees.includes(m.name);
-                            });
-                            localStorage.setItem('localMembersData', JSON.stringify(parsed));
-                            localStorage.setItem('session_attendees_sync_0822_v4', 'true');
-                        }
                         membersData = parsed;
                         renderUI();
-                        // 서버가 비어 있으니 이 기기의 명단을 올려 준다 (아이패드 데이터 유실 방지)
-                        uploadMembersToServer(parsed);
+                        // 서버가 비어 있다고 확인됐을 때만 이 기기의 명단을 올린다.
+                        if (allowUpload) uploadMembersToServer(parsed);
                         return;
                     }
                 } catch(e) {}
             }
+
+            // 로컬 캐시도 없고 서버 상태도 모른다 -> 아무것도 만들지 않는다.
+            // 가짜 시드를 띄우면 그 화면에서 출석 체크할 때 유령 회원이 서버에 생긴다.
+            if (!allowUpload) return;
 
             membersData = INITIAL_SEED_MEMBERS.map((item, idx) => ({
                 id: `mem-${idx + 1}-${crypto.randomUUID().slice(0, 8)}`,
@@ -4626,7 +4625,6 @@
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             }));
-            localStorage.setItem('session_attendees_sync_0822_v4', 'true');
             persistMembers(membersData);
 
             uploadMembersToServer(membersData);
