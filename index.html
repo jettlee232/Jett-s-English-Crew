@@ -4112,6 +4112,11 @@
                     navEl.className = "grid grid-cols-4 gap-1 sm:gap-1.5 pt-0.5";
                 }
             }
+
+            // 리더 모드 잠금/해제 상태 변경 시 좌석 카드(✕ 버튼 등) 즉시 동기화 재렌더링
+            if (typeof renderSeatingPlan === 'function' && typeof isPart2Shuffle !== 'undefined') {
+                renderSeatingPlan(isPart2Shuffle);
+            }
         }
 
         function openCustomPinModal(title, callback) {
@@ -5967,6 +5972,10 @@
         };
 
         window.quickRemoveSeatedMember = function(memberId) {
+            if (!isLeaderAuthenticated) {
+                showToast("🔒 리더 전용 기능입니다 (🔑 상단 인증 필요)", "warning");
+                return;
+            }
             const member = membersData.find(m => m.id === memberId);
             if (!member) return;
 
@@ -5991,6 +6000,10 @@
         };
 
         window.openSeatingAddMemberModal = function() {
+            if (!isLeaderAuthenticated) {
+                showToast("🔒 리더 전용 기능입니다 (🔑 상단 인증 필요)", "warning");
+                return;
+            }
             const modal = document.getElementById('seatingAddMemberModal');
             if (modal) {
                 modal.classList.remove('hidden');
