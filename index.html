@@ -989,7 +989,12 @@
                         </h2>
 
                         <!-- Discreet Action Buttons for Leader (Visible only in Leader Mode) -->
-                        <div id="leaderSeatingActions" class="hidden items-center gap-0.5 opacity-90 hover:opacity-100 transition-opacity">
+                        <div id="leaderSeatingActions" class="hidden items-center gap-1 opacity-90 hover:opacity-100 transition-opacity flex-wrap">
+                            <button id="btnSeatingAddMember" onclick="openSeatingAddMemberModal()" class="flex items-center justify-center px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap gap-1 cursor-pointer" title="오늘 참석자 추가 / 게스트 등록">
+                                <i class="fa-solid fa-user-plus text-[10px]"></i>
+                                <span>참석자 추가</span>
+                            </button>
+
                             <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition active:scale-95" title="1부 배치 복원">
                                 <i class="fa-solid fa-rotate-left text-[11px]"></i>
                             </button>
@@ -1916,6 +1921,85 @@
                             비밀번호 변경
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Member to Seating Modal (Leader Only) -->
+    <div id="seatingAddMemberModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-[#121216] border border-[#23232b] w-full max-w-md rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50 flex items-center justify-center text-sm shrink-0">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base text-white whitespace-nowrap">오늘 좌석에 참가자 추가</h3>
+                        <p class="text-xs text-zinc-400">미참석 회원을 좌석에 배정하거나 새 게스트를 등록합니다.</p>
+                    </div>
+                </div>
+                <button onclick="closeSeatingAddMemberModal()" class="text-zinc-400 hover:text-white p-1 text-base cursor-pointer">✕</button>
+            </div>
+
+            <!-- Sub Tabs for Add Modal -->
+            <div class="grid grid-cols-2 gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-bold">
+                <button id="tabBtnSeatingAddExisting" onclick="switchSeatingAddTab('existing')" class="py-2 rounded-lg text-center bg-blue-600 text-white transition flex items-center justify-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-users text-xs"></i>
+                    <span>1. 기존 회원에서 추가</span>
+                </button>
+                <button id="tabBtnSeatingAddNew" onclick="switchSeatingAddTab('new')" class="py-2 rounded-lg text-center text-zinc-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                    <span>2. 신규/게스트 즉시 등록</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: Existing Absent Members List -->
+            <div id="seatingAddContentExisting" class="space-y-2.5 flex-1 overflow-hidden flex flex-col">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs pointer-events-none"></i>
+                    <input id="seatingAddSearchInput" type="text" oninput="renderSeatingAddMemberList()" onkeyup="renderSeatingAddMemberList()" oncompositionupdate="renderSeatingAddMemberList()" oncompositionend="renderSeatingAddMemberList()" placeholder="이름/초성 실시간 검색..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs sm:text-sm rounded-xl pl-9 pr-8 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <button id="btnSeatingAddSearchClear" onclick="clearSeatingAddSearch()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs hidden cursor-pointer" title="검색어 지우기">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="seatingAddMemberListContainer" class="flex-1 overflow-y-auto max-h-[300px] space-y-1.5 pr-1 bg-zinc-950 p-2 rounded-xl border border-zinc-800">
+                    <!-- Dynamic List -->
+                </div>
+            </div>
+
+            <!-- TAB 2: Quick Register New Guest/Member -->
+            <div id="seatingAddContentNew" class="space-y-3 hidden">
+                <div class="bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 space-y-3">
+                    <div>
+                        <label class="text-xs text-zinc-400 font-medium block mb-1">이름 (영어 또는 한글)</label>
+                        <input id="quickNewGuestName" type="text" placeholder="예: Michael / 정우" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-zinc-400 font-medium block mb-1">성별</label>
+                            <select id="quickNewGuestGender" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option value="F">여성 (Female)</option>
+                                <option value="M">남성 (Male)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 font-medium block mb-1">연령대</label>
+                            <select id="quickNewGuestAge" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option value="20대">20대</option>
+                                <option value="30대" selected>30대</option>
+                                <option value="40대">40대</option>
+                                <option value="50대">50대</option>
+                                <option value="60대">60대</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="quickAddNewGuestToToday()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition shadow-sm flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>신규 등록 & 오늘 좌석 즉시 배치</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -4384,9 +4468,33 @@
 
                 onSnapshot(membersCollectionRef, (snapshot) => {
                     const list = [];
+                    const testIdsToDelete = [];
+                    const needsCarrotZero = !localStorage.getItem('carrot_points_zero_v3');
+
                     snapshot.forEach((docSnap) => {
-                        list.push({ id: docSnap.id, ...docSnap.data() });
+                        const data = docSnap.data();
+                        const name = (data.name || '').toLowerCase();
+                        if (name.includes('test') || name.includes('테스트') || name === 'testmember') {
+                            testIdsToDelete.push(docSnap.id);
+                        } else {
+                            if (needsCarrotZero) {
+                                data.coins = 0;
+                            }
+                            list.push({ id: docSnap.id, ...data });
+                        }
                     });
+
+                    // Remove test members from Firestore immediately
+                    if (testIdsToDelete.length > 0) {
+                        testIdsToDelete.forEach(id => {
+                            deleteDoc(doc(membersCollectionRef, id)).catch(() => {});
+                        });
+                    }
+
+                    if (needsCarrotZero && list.length > 0) {
+                        localStorage.setItem('carrot_points_zero_v3', 'true');
+                        uploadMembersToServer(list);
+                    }
 
                     membersData = list;
                     
@@ -4476,13 +4584,18 @@
 
             if (localSaved) {
                 try {
-                    const parsed = JSON.parse(localSaved);
+                    let parsed = JSON.parse(localSaved);
                     if (Array.isArray(parsed) && parsed.length >= 50) {
-                        if (!localStorage.getItem('carrot_points_reset_0823_v1')) {
+                        // Clean test members
+                        parsed = parsed.filter(m => {
+                            const name = (m.name || '').toLowerCase();
+                            return !name.includes('test') && !name.includes('테스트');
+                        });
+                        if (!localStorage.getItem('carrot_points_zero_v3')) {
                             parsed.forEach(m => {
                                 m.coins = 0;
                             });
-                            localStorage.setItem('carrot_points_reset_0823_v1', 'true');
+                            localStorage.setItem('carrot_points_zero_v3', 'true');
                             localStorage.setItem('localMembersData', JSON.stringify(parsed));
                         }
                         if (!syncKey) {
@@ -5819,7 +5932,12 @@
                                 }
 
                                 return `
-                                    <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none">
+                                    <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none group">
+                                        ${(isLeaderAuthenticated && !isLeader) ? `
+                                            <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 오늘 자리에서 제외">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        ` : ''}
                                         <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
                                             <span class="font-bold text-sm sm:text-base tracking-wide leading-snug break-keep">
                                                 ${esc(m.name || '미지정')}
@@ -5846,6 +5964,201 @@
                 renderSeatingPlan(isPart2Shuffle);
                 showToast(showLeaderFreshness ? "👁️ 리더 전용 신선도 지수가 표시됩니다." : "🔒 신선도 지수가 숨김 처리되었습니다.", "info");
             });
+        };
+
+        window.quickRemoveSeatedMember = function(memberId) {
+            const member = membersData.find(m => m.id === memberId);
+            if (!member) return;
+
+            openConfirmModal({
+                title: "👤 좌석 배치에서 제외",
+                msg: `<strong>${esc(member.name)}</strong>님을 오늘 스터디 자리 배치에서 제외(미참석 처리)하시겠습니까?`,
+                showOption: false,
+                onConfirm: async () => {
+                    member.isToday = false;
+                    member.updatedAt = new Date().toISOString();
+                    persistMembers([...membersData]);
+                    renderUI();
+                    showToast(`👋 ${member.name}님이 오늘 자리에서 제외되었습니다.`, "info");
+
+                    try {
+                        await updateDoc(doc(membersCollectionRef, member.id), { isToday: false, updatedAt: member.updatedAt });
+                    } catch (e) {
+                        console.warn("좌석 제외 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                    }
+                }
+            });
+        };
+
+        window.openSeatingAddMemberModal = function() {
+            const modal = document.getElementById('seatingAddMemberModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                switchSeatingAddTab('existing');
+                renderSeatingAddMemberList();
+                const searchInput = document.getElementById('seatingAddSearchInput');
+                if (searchInput) {
+                    searchInput.value = '';
+                    setTimeout(() => searchInput.focus(), 100);
+                }
+            }
+        };
+
+        window.closeSeatingAddMemberModal = function() {
+            const modal = document.getElementById('seatingAddMemberModal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.switchSeatingAddTab = function(tab) {
+            const btnExisting = document.getElementById('tabBtnSeatingAddExisting');
+            const btnNew = document.getElementById('tabBtnSeatingAddNew');
+            const contentExisting = document.getElementById('seatingAddContentExisting');
+            const contentNew = document.getElementById('seatingAddContentNew');
+
+            if (tab === 'existing') {
+                if (btnExisting) btnExisting.className = "py-2 rounded-lg text-center bg-blue-600 text-white font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer";
+                if (btnNew) btnNew.className = "py-2 rounded-lg text-center text-zinc-400 hover:text-white font-bold transition flex items-center justify-center gap-1 cursor-pointer";
+                if (contentExisting) contentExisting.classList.remove('hidden');
+                if (contentNew) contentNew.classList.add('hidden');
+                renderSeatingAddMemberList();
+            } else {
+                if (btnExisting) btnExisting.className = "py-2 rounded-lg text-center text-zinc-400 hover:text-white font-bold transition flex items-center justify-center gap-1 cursor-pointer";
+                if (btnNew) btnNew.className = "py-2 rounded-lg text-center bg-blue-600 text-white font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer";
+                if (contentExisting) contentExisting.classList.add('hidden');
+                if (contentNew) contentNew.classList.remove('hidden');
+                const nameInput = document.getElementById('quickNewGuestName');
+                if (nameInput) setTimeout(() => nameInput.focus(), 100);
+            }
+        };
+
+        window.renderSeatingAddMemberList = function() {
+            const container = document.getElementById('seatingAddMemberListContainer');
+            const searchInput = document.getElementById('seatingAddSearchInput');
+            const clearBtn = document.getElementById('btnSeatingAddSearchClear');
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            if (clearBtn) {
+                clearBtn.classList.toggle('hidden', !query);
+            }
+
+            if (!container) return;
+
+            let absentMembers = membersData.filter(m => !m.isToday);
+            if (query) {
+                absentMembers = absentMembers.filter(m => matchMemberSearch(m.name, query));
+            }
+            absentMembers.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+
+            if (absentMembers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-xs text-zinc-500 py-6">
+                        ${query ? `'${esc(query)}' 검색 결과가 없습니다.` : '모든 회원이 이미 오늘 참석 상태입니다.'}
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = absentMembers.map(m => {
+                return `
+                    <div class="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl flex items-center justify-between gap-2 hover:bg-zinc-850 transition">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="w-2 h-2 rounded-full bg-zinc-600 shrink-0"></span>
+                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate">${esc(m.name)}</span>
+                            <span class="text-[11px] text-zinc-400 whitespace-nowrap">(${m.gender === 'M' ? '남' : '여'}/${m.ageGroup || '30대'})</span>
+                        </div>
+                        <button onclick="quickAddExistingMemberToToday('${m.id}')" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs py-1.5 px-3 rounded-lg transition shrink-0 whitespace-nowrap flex items-center gap-1 shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>좌석 추가</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.clearSeatingAddSearch = function() {
+            const input = document.getElementById('seatingAddSearchInput');
+            if (input) {
+                input.value = '';
+                renderSeatingAddMemberList();
+                input.focus();
+            }
+        };
+
+        window.quickAddExistingMemberToToday = async function(memberId) {
+            const member = membersData.find(m => m.id === memberId);
+            if (!member) return;
+
+            const now = new Date().toISOString();
+            member.isToday = true;
+            member.leftEarly = false;
+            member.lastAttendedAt = now;
+            member.updatedAt = now;
+
+            persistMembers([...membersData]);
+            renderUI();
+            renderSeatingAddMemberList();
+            showToast(`🎉 ${member.name}님이 오늘 자리에 배정되었습니다!`, "success");
+
+            try {
+                await updateDoc(doc(membersCollectionRef, member.id), {
+                    isToday: true,
+                    leftEarly: false,
+                    lastAttendedAt: now,
+                    updatedAt: now
+                });
+            } catch (e) {
+                console.warn("좌석 추가 Firestore 동기화 실패 (로컬은 저장됨):", e);
+            }
+        };
+
+        window.quickAddNewGuestToToday = async function() {
+            const nameInput = document.getElementById('quickNewGuestName');
+            const genderSelect = document.getElementById('quickNewGuestGender');
+            const ageSelect = document.getElementById('quickNewGuestAge');
+
+            const name = nameInput ? nameInput.value.trim() : '';
+            if (!name) {
+                showToast("추가할 회원의 이름을 입력해주세요.", "warning");
+                if (nameInput) nameInput.focus();
+                return;
+            }
+
+            if (membersData.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+                showToast("이미 동일한 이름의 회원이 등록되어 있습니다.", "warning");
+                return;
+            }
+
+            const now = new Date().toISOString();
+            const newMember = {
+                id: `mem-${membersData.length + 1}-${crypto.randomUUID().slice(0, 8)}`,
+                name: name,
+                gender: genderSelect ? genderSelect.value : 'F',
+                ageGroup: ageSelect ? ageSelect.value : '30대',
+                coins: 0,
+                totalAttended: 1,
+                isNew: true,
+                isToday: true,
+                leftEarly: false,
+                isLeader: false,
+                lastAction: '신규 참석',
+                lastAttendedAt: now,
+                createdAt: now,
+                updatedAt: now
+            };
+
+            membersData.push(newMember);
+            persistMembers([...membersData]);
+            renderUI();
+
+            if (nameInput) nameInput.value = '';
+            closeSeatingAddMemberModal();
+            showToast(`🎉 신규 회원 [${name}] 등록 및 좌석 배정 완료!`, "success");
+
+            try {
+                await setDoc(doc(membersCollectionRef, newMember.id), newMember);
+            } catch (e) {
+                console.warn("신규 회원 Firestore 등록 실패 (로컬은 저장됨):", e);
+            }
         };
 
         window.toggleSeatMoveMode = function() {
