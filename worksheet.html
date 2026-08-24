@@ -9,10 +9,11 @@
     <link rel="icon" type="image/png" sizes="192x192" href="apple-touch-icon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-    <!-- Fonts: Pretendard (한글) + Plus Jakarta Sans (영문) + JetBrains Mono -->
+    <!-- Fonts: Pretendard CDN + Plus Jakarta Sans (영문) + JetBrains Mono -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -208,8 +209,7 @@
 
             /* 3. 메인 뷰포트 다크 배경 무효화 */
             #previewContainerWrapper,
-            main,
-            .flex-1 {
+            main {
                 background: #ffffff !important;
                 background-color: #ffffff !important;
                 padding: 0 !important;
@@ -600,7 +600,7 @@
         function saveLocalState() {
             try {
                 const rawMd = document.getElementById('markdownInput').value;
-                if (rawMd) localStorage.setItem('worksheet_markdown_cache', rawMd);
+                localStorage.setItem('worksheet_markdown_cache', rawMd);
                 localStorage.setItem('worksheet_edition_cache', currentEdition);
                 const fs = document.getElementById('fontSizeSelector').value;
                 if (fs) localStorage.setItem('worksheet_fontsize_cache', fs);
@@ -628,7 +628,7 @@
                     setMaterialEdition(savedEdition);
                 }
 
-                if (savedMd && savedMd.trim()) {
+                if (savedMd !== null) {
                     document.getElementById('markdownInput').value = savedMd;
                     renderLivePreview();
                     return true;

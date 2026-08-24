@@ -32,8 +32,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Pretendard -->
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Pretendard CDN -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <script>
         (function() {
@@ -914,7 +914,7 @@
 
                     <!-- Schedule Accordion Button -->
                     <div class="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-900/60">
-                        <button onclick="toggleTimelineAccordion()" class="w-full p-3 flex items-center justify-between bg-zinc-900 hover:bg-zinc-850 transition text-left">
+                        <button onclick="toggleTimelineAccordion()" class="w-full p-3 flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 transition text-left">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-calendar-check text-blue-400 text-sm"></i>
                                 <span class="font-bold text-xs sm:text-sm text-zinc-200">참가 신청 일정 및 상세 안내</span>
@@ -1300,7 +1300,7 @@
             <!-- 3. 상세 커리큘럼 (아코디언 형태) -->
             <div class="bg-[#121216] border border-[#23232b] rounded-2xl overflow-hidden shadow-xl transition">
                 <!-- Accordion Header Toggle Button -->
-                <button onclick="toggleCurriculumAccordion()" class="w-full p-4 sm:p-5 flex items-center justify-between bg-zinc-900 hover:bg-zinc-850 transition text-left">
+                <button onclick="toggleCurriculumAccordion()" class="w-full p-4 sm:p-5 flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 transition text-left">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-800 text-blue-400 border border-zinc-700 flex items-center justify-center text-base shrink-0 shadow-sm">
                             <i class="fa-solid fa-list-ol"></i>
@@ -1463,15 +1463,15 @@
                             <span>적립 모드 전환:</span>
                         </span>
                         <div class="grid grid-cols-3 gap-1.5 flex-1 min-w-[280px]">
-                            <button id="btnModeOntime" onclick="setLeaderMode('ontime')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-blue-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="제시간 도착 적립 모드 켜기">
+                            <button id="btnModeOntime" onclick="setLeaderMode('ontime')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-blue-300 hover:bg-zinc-800 border border-zinc-800 cursor-pointer" title="제시간 도착 적립 모드 켜기">
                                 <i id="iconModeOntime" class="fa-solid fa-stopwatch text-xs sm:text-sm text-blue-400"></i>
                                 <span>1. 제시간 도착</span>
                             </button>
-                            <button id="btnModeReview" onclick="setLeaderMode('review')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-pink-300 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="후기 작성 적립 모드 켜기">
+                            <button id="btnModeReview" onclick="setLeaderMode('review')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-pink-300 hover:bg-zinc-800 border border-zinc-800 cursor-pointer" title="후기 작성 적립 모드 켜기">
                                 <i id="iconModeReview" class="fa-solid fa-pen-nib text-xs sm:text-sm text-pink-400"></i>
                                 <span>2. 후기 작성</span>
                             </button>
-                            <button id="btnModeLocked" onclick="setLeaderMode('locked')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer" title="적립 잠금 / 마감">
+                            <button id="btnModeLocked" onclick="setLeaderMode('locked')" class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-800 cursor-pointer" title="적립 잠금 / 마감">
                                 <i id="iconModeLocked" class="fa-solid fa-lock text-xs sm:text-sm text-zinc-400"></i>
                                 <span>3. 적립 잠금</span>
                             </button>
@@ -1492,7 +1492,7 @@
                         </span>
                     </div>
 
-                    <div id="todayMemberTiles" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2.5 sm:gap-3.5 min-h-[160px] max-h-[380px] sm:max-h-[460px] overflow-y-auto bg-zinc-950/80 p-3 sm:p-4 rounded-2xl border border-zinc-850 shadow-inner">
+                    <div id="todayMemberTiles" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2.5 sm:gap-3.5 min-h-[160px] max-h-[380px] sm:max-h-[460px] overflow-y-auto bg-zinc-950/80 p-3 sm:p-4 rounded-2xl border border-zinc-800 shadow-inner">
                         <div class="col-span-full text-center text-xs sm:text-sm text-zinc-500 py-10">
                             참가자 명단을 로딩하는 중입니다...
                         </div>
@@ -1531,7 +1531,7 @@
             </div>
 
             <!-- 3 Sub-Tabs Bar -->
-            <div class="grid grid-cols-3 gap-1.5 sm:gap-2 bg-zinc-950 p-1.5 rounded-xl border border-zinc-850 text-xs sm:text-sm font-semibold">
+            <div class="grid grid-cols-3 gap-1.5 sm:gap-2 bg-zinc-950 p-1.5 rounded-xl border border-zinc-800 text-xs sm:text-sm font-semibold">
                 <button id="admin-tab-btn-1" onclick="switchAdminTab(1)" class="admin-tab-btn py-2 rounded-lg text-center bg-blue-600 text-white shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
                     <i class="fa-solid fa-film text-xs"></i>
                     <span>1. 주제 설정</span>
@@ -1554,7 +1554,7 @@
                         <div class="flex items-center gap-1.5 text-xs font-bold text-white">
                             <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
                             <span>워크시트 스튜디오 Pro</span>
-                            <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">신규</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">신규</span>
                         </div>
                         <p class="text-[11px] text-zinc-400">TED 스크립트로 고품질 A4 워크시트 & PDF 즉시 생성</p>
                     </div>
@@ -3706,7 +3706,7 @@
             const iconReview = document.getElementById('iconModeReview');
             const iconLocked = document.getElementById('iconModeLocked');
 
-            const defaultBtnClass = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850 border border-zinc-800 cursor-pointer";
+            const defaultBtnClass = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition active:scale-95 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-800 cursor-pointer";
 
             if (btnOntime) btnOntime.className = defaultBtnClass;
             if (btnReview) btnReview.className = defaultBtnClass;
@@ -4501,33 +4501,11 @@
 
                 onSnapshot(membersCollectionRef, (snapshot) => {
                     const list = [];
-                    const testIdsToDelete = [];
-                    const needsCarrotZero = !localStorage.getItem('carrot_points_zero_v3');
 
                     snapshot.forEach((docSnap) => {
                         const data = docSnap.data();
-                        const name = (data.name || '').toLowerCase();
-                        if (name.includes('test') || name.includes('테스트') || name === 'testmember') {
-                            testIdsToDelete.push(docSnap.id);
-                        } else {
-                            if (needsCarrotZero) {
-                                data.coins = 0;
-                            }
-                            list.push({ id: docSnap.id, ...data });
-                        }
+                        list.push({ id: docSnap.id, ...data });
                     });
-
-                    // Remove test members from Firestore immediately
-                    if (testIdsToDelete.length > 0) {
-                        testIdsToDelete.forEach(id => {
-                            deleteDoc(doc(membersCollectionRef, id)).catch(() => {});
-                        });
-                    }
-
-                    if (needsCarrotZero && list.length > 0) {
-                        localStorage.setItem('carrot_points_zero_v3', 'true');
-                        uploadMembersToServer(list);
-                    }
 
                     membersData = list;
                     
@@ -4619,18 +4597,6 @@
                 try {
                     let parsed = JSON.parse(localSaved);
                     if (Array.isArray(parsed) && parsed.length >= 50) {
-                        // Clean test members
-                        parsed = parsed.filter(m => {
-                            const name = (m.name || '').toLowerCase();
-                            return !name.includes('test') && !name.includes('테스트');
-                        });
-                        if (!localStorage.getItem('carrot_points_zero_v3')) {
-                            parsed.forEach(m => {
-                                m.coins = 0;
-                            });
-                            localStorage.setItem('carrot_points_zero_v3', 'true');
-                            localStorage.setItem('localMembersData', JSON.stringify(parsed));
-                        }
                         if (!syncKey) {
                             parsed.forEach(m => {
                                 if (m.name === '으니') m.name = 'Elle';
@@ -5267,7 +5233,7 @@
                             ? 'name-tile-selected' 
                             : isDone 
                                 ? 'bg-zinc-900/80 border-zinc-800 text-zinc-500 cursor-default opacity-60' 
-                                : 'bg-zinc-900 border-zinc-800 text-zinc-100 hover:border-zinc-700 hover:bg-zinc-850 shadow-sm'
+                                : 'bg-zinc-900 border-zinc-800 text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800 shadow-sm'
                     } active:scale-95">
                         <span class="truncate leading-tight text-sm sm:text-base lg:text-lg whitespace-nowrap font-bold">${esc(m.name || '미지정')}</span>
                         ${doneTag}
@@ -5939,9 +5905,9 @@
 
                                 let tagHtml = '';
                                 if (isLeader) {
-                                    tagHtml = `<span class="seat-badge-leader inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-blue-600 text-white font-black text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="리더">L</span>`;
+                                    tagHtml = `<span class="seat-badge-leader inline-flex items-center justify-center w-4 h-4 rounded bg-blue-600 text-white font-black text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="리더">L</span>`;
                                 } else if (isNew) {
-                                    tagHtml = `<span class="seat-badge-newbie inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded bg-[#dcfce7] text-zinc-900 border border-[#86efac] text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="신규">🌱</span>`;
+                                    tagHtml = `<span class="seat-badge-newbie inline-flex items-center justify-center w-4 h-4 rounded bg-[#dcfce7] text-zinc-900 border border-[#86efac] text-[10px] sm:text-[11px] leading-none shadow-sm shrink-0" title="신규">🌱</span>`;
                                 }
 
                                 const cardTheme = isMale 
@@ -6101,7 +6067,7 @@
 
             container.innerHTML = absentMembers.map(m => {
                 return `
-                    <div class="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl flex items-center justify-between gap-2 hover:bg-zinc-850 transition">
+                    <div class="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl flex items-center justify-between gap-2 hover:bg-zinc-800 transition">
                         <div class="flex items-center gap-2 truncate">
                             <span class="w-2 h-2 rounded-full bg-zinc-600 shrink-0"></span>
                             <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate">${esc(m.name)}</span>
