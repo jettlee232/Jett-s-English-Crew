@@ -771,6 +771,9 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
+                <a id="btnWorksheetStudio" href="worksheet.html" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-blue-950/70 hover:bg-blue-900/80 text-blue-300 border border-blue-500/50 shadow active:scale-95 transition cursor-pointer" title="워크시트 스튜디오 & A4 PDF 생성 (📄)">
+                    <i class="fa-solid fa-file-lines text-xs sm:text-sm"></i>
+                </a>
                 <button id="btnLeaderLock" onclick="lockLeaderAuth()" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-amber-950/70 hover:bg-amber-900/80 text-amber-300 border border-amber-500/50 shadow-md ring-1 ring-amber-400/30 active:scale-95 transition cursor-pointer" title="리더 모드 잠그기 (🔒)">
                     <i class="fa-solid fa-lock text-xs sm:text-sm"></i>
                 </button>
@@ -1545,6 +1548,22 @@
 
             <!-- ADMIN SUB-TAB 1: Topic & Media Settings -->
             <div id="admin-tab-content-1" class="admin-tab-content bg-zinc-900/90 p-3.5 sm:p-4 rounded-xl border border-zinc-800 space-y-3">
+                <!-- Worksheet Studio Quick Launch Card -->
+                <div class="p-3 rounded-xl bg-gradient-to-r from-blue-950/70 to-indigo-950/60 border border-blue-600/40 flex items-center justify-between shadow-sm">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-white">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                            <span>워크시트 스튜디오 Pro</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">신규</span>
+                        </div>
+                        <p class="text-[11px] text-zinc-400">TED 스크립트로 고품질 A4 워크시트 & PDF 즉시 생성</p>
+                    </div>
+                    <a href="worksheet.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow active:scale-95 shrink-0">
+                        <span>생성기 열기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+
                 <label class="block font-bold text-blue-400 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>이번 주 스터디 주제 & 미디어/장소 설정</span>
@@ -4065,6 +4084,7 @@
             const btn = document.getElementById('btnLeaderAdminMaster');
             const icon = document.getElementById('iconLeaderAdminMaster');
             const lockBtn = document.getElementById('btnLeaderLock');
+            const wsBtn = document.getElementById('btnWorksheetStudio');
             const seatingActions = document.getElementById('leaderSeatingActions');
             const tab5Btn = document.getElementById('tab-btn-5');
             const navEl = document.getElementById('mainNavBar');
@@ -4078,6 +4098,10 @@
                 if (lockBtn) {
                     lockBtn.classList.remove('hidden');
                     lockBtn.classList.add('flex');
+                }
+                if (wsBtn) {
+                    wsBtn.classList.remove('hidden');
+                    wsBtn.classList.add('flex');
                 }
                 if (seatingActions) {
                     seatingActions.classList.remove('hidden');
@@ -4099,6 +4123,10 @@
                 if (lockBtn) {
                     lockBtn.classList.remove('flex');
                     lockBtn.classList.add('hidden');
+                }
+                if (wsBtn) {
+                    wsBtn.classList.remove('flex');
+                    wsBtn.classList.add('hidden');
                 }
                 if (seatingActions) {
                     seatingActions.classList.remove('flex');

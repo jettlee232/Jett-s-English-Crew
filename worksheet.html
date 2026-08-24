@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>성북구 중상급 영어회화 - 워크시트 스튜디오 Pro</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Fonts: Pretendard (한글) + Plus Jakarta Sans (영문) + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Pretendard', 'Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        kr: ['Pretendard', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        studio: {
+                            bg: '#0f1117',
+                            panel: '#161922',
+                            border: '#242838',
+                            hover: '#2d3347',
+                            text: '#f1f3f9',
+                            muted: '#94a0b8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 기본 스크롤바 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1117; }
+        ::-webkit-scrollbar-thumb { background: #2b3247; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3d4766; }
+
+        /* ========================================================
+           A4 인쇄 & 시뮬레이션 기본 설정 (화면 뷰)
+           ======================================================== */
+        :root {
+            --watermark-opacity: 0.03;
+            --sheet-font-scale: 1.12;
+            --print-line-height: 1.72;
+        }
+
+        /* 화면 뷰에서의 실제 A4 시뮬레이션 */
+        .a4-page-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            padding: 13mm 16mm 12mm 16mm;
+            margin: 0 auto 30px auto;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12);
+            position: relative;
+            box-sizing: border-box;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-size: calc(10pt * var(--sheet-font-scale, 1.12));
+            line-height: var(--print-line-height, 1.72);
+            letter-spacing: -0.015em;
+        }
+
+        /* 워터마크 레이어 */
+        .watermark-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 55%;
+            max-width: 360px;
+            opacity: var(--watermark-opacity, 0.03);
+            filter: grayscale(100%) contrast(110%);
+            pointer-events: none;
+            z-index: 1;
+            user-select: none;
+        }
+
+        /* 인쇄 콘텐츠 영역 */
+        .sheet-content {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* 심플 러닝 헤더 (소프트 에디토리얼) */
+        .sheet-running-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 7.5pt;
+            font-weight: 700;
+            color: #64748b;
+            flex-shrink: 0;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 심플 러닝 푸터 (소프트 에디토리얼) */
+        .sheet-running-footer {
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 7.5pt;
+            color: #94a3b8;
+            font-weight: 600;
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 미니멀 영작 필기 라인 (단정한 노트 스타일) */
+        .clean-writing-card {
+            padding-bottom: 2px;
+        }
+
+        .clean-ruled-lines {
+            margin-top: 6px;
+            height: 90px;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 100% 30px;
+            background-position: 0 28px;
+        }
+
+        /* 본문 낭독 전용 은은한 배경 박스 & 정돈된 여백 */
+        .reading-script-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 18px;
+        }
+
+        /* 본문 낭독 어휘 하이라이트 (스위스 모노크롬 하이라이트) */
+        .reading-keyword-highlight {
+            font-weight: 800;
+            color: #000000;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 1px;
+            display: inline;
+        }
+        .reading-keyword-korean {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.92em;
+            margin-left: 2px;
+        }
+
+        /* ========================================================
+           🔥 인쇄 및 PDF 저장 전용 스타일 (@media print) 
+           어두운 스튜디오 테마 완전 제거 & 순백색 A4 완벽 출력
+           ======================================================== */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            /* 1. 최상위 html, body 순백색 강제 */
+            html, body {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 100% !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* 2. 네비게이션, 좌측 패널, 줌 바 완전 숨김 */
+            .no-print, header, aside, #leftControlPanel {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* 3. 메인 뷰포트 다크 배경 무효화 */
+            #previewContainerWrapper,
+            main,
+            .flex-1 {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                display: block !important;
+                overflow: visible !important;
+            }
+
+            #printPreviewContainer {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                display: block !important;
+                transform: none !important;
+            }
+
+            /* 4. A4 시트 고정 인쇄 크기 및 여백 (210mm x 297mm 완벽 분할) */
+            .a4-page-sheet {
+                width: 210mm !important;
+                min-height: 297mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                margin: 0 auto !important;
+                padding: 13mm 16mm 12mm 16mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                page-break-before: auto !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                box-sizing: border-box !important;
+                position: relative !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .a4-page-sheet:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+
+            /* 5. 낭독 박스 & 뱃지 명도 보존 */
+            .reading-script-box {
+                background-color: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                padding: 12px 18px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .bg-gray-900 {
+                background-color: #111827 !important;
+                color: #ffffff !important;
+            }
+            .bg-gray-200 {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+            }
+            .bg-gray-100 {
+                background-color: #f8fafc !important;
+                color: #0f172a !important;
+            }
+            .bg-gray-50 {
+                background-color: #fafafa !important;
+            }
+
+            .watermark-layer {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 55% !important;
+                max-width: 360px !important;
+                opacity: var(--watermark-opacity, 0.03) !important;
+                filter: grayscale(100%) !important;
+                z-index: 1 !important;
+                pointer-events: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full bg-studio-bg text-studio-text flex flex-col font-sans select-none">
+
+    <!-- TOP GLOBAL NAV BAR (No Print) -->
+    <header class="no-print h-14 bg-studio-panel border-b border-studio-border px-4 flex items-center justify-between shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-bg border border-studio-border hover:border-studio-hover text-zinc-300 hover:text-white transition text-xs font-semibold whitespace-nowrap">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">키오스크</span>
+            </a>
+            <div class="h-4 w-px bg-studio-border hidden sm:block"></div>
+            <div class="flex items-center gap-2">
+                <img src="logo.png" alt="Logo" class="h-7 w-auto object-contain">
+                <div class="leading-tight">
+                    <h1 class="text-sm font-bold text-white flex items-center gap-1.5 whitespace-nowrap">
+                        <span>워크시트 스튜디오</span>
+                        <span id="headerEditionBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap">현장 스터디용 (6p)</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Material Edition Switcher (Full vs Teaser Preview) -->
+        <div class="flex items-center gap-1 bg-studio-bg p-1 rounded-xl border border-studio-border shrink-0">
+            <button id="btnEditionFull" onclick="setMaterialEdition('full')" class="edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-600 text-white shadow whitespace-nowrap" title="표지, 웜업, 지문, 내용, 어휘, 영작, 토론 전체 포함">
+                <i class="fa-solid fa-book-open mr-1"></i>현장 스터디용 (6p)
+            </button>
+            <button id="btnEditionTeaser" onclick="setMaterialEdition('teaser')" class="edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-amber-300 transition whitespace-nowrap" title="질문 스포 방지: 타이틀, 지문 완독, 어휘/표현만 2페이지 제공">
+                <i class="fa-solid fa-file-lines mr-1 text-amber-400"></i>사전 예습용 (2p)
+            </button>
+        </div>
+
+        <!-- Right: Print & Copy Answers Action Buttons -->
+        <div class="flex items-center gap-2 shrink-0">
+            <button id="btnCopyAnswerTop" onclick="copyAnswerKeyToClipboard()" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-amber-300 hover:text-amber-200 text-xs font-bold transition cursor-pointer whitespace-nowrap" title="라이팅 모범답안을 카톡 공유용으로 복사">
+                <i class="fa-solid fa-clipboard-check text-amber-400"></i>
+                <span>모범답안 복사</span>
+            </button>
+            <button onclick="loadSampleData()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-zinc-300 hover:text-white text-xs font-medium transition cursor-pointer whitespace-nowrap" title="전문 스크립트 샘플 불러오기">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span>샘플</span>
+            </button>
+            <button id="btnPrintMainBtn" onclick="triggerA4Print()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-500/25 border border-blue-400/30 active:scale-95 transition cursor-pointer whitespace-nowrap">
+                <i class="fa-solid fa-print text-sm"></i>
+                <span id="printBtnLabel">PDF 인쇄 (6p)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN STUDIO WORKSPACE (No Print) -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: INPUT & CONTROL PANEL -->
+        <aside id="leftControlPanel" class="no-print w-full md:w-[460px] lg:w-[490px] xl:w-[520px] bg-studio-panel border-r border-studio-border flex flex-col shrink-0 overflow-hidden transition-all duration-200">
+            
+            <!-- Controls Toolbar -->
+            <div class="p-3.5 border-b border-studio-border bg-studio-panel/90 space-y-2.5 shrink-0">
+                
+                <!-- Option Row 1: Edition Mode Switch & Font Scale -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Edition Mode Selector -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-emerald-300 mb-1 flex items-center gap-1">
+                            <i class="fa-solid fa-sliders text-emerald-400"></i>
+                            <span>교재 모드</span>
+                        </label>
+                        <select id="editionSelector" onchange="setMaterialEdition(this.value)" class="w-full bg-studio-bg border border-emerald-500/50 text-emerald-200 rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-emerald-400">
+                            <option value="full" selected>현장 스터디용 (6p)</option>
+                            <option value="teaser">사전 예습용 (2p)</option>
+                        </select>
+                    </div>
+
+                    <!-- Global Font Size Scaling -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-amber-300 mb-1 flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus text-amber-400"></i>
+                            <span>글씨 크기</span>
+                        </label>
+                        <select id="fontSizeSelector" onchange="changeFontSize(this.value)" class="w-full bg-studio-bg border border-amber-500/40 text-amber-100 rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-amber-400">
+                            <option value="1.18">초특대 118% (시니어)</option>
+                            <option value="1.12" selected>큼직한 글씨 112% (추천)</option>
+                            <option value="1.06">보기 편한 106%</option>
+                            <option value="1.0">표준 100%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Option Row 2: Watermark & Quick Action -->
+                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-studio-border/60">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-zinc-400 mb-1">워터마크</label>
+                        <select id="watermarkSelector" onchange="changeWatermark(this.value)" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none">
+                            <option value="0.03" selected>은은하게 3% (권장)</option>
+                            <option value="0.06">조금 진하게 (6%)</option>
+                            <option value="0">끄기 (0%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-zinc-400 mb-1">카톡 공유</label>
+                        <button onclick="copyAnswerKeyToClipboard()" class="w-full bg-studio-bg hover:bg-zinc-800 border border-zinc-700 text-amber-300 hover:text-amber-200 rounded-lg px-2 py-1 text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-copy text-[10px]"></i>
+                            <span>모범답안 복사</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Markdown Input Editor Area -->
+            <div class="flex-1 flex flex-col p-3.5 space-y-2 overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-xs font-bold text-zinc-300">Gems 마크다운 원본 붙여넣기</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="pasteFromClipboard()" class="px-2.5 py-1 rounded-lg bg-studio-bg border border-studio-border hover:border-zinc-500 text-[11px] text-zinc-300 transition" title="클립보드 붙여넣기">
+                            <i class="fa-regular fa-paste mr-1"></i>붙여넣기
+                        </button>
+                        <button onclick="clearMarkdownInput()" class="px-2.5 py-1 rounded-lg bg-studio-bg border border-studio-border hover:border-rose-500/50 text-[11px] text-zinc-400 hover:text-rose-400 transition" title="지우기">
+                            <i class="fa-solid fa-trash-can mr-1"></i>비우기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 relative">
+                    <textarea id="markdownInput" oninput="debounceRender()" class="w-full h-full bg-[#0a0b10] border border-studio-border focus:border-blue-500 rounded-xl p-3 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none resize-none leading-relaxed select-text" placeholder="여기에 Gems에서 생성된 마크다운 전문을 붙여넣으세요. 상단 모드(현장 스터디용 6p / 사전 예습용 2p)에 따라 실시간으로 완벽하게 자동 조판됩니다."></textarea>
+                </div>
+
+                <!-- Edition Mode Guide Box -->
+                <div id="editionGuideBox" class="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700/60 text-[11px] text-zinc-300 space-y-1">
+                    <div class="font-bold text-emerald-400 flex items-center justify-between">
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span id="guideBoxTitle">현장 스터디용 (양면 3장 / 6페이지)</span>
+                        </div>
+                        <span id="guideBoxBadge" class="text-[10px] text-zinc-400 font-mono">Total 6 Pages</span>
+                    </div>
+                    <div id="guideBoxContent" class="grid grid-cols-3 gap-1.5 text-[10px] text-zinc-300 font-medium text-center pt-0.5">
+                        <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                            <span class="text-amber-300 font-bold block">1장 (앞/뒤)</span>
+                            <span>P1. 클린 표지<br>P2. 웜업+지문 1부</span>
+                        </div>
+                        <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                            <span class="text-amber-300 font-bold block">2장 (앞/뒤)</span>
+                            <span>P3. 지문 2부 완독<br>P4. 내용+어휘</span>
+                        </div>
+                        <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                            <span class="text-amber-300 font-bold block">3장 (앞/뒤)</span>
+                            <span>P5. 큰 글씨 영작<br>P6. 토론 8문항</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT: LIVE A4 PRINT PREVIEW AREA -->
+        <main id="previewContainerWrapper" class="flex-1 bg-[#090a0f] p-4 sm:p-6 lg:p-8 overflow-y-auto flex flex-col items-center">
+            
+            <!-- Floating Zoom & Action Bar for Preview (No Print) -->
+            <div class="no-print sticky top-0 z-20 mb-4 px-4 py-2 rounded-2xl bg-studio-panel/90 backdrop-blur-md border border-studio-border shadow-2xl flex items-center gap-3 text-xs">
+                <span class="font-bold text-zinc-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-lines text-blue-400"></i>
+                    <span id="previewBarTitle">현장 스터디용 (6p)</span>
+                </span>
+                <div class="h-3 w-px bg-studio-border"></div>
+                <div class="flex items-center gap-1 text-zinc-400">
+                    <button onclick="adjustZoom(-0.1)" class="w-6 h-6 rounded bg-studio-bg hover:bg-studio-hover flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="zoomLevelDisplay" class="font-mono text-[11px] px-1 font-semibold text-zinc-300">100%</span>
+                    <button onclick="adjustZoom(0.1)" class="w-6 h-6 rounded bg-studio-bg hover:bg-studio-hover flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="h-3 w-px bg-studio-border"></div>
+                <button onclick="triggerA4Print()" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer">
+                    <i class="fa-solid fa-print"></i>
+                    <span id="previewBarPrintBtn">PDF 인쇄 (6p)</span>
+                </button>
+            </div>
+
+            <!-- THE RENDERED A4 PAGES CONTAINER -->
+            <div id="printPreviewContainer" class="w-full flex flex-col items-center transition-transform origin-top">
+                <!-- Javascript will inject .a4-page-sheet elements here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT: MASTER PARSER & DUAL EDITION ENGINE (FULL 6P vs TEASER 2P) -->
+    <script>
+        let currentZoom = 1.0;
+        let currentEdition = 'full'; // 'full' or 'teaser'
+        let lastParsedAnswerKey = [];
+
+        function adjustZoom(delta) {
+            currentZoom = Math.min(Math.max(0.5, currentZoom + delta), 1.5);
+            document.getElementById('zoomLevelDisplay').innerText = Math.round(currentZoom * 100) + '%';
+            document.getElementById('printPreviewContainer').style.transform = `scale(${currentZoom})`;
+        }
+
+        // Switch Material Edition (Full 6P vs Teaser 2P)
+        function setMaterialEdition(edition) {
+            currentEdition = edition;
+            
+            // Sync selectors and buttons
+            document.getElementById('editionSelector').value = edition;
+            const btnFull = document.getElementById('btnEditionFull');
+            const btnTeaser = document.getElementById('btnEditionTeaser');
+            const headerBadge = document.getElementById('headerEditionBadge');
+            const printBtnLabel = document.getElementById('printBtnLabel');
+            const previewBarTitle = document.getElementById('previewBarTitle');
+            const previewBarPrintBtn = document.getElementById('previewBarPrintBtn');
+            const guideTitle = document.getElementById('guideBoxTitle');
+            const guideBadge = document.getElementById('guideBoxBadge');
+            const guideContent = document.getElementById('guideBoxContent');
+
+            if (edition === 'full') {
+                btnFull.className = "edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-600 text-white shadow whitespace-nowrap";
+                btnTeaser.className = "edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-amber-300 transition whitespace-nowrap";
+                headerBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap";
+                headerBadge.innerText = "현장 스터디용 (6p)";
+                printBtnLabel.innerText = "PDF 인쇄 (6p)";
+                previewBarTitle.innerText = "현장 스터디용 (6p)";
+                previewBarPrintBtn.innerText = "PDF 인쇄 (6p)";
+                
+                guideTitle.innerText = "현장 스터디용 (양면 3장 / 6페이지)";
+                guideBadge.innerText = "Total 6 Pages";
+                guideContent.innerHTML = `
+                    <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                        <span class="text-amber-300 font-bold block">1장 (앞/뒤)</span>
+                        <span>P1. 클린 표지<br>P2. 웜업+지문 1부</span>
+                    </div>
+                    <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                        <span class="text-amber-300 font-bold block">2장 (앞/뒤)</span>
+                        <span>P3. 지문 2부 완독<br>P4. 내용+어휘</span>
+                    </div>
+                    <div class="bg-zinc-800/80 p-1.5 rounded border border-zinc-700/50">
+                        <span class="text-amber-300 font-bold block">3장 (앞/뒤)</span>
+                        <span>P5. 큰 글씨 영작<br>P6. 토론 8문항</span>
+                    </div>
+                `;
+            } else {
+                btnFull.className = "edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-emerald-300 transition whitespace-nowrap";
+                btnTeaser.className = "edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-amber-600 text-white shadow whitespace-nowrap";
+                headerBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap";
+                headerBadge.innerText = "사전 예습용 (2p)";
+                printBtnLabel.innerText = "PDF 다운로드 (2p)";
+                previewBarTitle.innerText = "사전 예습용 (2p)";
+                previewBarPrintBtn.innerText = "PDF 다운로드 (2p)";
+
+                guideTitle.innerText = "사전 예습용 (양면 1장 / 2페이지 완결)";
+                guideBadge.innerText = "Total 2 Pages";
+                guideContent.innerHTML = `
+                    <div class="bg-zinc-800/80 p-2 rounded border border-amber-500/40 col-span-3 text-left space-y-1">
+                        <div class="flex items-center justify-between text-amber-300 font-bold">
+                            <span>양면 1장 완결 (1P 가득 채움 & 2P 여유 조판)</span>
+                            <span class="text-emerald-400 font-mono">Sheet 1</span>
+                        </div>
+                        <p class="text-[10px] text-zinc-300">
+                            <strong>• 1페이지(앞):</strong> 토픽 + 지문 1부 ([1]~[8]단락 하단까지 가득 수록)<br>
+                            <strong>• 2페이지(뒤):</strong> 지문 2부 완독 ([9]~[12]단락) + 핵심 어휘/표현 6개 + 스포 방지 안내
+                        </p>
+                    </div>
+                `;
+            }
+
+            renderLivePreview();
+        }
+
+        function changeWatermark(val) {
+            document.documentElement.style.setProperty('--watermark-opacity', val);
+        }
+
+        function changeFontSize(val) {
+            document.documentElement.style.setProperty('--sheet-font-scale', val);
+            const sheets = document.querySelectorAll('.a4-page-sheet');
+            sheets.forEach(s => {
+                s.style.fontSize = `calc(10pt * ${val})`;
+            });
+        }
+
+        // Print Trigger with safe zoom reset and restoration
+        function triggerA4Print() {
+            const container = document.getElementById('printPreviewContainer');
+            const originalTransform = container.style.transform;
+            container.style.transform = 'none';
+            
+            setTimeout(() => {
+                window.print();
+                container.style.transform = originalTransform;
+            }, 50);
+        }
+
+        // LocalStorage auto-save & auto-restore for convenient local workflow
+        function saveLocalState() {
+            try {
+                const rawMd = document.getElementById('markdownInput').value;
+                if (rawMd) localStorage.setItem('worksheet_markdown_cache', rawMd);
+                localStorage.setItem('worksheet_edition_cache', currentEdition);
+                const fs = document.getElementById('fontSizeSelector').value;
+                if (fs) localStorage.setItem('worksheet_fontsize_cache', fs);
+                const wm = document.getElementById('watermarkSelector').value;
+                if (wm) localStorage.setItem('worksheet_watermark_cache', wm);
+            } catch (e) {}
+        }
+
+        function loadLocalState() {
+            try {
+                const savedMd = localStorage.getItem('worksheet_markdown_cache');
+                const savedEdition = localStorage.getItem('worksheet_edition_cache');
+                const savedFs = localStorage.getItem('worksheet_fontsize_cache');
+                const savedWm = localStorage.getItem('worksheet_watermark_cache');
+
+                if (savedFs) {
+                    document.getElementById('fontSizeSelector').value = savedFs;
+                    changeFontSize(savedFs);
+                }
+                if (savedWm) {
+                    document.getElementById('watermarkSelector').value = savedWm;
+                    changeWatermark(savedWm);
+                }
+                if (savedEdition && savedEdition !== currentEdition) {
+                    setMaterialEdition(savedEdition);
+                }
+
+                if (savedMd && savedMd.trim()) {
+                    document.getElementById('markdownInput').value = savedMd;
+                    renderLivePreview();
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('markdownInput').value = text;
+                    renderLivePreview();
+                    saveLocalState();
+                }
+            } catch (err) {
+                alert('클립보드 권한이 필요합니다. 텍스트를 직접 입력창에 Ctrl+V (Cmd+V) 해주세요.');
+            }
+        }
+
+        function clearMarkdownInput() {
+            if (confirm('입력창을 비우시겠습니까?')) {
+                document.getElementById('markdownInput').value = '';
+                try { localStorage.removeItem('worksheet_markdown_cache'); } catch(e){}
+                renderLivePreview();
+            }
+        }
+
+        function copyAnswerKeyToClipboard() {
+            if (!lastParsedAnswerKey || lastParsedAnswerKey.length === 0) {
+                alert('복사할 모범 답안이 없습니다. 먼저 마크다운을 입력해주세요.');
+                return;
+            }
+            const text = `[성북구 중상급 영어회화] 이번 주 Writing Build-up 모범답안\n\n` + 
+                lastParsedAnswerKey.map(a => `${a.num}. ${a.text}`).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                alert('카톡 전송용 모범답안이 클립보드에 복사되었습니다.\n단톡방에 바로 붙여넣기(Cmd+V)하세요.');
+            }).catch(() => {
+                alert('클립보드 복사에 실패했습니다.');
+            });
+        }
+
+        // Debounce Render
+        let renderTimeout = null;
+        function debounceRender() {
+            clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(() => {
+                renderLivePreview();
+                saveLocalState();
+            }, 150);
+        }
+
+        // ========================================================
+        // 🎯 MASTER PARSER FOR 100% SCRIPT & GEMS SECTIONS
+        // ========================================================
+        function parseGemsMarkdown(md) {
+            if (!md || !md.trim()) return null;
+
+            const data = {
+                title: 'Weekly Advanced English Study',
+                overview: '',
+                warmup: [],
+                readingParagraphs: [],
+                comprehension: [],
+                vocabList: [],
+                expressionList: [],
+                writingList: [],
+                discussionParts: {
+                    partA: { title: 'Personal Perspectives & Lifestyle', questions: [] },
+                    partB: { title: 'Social Trends & Cultural Dynamics', questions: [] },
+                    partC: { title: 'Thought Experiments & Hypothetical Scenarios', questions: [] },
+                    partD: { title: 'Hard Debates & Ethical Dilemmas', questions: [] },
+                },
+                answerKey: []
+            };
+
+            // 1. Extract Title
+            const titleMatch = md.match(/#\s*\*{0,2}Title:?\*{0,2}\s*(.+)/i) || md.match(/Title:\s*(.+)/i);
+            if (titleMatch) {
+                data.title = titleMatch[1].replace(/\*\*/g, '').trim();
+            }
+
+            // 2. Extract Overview
+            const overviewMatch = md.match(/\*{0,2}Overview:?\*{0,2}\s*([\s\S]+?)(?=\n---|\n###|\n\*\*1\.\s*Warm-up)/i);
+            if (overviewMatch) {
+                data.overview = overviewMatch[1].replace(/\*\*/g, '').trim();
+            }
+
+            // 3. Extract Warm-up Questions
+            const warmupSection = md.match(/\*\*1\.\s*Warm-up[\s\S]+?(?=\n---\n\s*\*\*2|\n\*\*2\.\s*Intensive)/i);
+            if (warmupSection) {
+                const qRegex = /\*\*(\d+)\.\*\*\s*(.+)/g;
+                let match;
+                while ((match = qRegex.exec(warmupSection[0])) !== null) {
+                    data.warmup.push({ num: match[1], text: match[2].trim() });
+                }
+            }
+
+            // 4. Extract Intensive Reading Paragraphs (100% Full Script Guaranteed!)
+            const readingSection = md.match(/\*\*2\.\s*Intensive Reading[\s\S]+?(?=\n---\n\s*\*\*3|\n\*\*3\.\s*Comprehension|\n###\s*\[\s*Answer)/i);
+            if (readingSection) {
+                const text = readingSection[0];
+                const pRegex = /\[(\d+)\]\s*([\s\S]+?)(?=\n\s*\[\d+\]|\n---|$)/g;
+                let match;
+                while ((match = pRegex.exec(text)) !== null) {
+                    const pNum = match[1];
+                    let pContent = match[2].trim().replace(/\n+/g, ' ');
+                    data.readingParagraphs.push({ num: pNum, content: pContent });
+                }
+
+                if (data.readingParagraphs.length === 0) {
+                    const lines = text.split('\n');
+                    let cur = null;
+                    for (const line of lines) {
+                        const m = line.match(/^\[(\d+)\]\s*(.+)/);
+                        if (m) {
+                            cur = { num: m[1], content: m[2].trim() };
+                            data.readingParagraphs.push(cur);
+                        } else if (cur && line.trim() && !line.startsWith('**2.') && !line.startsWith('*TED')) {
+                            cur.content += ' ' + line.trim();
+                        }
+                    }
+                }
+            }
+
+            // 5. Extract Comprehension Questions
+            const compSection = md.match(/\*\*3\.\s*Comprehension Check[\s\S]+?(?=\n---\n\s*\*\*Vocabulary|\n\*\*4\.\s*Vocabulary|\n\*\*Vocabulary)/i);
+            if (compSection) {
+                const qRegex = /\*\*(\d+)\.\*\*\s*(.+)/g;
+                let match;
+                while ((match = qRegex.exec(compSection[0])) !== null) {
+                    data.comprehension.push({ num: match[1], text: match[2].trim() });
+                }
+            }
+
+            // 6. Extract Vocabulary (3 items)
+            const vocabSection = md.match(/\*\*4\.\s*Vocabulary[\s\S]+?(?=\n\*\*5\.\s*Expression|\n\*\*5\.)/i);
+            if (vocabSection) {
+                const itemBlocks = vocabSection[0].split(/\n\s*\*\s*\*\*/).filter(b => b.trim() && !b.includes('Vocabulary'));
+                for (const block of itemBlocks) {
+                    const cleanBlock = '**' + block;
+                    const wordMatch = cleanBlock.match(/\*\*\[?([^\]]+?)\]?\*\*\s*(\[.+?\])?\s*\((.+?)\)/);
+                    const synMatch = cleanBlock.match(/Synonyms:\*?\s*(.+)/i);
+                    const exMatch = cleanBlock.match(/Example:\*?\s*(.+)/i);
+
+                    if (wordMatch) {
+                        data.vocabList.push({
+                            word: wordMatch[1].replace(/\[|\]/g, '').trim(),
+                            phonetic: wordMatch[2] ? wordMatch[2].trim() : '',
+                            meaning: wordMatch[3] ? wordMatch[3].trim() : '',
+                            synonyms: synMatch ? synMatch[1].replace(/\*/g, '').trim() : '',
+                            example: exMatch ? exMatch[1].replace(/\*/g, '').trim() : ''
+                        });
+                    }
+                }
+            }
+
+            // 7. Extract Expressions (3 items)
+            const exprSection = md.match(/\*\*5\.\s*Expression[\s\S]+?(?=\n---\n\s*\*\*☕|\n###\s*\[\s*Session 2|\n\*\*6\.\s*Writing)/i);
+            if (exprSection) {
+                const itemBlocks = exprSection[0].split(/\n\s*\*\s*\*\*/).filter(b => b.trim() && !b.includes('Expression'));
+                for (const block of itemBlocks) {
+                    const cleanBlock = '**' + block;
+                    const exprMatch = cleanBlock.match(/\*\*\[?([^\]]+?)\]?\*\*\s*\((.+?)\)/);
+                    const synMatch = cleanBlock.match(/Synonyms:\*?\s*(.+)/i);
+                    const exMatch = cleanBlock.match(/Example:\*?\s*(.+)/i);
+
+                    if (exprMatch) {
+                        data.expressionList.push({
+                            expr: exprMatch[1].replace(/\[|\]/g, '').trim(),
+                            meaning: exprMatch[2] ? exprMatch[2].trim() : '',
+                            synonyms: synMatch ? synMatch[1].replace(/\*/g, '').trim() : '',
+                            example: exMatch ? exMatch[1].replace(/\*/g, '').trim() : ''
+                        });
+                    }
+                }
+            }
+
+            // 8. Extract Writing Build-up Questions (5 items)
+            const writingSection = md.match(/\*\*6\.\s*Writing Build-up[\s\S]+?(?=\n---\n\s*\*\*7|\n\*\*7\.\s*In-depth)/i);
+            if (writingSection) {
+                const qRegex = /\*\*(\d+)\.\*\*\s*(.+)/g;
+                let match;
+                while ((match = qRegex.exec(writingSection[0])) !== null) {
+                    const line = match[2].trim();
+                    const hintMatch = line.match(/\((?:힌트|Hint):\s*([^\)]+)\)/i);
+                    const korean = line.replace(/\((?:힌트|Hint):[^\)]+\)/gi, '').trim();
+                    data.writingList.push({
+                        num: match[1],
+                        korean: korean,
+                        hint: hintMatch ? hintMatch[1].trim() : ''
+                    });
+                }
+            }
+
+            // 9. Extract Discussion Questions (Robust Section-by-Section Split by Part A, B, C, D)
+            const discSection = md.match(/\*\*7\.\s*In-depth Discussion[\s\S]+?(?=\n---\n\s*###\s*\[\s*Answer|\n###\s*\[\s*Answer|$)/i);
+            if (discSection) {
+                const text = discSection[0];
+
+                const parseQuestionsFromBlock = (blockStr) => {
+                    if (!blockStr) return [];
+                    const list = [];
+                    const qRegex = /(?:\*\*(\d+)\.\*\*|^\s*(\d+)\.)\s*([^\n]+)/gm;
+                    let m;
+                    while ((m = qRegex.exec(blockStr)) !== null) {
+                        const num = m[1] || m[2];
+                        const qText = m[3].replace(/\*\*/g, '').trim();
+                        if (qText && !qText.toLowerCase().startsWith('part')) {
+                            list.push({ num: num, text: qText });
+                        }
+                    }
+                    return list;
+                };
+
+                // Split text by Part A, B, C, D markers
+                const partA_Block = text.match(/Part\s*A[\s\S]*?(?=Part\s*B|$)/i);
+                const partB_Block = text.match(/Part\s*B[\s\S]*?(?=Part\s*C|$)/i);
+                const partC_Block = text.match(/Part\s*C[\s\S]*?(?=Part\s*D|$)/i);
+                const partD_Block = text.match(/Part\s*D[\s\S]*?(?=\n---|\n###|$)/i);
+
+                if (partA_Block) data.discussionParts.partA.questions = parseQuestionsFromBlock(partA_Block[0]);
+                if (partB_Block) data.discussionParts.partB.questions = parseQuestionsFromBlock(partB_Block[0]);
+                if (partC_Block) data.discussionParts.partC.questions = parseQuestionsFromBlock(partC_Block[0]);
+                if (partD_Block) data.discussionParts.partD.questions = parseQuestionsFromBlock(partD_Block[0]);
+
+                // Fallback: If no Part markers exist, extract all and distribute 2 questions per part
+                const totalExtracted = data.discussionParts.partA.questions.length + 
+                                       data.discussionParts.partB.questions.length + 
+                                       data.discussionParts.partC.questions.length + 
+                                       data.discussionParts.partD.questions.length;
+                
+                if (totalExtracted === 0) {
+                    const allQ = parseQuestionsFromBlock(text);
+                    data.discussionParts.partA.questions = allQ.slice(0, 2);
+                    data.discussionParts.partB.questions = allQ.slice(2, 4);
+                    data.discussionParts.partC.questions = allQ.slice(4, 6);
+                    data.discussionParts.partD.questions = allQ.slice(6, 8);
+                }
+            }
+
+            // 10. Extract Answer Key
+            const ansSection = md.match(/Writing Answers[\s\S]+$/i);
+            if (ansSection) {
+                const ansRegex = /\*\*(\d+)\.\*\*\s*([^\n]+)/g;
+                let match;
+                while ((match = ansRegex.exec(ansSection[0])) !== null) {
+                    data.answerKey.push({ num: match[1], text: match[2].trim() });
+                }
+            }
+            lastParsedAnswerKey = data.answerKey;
+
+            return data;
+        }
+
+        // ========================================================
+        // 🎨 RENDER ENGINE (DYNAMIC: FULL 6P VS TEASER PREVIEW 2P)
+        // ========================================================
+        function renderLivePreview() {
+            const rawMd = document.getElementById('markdownInput').value;
+            const container = document.getElementById('printPreviewContainer');
+            if (!container) return;
+
+            if (!rawMd || !rawMd.trim()) {
+                container.innerHTML = `
+                    <div class="a4-page-sheet flex items-center justify-center text-center p-12 text-zinc-400">
+                        <div class="space-y-3">
+                            <div class="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400 text-2xl">
+                                <i class="fa-solid fa-file-circle-plus"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-zinc-700">마크다운 입력 대기 중</h3>
+                            <p class="text-xs text-zinc-500 max-w-sm">
+                                좌측 입력창에 Gems 마크다운을 붙여넣거나 상단의 <strong>[샘플]</strong> 버튼을 누르면 즉시 교재가 조판됩니다.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = parseGemsMarkdown(rawMd);
+            if (!data) return;
+
+            // Robust multi-pattern formatter for bold vocabulary + Korean explanation on ALL pages!
+            const formatAnnotatedText = (text) => {
+                let res = text.replace(/\*\*\[?([^*\]]+?)\]?\s*\(([^)]+?)\)\*\*/g, (m, eng, kor) => {
+                    return `<span class="reading-keyword-highlight">${eng}<span class="reading-keyword-korean">(${kor})</span></span>`;
+                });
+                res = res.replace(/\*\*\[?([^*\]]+?)\]?\*\*\s*\(([^)]+?)\)/g, (m, eng, kor) => {
+                    return `<span class="reading-keyword-highlight">${eng}<span class="reading-keyword-korean">(${kor})</span></span>`;
+                });
+                res = res.replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-extrabold text-black">$1</strong>');
+                return res;
+            };
+
+            const totalParas = data.readingParagraphs.length;
+
+            // ========================================================
+            // 🎁 EDITION 2: TEASER / PREVIEW HANDOUT (SUBTLE HAIRLINES)
+            // ========================================================
+            if (currentEdition === 'teaser') {
+                
+                // Calculate total character weight across all paragraphs
+                let totalChars = 0;
+                data.readingParagraphs.forEach(p => totalChars += p.content.length);
+
+                // Maximize Page 1 fill: Page 1 holds ~68-70% of paragraphs (8 paragraphs out of 12)
+                let teaserSplit = 8;
+                if (totalParas <= 8) teaserSplit = 5;
+                else if (totalParas <= 10) teaserSplit = 7;
+                else if (totalParas <= 12) teaserSplit = 8;
+                else if (totalParas <= 15) teaserSplit = 10;
+                else teaserSplit = Math.ceil(totalParas * 0.7);
+
+                const teaserP1Paras = data.readingParagraphs.slice(0, teaserSplit);
+                const teaserP2Paras = data.readingParagraphs.slice(teaserSplit);
+
+                // Refined typography: Natural Left Alignment with Compact Comfortable Line Length
+                let scriptFontSize = "10.0pt";
+                let scriptLineHeight = "1.70";
+
+                if (totalChars > 4500) { // Extremely long script
+                    scriptFontSize = "9.0pt";
+                    scriptLineHeight = "1.50";
+                } else if (totalChars > 3500) { // Long script
+                    scriptFontSize = "9.5pt";
+                    scriptLineHeight = "1.60";
+                } else if (totalChars > 2600) { // Standard script
+                    scriptFontSize = "10.0pt";
+                    scriptLineHeight = "1.70";
+                } else { // Short script
+                    scriptFontSize = "10.5pt";
+                    scriptLineHeight = "1.78";
+                }
+
+                let teaserHtml = `
+                <!-- ================= TEASER PAGE 1 (Sheet 1 Front) : TITLE & SCRIPT 1 ================= -->
+                <div class="a4-page-sheet flex flex-col justify-between p-8 sm:p-10">
+                    <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                    <div class="sheet-running-header">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[7.5pt] tracking-wider">PREVIEW</span>
+                            <span>성북구 중상급 영어회화 • 이번 주 스터디 사전 예습 자료</span>
+                        </div>
+                        <div class="text-[8pt] text-gray-700 font-bold font-mono">
+                            PART 1
+                        </div>
+                    </div>
+
+                    <div class="sheet-content space-y-4 flex flex-col flex-1">
+                        
+                        <!-- Topic Title & Overview Box (Subtle Hairline Underline) -->
+                        <div class="space-y-1.5 shrink-0 pt-1 border-b border-gray-200 pb-3">
+                            <div class="text-[7.5pt] font-bold text-gray-400 tracking-widest font-mono uppercase">
+                                THIS WEEK'S TOPIC
+                            </div>
+                            <h1 class="text-xl font-black text-gray-950 tracking-tight leading-snug">
+                                ${data.title}
+                            </h1>
+                            ${data.overview ? `
+                            <p class="text-[9.8pt] text-gray-600 leading-relaxed font-kr font-normal pt-0.5">
+                                ${data.overview}
+                            </p>` : ''}
+                        </div>
+
+                        <!-- Intensive Reading Part 1 (Subtle Hairline Header & Box) -->
+                        <div class="space-y-2 pt-1 flex-1 flex flex-col justify-between">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
+                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${teaserP1Paras.length}] 단락)</span></h2>
+                                </div>
+                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
+                            </div>
+                            <div class="reading-script-box text-gray-950 space-y-2.5" style="font-size: ${scriptFontSize}; line-height: ${scriptLineHeight};">
+                                ${teaserP1Paras.map(p => `
+                                    <p class="text-left font-medium leading-relaxed">
+                                        <span class="font-mono font-black text-gray-900 mr-1 text-[0.9em]">[${p.num}]</span>
+                                        ${formatAnnotatedText(p.content)}
+                                    </p>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="sheet-running-footer">
+                        <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                        <span class="font-mono font-bold text-gray-700 text-[8.5pt]">01</span>
+                    </div>
+                </div>
+
+                <!-- ================= TEASER PAGE 2 (Sheet 1 Back) : SCRIPT 2 & VOCABULARY ================= -->
+                <div class="a4-page-sheet flex flex-col justify-between p-8 sm:p-10">
+                    <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                    <div class="sheet-running-header">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[7.5pt] tracking-wider">PREVIEW</span>
+                            <span>성북구 중상급 영어회화 • 지문 완독 및 핵심 어휘/표현</span>
+                        </div>
+                        <div class="text-[8pt] text-gray-700 font-bold font-mono">
+                            PART 2
+                        </div>
+                    </div>
+
+                    <div class="sheet-content space-y-4 flex flex-col flex-1">
+                        
+                        <!-- Intensive Reading Part 2 (Subtle Hairline Header & Box) -->
+                        <div class="space-y-2 shrink-0">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
+                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${teaserSplit + 1}]~[${totalParas}] 완독)</span></h2>
+                                </div>
+                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
+                            </div>
+                            <div class="reading-script-box text-gray-950 space-y-2.5" style="font-size: ${scriptFontSize}; line-height: ${scriptLineHeight};">
+                                ${teaserP2Paras.map(p => `
+                                    <p class="text-left font-medium leading-relaxed">
+                                        <span class="font-mono font-black text-gray-900 mr-1 text-[0.9em]">[${p.num}]</span>
+                                        ${formatAnnotatedText(p.content)}
+                                    </p>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Core Vocabulary & Expressions (Subtle Hairline Header) -->
+                        <div class="space-y-2.5 pt-2">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
+                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(핵심 6선)</span></h2>
+                                </div>
+                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">PRE-STUDY</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-5 pt-1">
+                                <!-- Left Col: Vocabulary -->
+                                <div class="space-y-2.5">
+                                    <div class="text-[9.5pt] font-black text-gray-950 border-b border-gray-200 pb-0.5 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                        <span>Core Vocabulary (단어 3개)</span>
+                                    </div>
+                                    ${data.vocabList.map(v => `
+                                        <div class="space-y-0.5 text-[9.2pt]">
+                                            <div class="flex items-baseline justify-between">
+                                                <span class="font-black text-gray-950 text-[10.5pt]">${v.word}</span>
+                                                <span class="text-[8pt] font-mono text-gray-500">${v.phonetic}</span>
+                                            </div>
+                                            <div class="text-gray-950 font-bold font-kr text-[9.5pt]">
+                                                ➔ ${v.meaning}
+                                            </div>
+                                            ${v.example ? `
+                                            <div class="text-[8.5pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
+                                                "${v.example}"
+                                            </div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <!-- Right Col: Expressions -->
+                                <div class="space-y-2.5">
+                                    <div class="text-[9.5pt] font-black text-gray-950 border-b border-gray-200 pb-0.5 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                        <span>Core Expressions (표현 3개)</span>
+                                    </div>
+                                    ${data.expressionList.map(e => `
+                                        <div class="space-y-0.5 text-[9.2pt]">
+                                            <div class="flex items-baseline justify-between">
+                                                <span class="font-black text-gray-950 text-[10.5pt]">${e.expr}</span>
+                                                <span class="text-[7.5pt] font-mono font-bold text-gray-400 uppercase">PHRASES</span>
+                                            </div>
+                                            <div class="text-gray-950 font-bold font-kr text-[9.5pt]">
+                                                ➔ ${e.meaning}
+                                            </div>
+                                            ${e.example ? `
+                                            <div class="text-[8.5pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
+                                                "${e.example}"
+                                            </div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Spoiler Notice Box (Clean Swiss Border) -->
+                        <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 flex items-center justify-between text-gray-950 mt-auto shrink-0">
+                            <div class="space-y-0.5 text-left">
+                                <div class="font-bold text-[8pt] font-mono uppercase tracking-wider text-gray-500">
+                                    ON-SITE STUDY SESSION NOTICE
+                                </div>
+                                <div class="text-[8.5pt] text-gray-700 font-medium font-kr">
+                                    웜업 질문(5문항), 내용 확인, 5문장 영작 및 8가지 심층 자유 토론은 <strong>현장 세션 교재</strong>에서 제공됩니다.
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded bg-gray-900 text-white font-bold text-[7.5pt] shrink-0 font-mono tracking-wider">
+                                ON-SITE ONLY
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="sheet-running-footer">
+                        <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                        <span class="font-mono font-bold text-gray-700 text-[8.5pt]">02</span>
+                    </div>
+                </div>
+                `;
+
+                container.innerHTML = teaserHtml;
+                return;
+            }
+
+            // ========================================================
+            // 📘 EDITION 1: FULL 6-PAGE WORKSHEET (STUDY ON-SITE)
+            // ========================================================
+            
+            // Intelligent Adaptive Paragraph Split for P2 & P3 (Guarantees Perfect 6 Pages)
+            let splitIndex = 5;
+            if (totalParas <= 6) splitIndex = 2;
+            else if (totalParas <= 8) splitIndex = 3;
+            else if (totalParas <= 10) splitIndex = 4;
+            else if (totalParas <= 12) splitIndex = 5; // Standard 12-para TED
+            else if (totalParas <= 14) splitIndex = 6;
+            else if (totalParas <= 16) splitIndex = 7;
+            else splitIndex = Math.ceil(totalParas * 0.42);
+
+            const page2Paras = data.readingParagraphs.slice(0, splitIndex);
+            const page3Paras = data.readingParagraphs.slice(splitIndex);
+
+            // Adaptive Script Typography for P2 & P3 based on paragraph count & text density
+            let p2Chars = 0;
+            page2Paras.forEach(p => p2Chars += p.content.length);
+            let p3Chars = 0;
+            page3Paras.forEach(p => p3Chars += p.content.length);
+
+            let fullP2FontSize = "10.6pt";
+            let fullP2LineHeight = "1.80";
+            let fullP3FontSize = "10.6pt";
+            let fullP3LineHeight = "1.82";
+
+            if (p2Chars > 1600) { fullP2FontSize = "9.5pt"; fullP2LineHeight = "1.58"; }
+            else if (p2Chars > 1200) { fullP2FontSize = "10.0pt"; fullP2LineHeight = "1.68"; }
+
+            if (p3Chars > 2400) { fullP3FontSize = "9.2pt"; fullP3LineHeight = "1.52"; }
+            else if (p3Chars > 1800) { fullP3FontSize = "9.8pt"; fullP3LineHeight = "1.65"; }
+
+            // Dynamic continuous numbering for Discussion Questions (1 to N)
+            let runningDiscNum = 1;
+            const partA_Questions = data.discussionParts.partA.questions.map(q => ({ num: runningDiscNum++, text: q.text }));
+            const partB_Questions = data.discussionParts.partB.questions.map(q => ({ num: runningDiscNum++, text: q.text }));
+            const partC_Questions = data.discussionParts.partC.questions.map(q => ({ num: runningDiscNum++, text: q.text }));
+            const partD_Questions = data.discussionParts.partD.questions.map(q => ({ num: runningDiscNum++, text: q.text }));
+            const totalDiscQCount = runningDiscNum - 1;
+
+            // Adaptive Discussion Layout Spacing for P6
+            let discSpaceClass = "space-y-4";
+            let discQSizeClass = "text-[11pt]";
+            let discQLineHeight = "leading-[1.68]";
+
+            if (totalDiscQCount > 10) {
+                discSpaceClass = "space-y-2";
+                discQSizeClass = "text-[9.8pt]";
+                discQLineHeight = "leading-[1.50]";
+            } else if (totalDiscQCount > 8) {
+                discSpaceClass = "space-y-3";
+                discQSizeClass = "text-[10.4pt]";
+                discQLineHeight = "leading-[1.58]";
+            }
+
+            let html = `
+            <!-- ================= PAGE 1 : COVER (CLEAN MONOGRAPH) ================= -->
+            <div class="a4-page-sheet flex flex-col justify-between items-center text-center p-8 sm:p-12">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <!-- Cover Top Minimal Header (Clean Floating Typography) -->
+                <div class="w-full flex items-center justify-between text-[8.5pt] font-mono tracking-widest text-gray-400 uppercase">
+                    <span>SEONGBUK ADVANCED ENGLISH CONVERSATION</span>
+                    <span class="font-bold text-gray-900">STUDY WORKBOOK</span>
+                </div>
+
+                <!-- Cover Middle : Hero Logo & Topic Presentation -->
+                <div class="w-full my-auto space-y-10 max-w-lg">
+                    
+                    <!-- Grand Hero Logo -->
+                    <div class="py-2">
+                        <img src="logo.png" alt="성북구 중상급 영어회화 로고" class="h-40 sm:h-48 w-auto object-contain mx-auto drop-shadow-sm">
+                    </div>
+
+                    <!-- Topic Title & Overview (Pure Typographic Art) -->
+                    <div class="space-y-3 px-2">
+                        <div class="text-[8pt] font-bold text-gray-400 tracking-[0.25em] font-mono uppercase">
+                            THIS WEEK'S TOPIC
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-snug">
+                            ${data.title}
+                        </h1>
+                        ${data.overview ? `
+                        <p class="text-[10.5pt] text-gray-600 leading-relaxed font-kr font-normal pt-1 max-w-md mx-auto">
+                            ${data.overview}
+                        </p>` : ''}
+                    </div>
+
+                    <!-- Clean Member & Date Input -->
+                    <div class="grid grid-cols-2 gap-8 text-left pt-6 max-w-md mx-auto w-full">
+                        <div class="space-y-1">
+                            <span class="text-gray-400 font-mono text-[8pt] tracking-wider uppercase block font-semibold">MEMBER</span>
+                            <div class="border-b border-gray-300 h-6"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-gray-400 font-mono text-[8pt] tracking-wider uppercase block font-semibold">TABLE / DATE</span>
+                            <div class="border-b border-gray-300 h-6"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Cover Bottom Footer -->
+                <div class="w-full flex items-center justify-between text-[8pt] text-gray-400 font-mono">
+                    <span>SEONGBUK STUDY CREW</span>
+                    <span class="font-bold text-gray-800">01</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 2 : WARM-UP & READING 1 ================= -->
+            <div class="a4-page-sheet">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <div class="sheet-running-header">
+                    <div class="flex items-center gap-2">
+                        <span>SESSION 1 • Warm-up & Reading (Part 1)</span>
+                    </div>
+                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                        SEONGBUK ADVANCED ENGLISH
+                    </div>
+                </div>
+
+                <div class="sheet-content space-y-3 flex flex-col justify-between flex-1">
+                    
+                    <!-- 1. WARM-UP (Subtle Hairline Underline) -->
+                    <div class="space-y-2 shrink-0">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Warm-up <span class="text-[10pt] font-bold text-gray-500 ml-1">(입과 뇌를 푸는 질문 5개)</span></h2>
+                            </div>
+                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">15 MIN</span>
+                        </div>
+                        <div class="space-y-2 pt-0.5 pl-1">
+                            ${data.warmup.map(q => `
+                                <div class="flex items-start gap-2.5 text-[10.8pt] text-gray-950 leading-[1.60] font-semibold">
+                                    <span class="font-mono font-black text-[11pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                    <span>${q.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Divider between Warm-up and Reading with Comfortable Breathing Room -->
+                    <div class="border-t border-gray-200 my-1"></div>
+
+                    <!-- 2. INTENSIVE READING PART 1 (Subtle Hairline Underline & Box) -->
+                    <div class="space-y-2 flex-1 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${page2Paras.length}] 단락)</span></h2>
+                            </div>
+                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">10 MIN</span>
+                        </div>
+                        <div class="reading-script-box text-gray-950 space-y-2.5 flex-1 flex flex-col justify-between" style="font-size: ${fullP2FontSize}; line-height: ${fullP2LineHeight};">
+                            ${page2Paras.map(p => `
+                                <p class="text-left font-medium">
+                                    <span class="font-mono font-black text-[9pt] text-gray-900 mr-1.5">[${p.num}]</span>
+                                    ${formatAnnotatedText(p.content)}
+                                </p>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="sheet-running-footer">
+                    <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                    <span class="font-mono font-bold text-gray-700 text-[8.5pt]">02</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 3 : READING 2 FULL SCRIPT ================= -->
+            <div class="a4-page-sheet">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <div class="sheet-running-header">
+                    <div class="flex items-center gap-2">
+                        <span>SESSION 1 • Intensive Reading (Part 2)</span>
+                    </div>
+                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                        SEONGBUK ADVANCED ENGLISH
+                    </div>
+                </div>
+
+                <div class="sheet-content space-y-3 flex flex-col justify-between flex-1">
+                    
+                    <!-- Subtle Hairline Header Underline -->
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
+                            <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${splitIndex + 1}]~[${totalParas}] 완독)</span></h2>
+                        </div>
+                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">FULL SCRIPT</span>
+                    </div>
+
+                    <!-- Clean Script Container with Subtle Background Box & Compact Left Alignment -->
+                    <div class="reading-script-box text-gray-950 space-y-2.5 flex-1 flex flex-col justify-between pt-1" style="font-size: ${fullP3FontSize}; line-height: ${fullP3LineHeight};">
+                        ${page3Paras.map(p => `
+                            <p class="text-left font-medium">
+                                <span class="font-mono font-black text-[9pt] text-gray-900 mr-1.5">[${p.num}]</span>
+                                ${formatAnnotatedText(p.content)}
+                            </p>
+                        `).join('')}
+                    </div>
+
+                </div>
+
+                <div class="sheet-running-footer">
+                    <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                    <span class="font-mono font-bold text-gray-700 text-[8.5pt]">03</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 4 : COMPREHENSION & VOCABULARY ================= -->
+            <div class="a4-page-sheet">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <div class="sheet-running-header">
+                    <div class="flex items-center gap-2">
+                        <span>SESSION 1 • Comprehension & Vocabulary</span>
+                    </div>
+                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                        SEONGBUK ADVANCED ENGLISH
+                    </div>
+                </div>
+
+                <div class="sheet-content space-y-4 flex flex-col justify-between flex-1">
+                    
+                    <!-- 3. COMPREHENSION CHECK (Subtle Hairline Underline) -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">03</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Comprehension Check <span class="text-[10pt] font-bold text-gray-500 ml-1">(내용 파악 5문항)</span></h2>
+                            </div>
+                            <span class="text-[7.5pt] font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded border border-gray-300 tracking-wider uppercase">
+                                PARAPHRASE REQUIRED
+                            </span>
+                        </div>
+                        <div class="space-y-2 pt-0.5 pl-1">
+                            ${data.comprehension.map(q => `
+                                <div class="flex items-start gap-2.5 text-[10.8pt] text-gray-950 leading-[1.62] font-semibold">
+                                    <span class="font-mono font-black text-[11.5pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                    <span>${q.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- 4 & 5. VOCABULARY & EXPRESSIONS (Subtle Hairline Header & Categories) -->
+                    <div class="space-y-2.5 pt-3">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">04</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[10pt] font-bold text-gray-500 ml-1">(핵심 6선)</span></h2>
+                            </div>
+                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">10 MIN</span>
+                        </div>
+
+                        <!-- 2-Column Simple Accent List -->
+                        <div class="grid grid-cols-2 gap-5 pt-1">
+                            
+                            <!-- Left Col: Vocabulary -->
+                            <div class="space-y-2.5">
+                                <div class="text-[10pt] font-black text-gray-950 border-b border-gray-200 pb-1 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                    <span>Core Vocabulary (단어 3개)</span>
+                                </div>
+                                ${data.vocabList.map(v => `
+                                    <div class="space-y-0.5 text-[9.5pt]">
+                                        <div class="flex items-baseline justify-between">
+                                            <span class="font-black text-gray-950 text-[11pt]">${v.word}</span>
+                                            <span class="text-[8.5pt] font-mono text-gray-500">${v.phonetic}</span>
+                                        </div>
+                                        <div class="text-gray-950 font-bold font-kr text-[9.8pt]">
+                                            ➔ ${v.meaning}
+                                        </div>
+                                        ${v.synonyms ? `
+                                        <div class="text-[8.5pt] text-gray-600">
+                                            <span class="font-bold text-gray-800">유의어:</span> ${v.synonyms}
+                                        </div>` : ''}
+                                        ${v.example ? `
+                                        <div class="text-[9pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
+                                            "${v.example}"
+                                        </div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Right Col: Expressions -->
+                            <div class="space-y-2.5">
+                                <div class="text-[10pt] font-black text-gray-950 border-b border-gray-200 pb-1 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                    <span>Core Expressions (표현 3개)</span>
+                                </div>
+                                ${data.expressionList.map(e => `
+                                    <div class="space-y-0.5 text-[9.5pt]">
+                                        <div class="flex items-baseline justify-between">
+                                            <span class="font-black text-gray-950 text-[10.5pt]">${e.expr}</span>
+                                            <span class="text-[7.5pt] font-mono font-bold text-gray-400 uppercase">PHRASES</span>
+                                        </div>
+                                        <div class="text-gray-950 font-bold font-kr text-[9.8pt]">
+                                            ➔ ${e.meaning}
+                                        </div>
+                                        ${e.synonyms ? `
+                                        <div class="text-[8.5pt] text-gray-600">
+                                            <span class="font-bold text-gray-800">유사:</span> ${e.synonyms}
+                                        </div>` : ''}
+                                        ${e.example ? `
+                                        <div class="text-[9pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
+                                            "${e.example}"
+                                        </div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Clean Break Time Divider (Minimal Floating Pill) -->
+                    <div class="py-2 px-3 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-between text-gray-950 text-[9pt] font-bold mt-auto">
+                        <div class="flex items-center gap-2 font-mono text-[8pt] uppercase tracking-wider text-gray-600">
+                            <span>INTERMISSION & COFFEE BREAK</span>
+                        </div>
+                        <span class="font-mono text-[8pt] font-bold text-gray-500">10 MIN</span>
+                    </div>
+
+                </div>
+
+                <div class="sheet-running-footer">
+                    <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                    <span class="font-mono font-bold text-gray-700 text-[8.5pt]">04</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 5 : WRITING BUILD-UP (SOFTENED Q1-Q5 BADGES) ================= -->
+            <div class="a4-page-sheet">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <div class="sheet-running-header">
+                    <div class="flex items-center gap-2">
+                        <span>SESSION 2 • Writing Build-up</span>
+                    </div>
+                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                        SEONGBUK ADVANCED ENGLISH
+                    </div>
+                </div>
+
+                <div class="sheet-content flex flex-col justify-between flex-1">
+                    
+                    <!-- Section Header with Subtle Hairline -->
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-3.5 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">06</span>
+                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">Writing Build-up <span class="text-[10pt] font-bold text-gray-500 ml-1">(배운 표현 활용 5문장 영작)</span></h2>
+                        </div>
+                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">20 MIN</span>
+                    </div>
+
+                    <!-- 5 Clean Writing Cards with Soft Typography Q-Numbers (No Heavy Black Block) -->
+                    <div class="space-y-4 flex-1 flex flex-col justify-between">
+                        ${data.writingList.map(w => `
+                            <div class="clean-writing-card pb-1">
+                                <div class="flex items-baseline justify-between gap-3">
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="font-mono font-black text-[11pt] text-gray-400 shrink-0">Q${w.num}.</span>
+                                        <span class="font-bold text-[10.8pt] text-gray-950 leading-snug">${w.korean}</span>
+                                    </div>
+                                    ${w.hint ? `
+                                    <span class="text-[8.5pt] text-gray-500 font-mono font-medium shrink-0 tracking-tight">
+                                        [Hint: ${w.hint}]
+                                    </span>` : ''}
+                                </div>
+                                <div class="clean-ruled-lines w-full"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                </div>
+
+                <div class="sheet-running-footer">
+                    <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                    <span class="font-mono font-bold text-gray-700 text-[8.5pt]">05</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 6 : IN-DEPTH DISCUSSION (SOFTENED PART A-D BADGES) ================= -->
+            <div class="a4-page-sheet">
+                <img src="logo.png" class="watermark-layer" alt="Watermark">
+
+                <div class="sheet-running-header">
+                    <div class="flex items-center gap-2">
+                        <span>SESSION 2 • In-depth Discussion</span>
+                    </div>
+                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                        SEONGBUK ADVANCED ENGLISH
+                    </div>
+                </div>
+
+                <div class="sheet-content space-y-4 flex flex-col justify-between flex-1">
+                    
+                    <!-- Section Title Header with Subtle Hairline -->
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-2 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">07</span>
+                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">In-depth Discussion <span class="text-[10pt] font-bold text-gray-500 ml-1">(4가지 테마 심층 질문 ${totalDiscQCount}선)</span></h2>
+                        </div>
+                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">30 MIN</span>
+                    </div>
+
+                    <!-- 4 Clean Editorial Thematic Sections with Soft Minimalist PART Labels -->
+                    <div class="${discSpaceClass} flex-1 flex flex-col justify-between pt-1">
+                        
+                        <!-- Part A -->
+                        ${partA_Questions.length > 0 ? `
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
+                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART A</span>
+                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-bold text-[10.5pt] text-gray-900">Personal Perspectives & Lifestyle</span>
+                            </div>
+                            <div class="space-y-1.5 pt-0.5 pl-1">
+                                ${partA_Questions.map(q => `
+                                    <div class="${discQSizeClass} text-gray-950 ${discQLineHeight} font-semibold flex items-start gap-2.5">
+                                        <span class="font-mono font-black text-[11.5pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                        <span>${q.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
+
+                        <!-- Part B -->
+                        ${partB_Questions.length > 0 ? `
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
+                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART B</span>
+                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-bold text-[10.5pt] text-gray-900">Social Trends & Cultural Dynamics</span>
+                            </div>
+                            <div class="space-y-1.5 pt-0.5 pl-1">
+                                ${partB_Questions.map(q => `
+                                    <div class="${discQSizeClass} text-gray-950 ${discQLineHeight} font-semibold flex items-start gap-2.5">
+                                        <span class="font-mono font-black text-[11.5pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                        <span>${q.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
+
+                        <!-- Part C -->
+                        ${partC_Questions.length > 0 ? `
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
+                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART C</span>
+                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-bold text-[10.5pt] text-gray-900">Thought Experiments & Hypothetical Scenarios</span>
+                            </div>
+                            <div class="space-y-1.5 pt-0.5 pl-1">
+                                ${partC_Questions.map(q => `
+                                    <div class="${discQSizeClass} text-gray-950 ${discQLineHeight} font-semibold flex items-start gap-2.5">
+                                        <span class="font-mono font-black text-[11.5pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                        <span>${q.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
+
+                        <!-- Part D -->
+                        ${partD_Questions.length > 0 ? `
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
+                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART D</span>
+                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-bold text-[10.5pt] text-gray-900">Hard Debates & Ethical Dilemmas</span>
+                            </div>
+                            <div class="space-y-1.5 pt-0.5 pl-1">
+                                ${partD_Questions.map(q => `
+                                    <div class="${discQSizeClass} text-gray-950 ${discQLineHeight} font-semibold flex items-start gap-2.5">
+                                        <span class="font-mono font-black text-[11.5pt] text-gray-950 shrink-0 w-5">${q.num}.</span>
+                                        <span>${q.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
+
+                    </div>
+
+                    <!-- Clean Simple Outro (Floating Footer Note) -->
+                    <div class="pt-3 mt-auto shrink-0 flex items-center justify-between text-[8.5pt] text-gray-500 font-medium">
+                        <div class="flex items-center gap-2">
+                            <span>스터디 참여 후 소중한 리뷰를 남겨주시면 포인트가 적립됩니다. 수고하셨습니다.</span>
+                        </div>
+                        <span class="font-mono text-[8pt] text-gray-400 font-semibold tracking-wider uppercase">SEONGBUK CREW</span>
+                    </div>
+
+                </div>
+
+                <div class="sheet-running-footer">
+                    <span>SEONGBUK ADVANCED ENGLISH CREW</span>
+                    <span class="font-mono font-bold text-gray-700 text-[8.5pt]">06</span>
+                </div>
+            </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ========================================================
+        // 🌟 REALISTIC FULL 12-PARAGRAPH TED SCRIPT SAMPLE DATA
+        // ========================================================
+        function loadSampleData() {
+            const sampleMd = `# **Title:** How AI is Changing How We Think and Remember
+
+**Overview:** 인공지능 기술이 인간의 사고방식과 기억력에 미치는 영향에 대해 탐구하는 흥미진진한 TED 강연입니다! AI가 인간의 인지 능력을 보조하는 강력한 도구가 될지, 아니면 비판적 사고를 퇴화시킬지 이번 스터디에서 치열하고 깊이 있게 토론해 봅니다.
+
+---
+
+### **[ Session 1. Input ]**
+*가벼운 질문으로 입을 풀고, TED 스크립트를 돌아가며 낭독한 후 관련 표현들을 함께 익히는 시간입니다.*
+
+<br>
+
+**1. Warm-up ⏱️ (15 min)**
+*한 주간 안부를 묻고 가벼운 질문 5개로 입과 뇌를 풀어줍니다.*
+
+**1.** What is the very first app or digital tool you check right after waking up in the morning?
+
+**2.** How often do you rely on navigation maps or search engines instead of trying to remember directions or facts yourself?
+
+**3.** In your daily routine, what is one repetitive task you wish someone—or an AI—could completely take over for you?
+
+**4.** Have you ever felt that using smartphones and smart devices has noticeably shortened your attention span or memory retention?
+
+**5.** If an advanced AI assistant could think, schedule, and write exactly like you with 99% accuracy, how much of your daily intellectual work would you willingly outsource to it?
+
+---
+
+**2. Intensive Reading ⏱️ (10 min)**
+*TED-Ed 스크립트를 돌아가며 소리내어 읽습니다.*
+
+[1] Throughout human history, technological revolutions have continually reshaped our cognitive landscape. When the printing press was first introduced in the 15th century, critics warned that reliance on written texts would **erode our capacity (~하는 능력을 약화시키다)** for deep memorization. Yet, it unlocked unprecedented eras of scientific discovery and widespread literacy.
+
+[2] Today, as generative artificial intelligence weaves its way into our daily workflows, humanity finds itself at another profound inflection point. We are increasingly **plagued by (~에 시달리는)** digital cognitive overload, struggling to distinguish authentic information from synthesized hallucinations.
+
+[3] Rather than merely functioning as computational calculators, modern machine learning models are actively **stepping up to (~에 적극 나서고 있는)** take over high-level creative synthesis and strategic drafting. This has triggered fierce debates among neuroscientists and educators worldwide.
+
+[4] Proponents argue that offloading menial cognitive chores allows human minds to **channel our energy into (~로 에너지를 쏟아붓다)** higher-order philosophical inquiry, empathy, and holistic judgment that machines cannot easily replicate.
+
+[5] However, skeptics caution that when we consistently bypass the friction of problem-solving, our innate intellectual resilience begins to **atrophy over time (시간이 지나며 퇴화하다)**. The question is no longer whether AI will transform our brains, but how intentionally we choose to co-evolve alongside it.
+
+[6] In educational environments, students who use conversational agents as continuous **sounding boards (아이디어를 점검해 주는 상대)** report feeling greater intellectual curiosity. When guided well, the dialogue becomes an interactive Socratic seminar rather than passive consumption.
+
+[7] Conversely, when learners delegate the fundamental struggle of structuring an argument, neural pathways associated with **deductive reasoning (연역적 추론 능력)** receive substantially less stimulation throughout critical developmental windows.
+
+[8] Workplace dynamics reflect a similar polarization. Early adopters who master prompt iteration discover they can compress forty hours of **analytical drudgery (고된 단순 분석 작업)** into four hours of creative curation.
+
+[9] Yet, organizational psychologists observe a hidden risk: when foundational skills are completely **abstracted away (추상화되어 생략되다)**, junior professionals may never develop the deep **domain intuition (직관적 현장 감각)** required to spot subtle algorithmic errors.
+
+[10] Memory research reveals that the human brain operates on an efficiency principle: we tend not to remember facts if we know where those facts are stably stored. In the age of omnipresent search and conversational retrieval, our brains become **master indexes (핵심 색인 목록)** rather than encyclopedias.
+
+[11] This transformation is neither inherently tragic nor purely triumphant; it simply demands mindful **cognitive hygiene (인지적 건강 관리)**. We must intentionally cultivate offline intervals of deep reading and **unstructured contemplation (자유로운 깊은 사색)**.
+
+[12] Ultimately, artificial intelligence will not diminish human wisdom unless we **abdicate our agency (우리의 주도권을 포기하다)**. By balancing algorithmic leverage with rigorous internal discipline, we can expand the frontiers of what human consciousness is capable of achieving.
+
+---
+
+**3. Comprehension Check ⏱️ (15 min)**
+*질문 5개로 내용을 파악합니다.*
+
+**1.** What historical parallel does the speaker draw between the invention of the printing press and modern AI?
+
+**2.** According to the script, what specific danger are modern professionals facing due to digital cognitive overload?
+
+**3.** In what specific domains are modern machine learning models expanding beyond simple computational calculations?
+
+**4.** According to proponents of AI, what positive outcome can humans achieve by offloading routine intellectual tasks?
+
+**5.** What long-term risk do psychologists identify when junior professionals completely abstract away foundational work?
+
+---
+
+**Vocabulary & Expression ⏱️ (10 min)**
+*스크립트 속의 핵심 어휘와 표현을 속도감 있게 확인합니다.*
+
+<br>
+
+**4. Vocabulary**
+* **[Erode]** [ɪˈroʊd] (서서히 침식하다, 약화시키다)
+    * *Synonyms:* wear away, deteriorate, undermine
+    * *Example:* Constant digital distractions gradually erode our ability to maintain deep focus.
+
+* **[Inflection]** [ɪnˈflekʃn] (전환점, 변곡점)
+    * *Synonyms:* turning point, pivotal moment, transition
+    * *Example:* The widespread adoption of generative AI marks a crucial inflection point in modern education.
+
+* **[Atrophy]** [ˈætrəfi] (위축되다, 퇴화하다)
+    * *Synonyms:* wither, degenerate, decline
+    * *Example:* Without regular mental challenges, our critical thinking skills may begin to atrophy.
+
+<br>
+
+**5. Expression**
+* **[Plagued by]** (~에 시달리는, 괴로워하는)
+    * *Synonyms:* troubled by, beset with, afflicted by
+    * *Example:* Modern professionals are constantly plagued by endless notifications and decision fatigue.
+
+* **[Stepping up to]** (~에 적극적으로 나서다, 부응하다)
+    * *Synonyms:* taking the initiative, rising to the challenge
+    * *Example:* Many tech innovators are stepping up to establish ethical guidelines for artificial intelligence.
+
+* **[Channel into]** (~에 쏟아붓다, 집중시키다)
+    * *Synonyms:* direct toward, funnel into, concentrate on
+    * *Example:* By automating routine paperwork, we can channel our energy into creative problem-solving.
+
+---
+
+**☕ Break Time ⏱️ (10 min) ☕**
+
+---
+
+### **[ Session 2. Output ]**
+*Writing과 Speaking을 하는 시간입니다.*
+
+<br>
+
+**6. Writing Build-up ⏱️ (20 min)**
+*배운 표현을 활용해 5문장 직접 영작!*
+
+**[Questions]**
+
+**1.** 스마트폰에 지나치게 의존하면 우리의 기억력이 서서히 약화될 수 있습니다. (힌트: erode)
+
+| |
+| :--- |
+| <br><br> |
+
+<br>
+
+**2.** 수많은 직장인들이 매일 쏟아지는 업무 이메일과 알림에 시달리고 있습니다. (힌트: plagued by)
+
+| |
+| :--- |
+| <br><br> |
+
+<br>
+
+**3.** 번거로운 단순 반복 업무를 줄이면, 우리는 보다 창의적인 기획에 에너지를 쏟아부을 수 있습니다. (힌트: channel into)
+
+| |
+| :--- |
+| <br><br> |
+
+<br>
+
+**4.** 기술 업계의 리더들은 인공지능의 부작용을 해결하기 위해 책임감 있는 조치를 취하는 데 적극적으로 나서고 있습니다. (힌트: stepping up to)
+
+| |
+| :--- |
+| <br><br><br> |
+
+<br>
+
+**5.** 우리가 스스로 깊이 고민하고 해결하는 지적 마찰을 회피한다면, 시간이 흐름에 따라 비판적 사고 능력이 퇴화할 수밖에 없습니다. (힌트: atrophy)
+
+| |
+| :--- |
+| <br><br><br> |
+
+---
+
+**7. In-depth Discussion ⏱️ (30 min)**
+*다양한 관점의 8가지 질문을 바탕으로 치열하게 토론합니다!*
+
+**Part A. Personal Perspectives & Lifestyle**
+**1.** How has your personal note-taking or memory habit changed since you started using AI tools like ChatGPT or Gemini?
+
+**2.** In which daily decisions (e.g., travel itineraries, meal plans, career advice) do you trust AI recommendations over human advice?
+
+<br>
+
+**Part B. Social Trends & Cultural Dynamics**
+**3.** Should universities and schools prohibit AI-generated essays to protect student cognitive growth, or embrace it as an essential career skill?
+
+**4.** How might the generational divide widen between digital natives who co-pilot with AI and older generations who rely on traditional cognitive methods?
+
+<br>
+
+**Part C. Thought Experiments & Hypothetical Scenarios**
+**5.** If a neural microchip could instantly double your memory capacity but cause you to lose spontaneous daydreams, would you implant it?
+
+**6.** Imagine an AI assistant that anticipates and solves all your life problems before they occur. Would your life feel happier or devoid of genuine satisfaction?
+
+<br>
+
+**Part D. Hard Debates & Ethical Dilemmas**
+**7.** If an AI can write better literature and compose more moving music than 99% of humans, should we still prioritize funding human artistic education?
+
+**8.** Does delegating moral and judicial decisions to unbiased AI algorithms lead to a fairer society, or does it strip away essential human compassion?
+
+---
+
+### **[ Answer Key ]**
+
+**Writing Answers**
+**1.** Over-relying on smartphones can gradually erode our memory retention.
+**2.** Countless working professionals are constantly plagued by daily incoming emails and endless notifications.
+**3.** By reducing tedious routine tasks, we can channel our energy into much more creative planning.
+**4.** Tech industry leaders are stepping up to take responsible measures in tackling the adverse side effects of AI.
+**5.** If we consistently avoid the cognitive friction of solving complex problems ourselves, our critical thinking skills will inevitably atrophy over time.`;
+
+            document.getElementById('markdownInput').value = sampleMd;
+            renderLivePreview();
+        }
+
+        // Initialize on load (Restore saved work if exists, or load sample data)
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasRestored = loadLocalState();
+            if (!hasRestored) {
+                loadSampleData();
+            }
+        });
+    </script>
+</body>
+</html>
