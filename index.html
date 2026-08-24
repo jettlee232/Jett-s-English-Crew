@@ -1016,11 +1016,16 @@
                         </div>
                     </div>
 
-                    <!-- Seating Criteria Capsule Badge -->
-                    <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                        <span class="text-zinc-400 font-medium">1부 매칭:</span>
-                        <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                    <!-- Seating Status & Criteria Capsule Badges -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div id="seatingCountBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm"></div>
+
+                        <!-- Seating Criteria Capsule Badge -->
+                        <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                            <span class="text-zinc-400 font-medium">1부 매칭:</span>
+                            <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                        </div>
                     </div>
                 </div>
 
@@ -5673,6 +5678,22 @@
 
             const todayMembers = membersData.filter(m => m.isToday && !m.leftEarly);
             const totalCount = todayMembers.length;
+
+            // 적립 탭(오늘 참석)과 좌석 인원이 다른 이유를 화면에서 설명한다
+            const attendedCount = membersData.filter(m => m.isToday).length;
+            const leftEarlyCount = attendedCount - totalCount;
+            const countBadge = document.getElementById('seatingCountBadge');
+            if (countBadge) {
+                countBadge.innerHTML = leftEarlyCount > 0
+                    ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                       <span class="text-zinc-400 font-medium">착석</span>
+                       <strong class="text-zinc-100 font-semibold">${totalCount}명</strong>
+                       <span class="text-zinc-600">/</span>
+                       <span class="text-amber-300 font-medium whitespace-nowrap">조기 퇴장 ${leftEarlyCount}명</span>`
+                    : `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                       <span class="text-zinc-400 font-medium">착석</span>
+                       <strong class="text-zinc-100 font-semibold">${totalCount}명</strong>`;
+            }
 
             if (totalCount === 0) {
                 container.innerHTML = `
