@@ -1945,7 +1945,7 @@
                         리더 전용 기능 및 관리자 설정 접속에 사용되는 4~6자리 비밀번호를 안전하게 변경합니다.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-2 pt-0.5">
-                        <input id="adminNewPinInput" type="password" maxlength="6" placeholder="새 4~6자리 비밀번호 입력" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3.5 py-2 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input id="adminNewPinInput" type="password" maxlength="30" placeholder="새 비밀번호 (영문+숫자 권장)" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-xl px-3.5 py-2 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <button onclick="changeLeaderPinFromAdmin()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition whitespace-nowrap shadow-sm active:scale-95">
                             비밀번호 변경
                         </button>
@@ -2046,7 +2046,7 @@
             </div>
 
             <div>
-                <input id="customPinPromptInput" type="password" maxlength="6" placeholder="비밀번호 입력" class="w-full bg-zinc-950 border border-zinc-700 text-white text-center rounded-xl py-2.5 font-mono text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input id="customPinPromptInput" type="password" maxlength="30" placeholder="리더 비밀번호 입력" class="w-full bg-zinc-950 border border-zinc-700 text-white text-center rounded-xl py-2.5 font-mono text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Remember This Device Checkbox -->
@@ -3272,11 +3272,11 @@
         const COIN_WARN_DAYS = 7;      // 만료 며칠 전부터 경고를 띄울지
         let coinExpiryChecked = false;
 
-        const DEFAULT_PIN_HASH = "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e"; // SHA-256 for '2323'
+        const DEFAULT_PIN_HASH = "551a3ab454312f5a94a0fe410c9e66e40a8e219177233fca8e6d6bcd5920b9cf"; // SHA-256 for 'jett2323!'
         let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
 
-        // If previously saved with legacy '1234' hash, update to new default '2323'
-        if (leaderPinHash === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4") {
+        // Upgrade legacy weak 4-digit PIN hashes ('1234', '2323') to new strong default 'jett2323!'
+        if (leaderPinHash === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4" || leaderPinHash === "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e") {
             leaderPinHash = DEFAULT_PIN_HASH;
             localStorage.setItem('leaderPinHash', leaderPinHash);
         }
@@ -3292,7 +3292,7 @@
         const legacyPin = localStorage.getItem('leaderPin');
         if (legacyPin) {
             hashPin(legacyPin).then(h => {
-                leaderPinHash = (h === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4") ? DEFAULT_PIN_HASH : h;
+                leaderPinHash = (h === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4" || h === "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e") ? DEFAULT_PIN_HASH : h;
                 localStorage.setItem('leaderPinHash', leaderPinHash);
                 localStorage.removeItem('leaderPin');
             });
