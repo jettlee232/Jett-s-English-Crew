@@ -1028,15 +1028,15 @@
                 let totalChars = 0;
                 data.readingParagraphs.forEach(p => totalChars += p.content.length);
 
-                // Balanced split between Page 1 (Title + Overview + Script 1) and Page 2 (Script 2 + Vocab 6)
-                let teaserSplit = 6;
-                if (totalParas <= 6) teaserSplit = Math.ceil(totalParas * 0.5);
-                else if (totalParas <= 8) teaserSplit = 4;
-                else if (totalParas <= 10) teaserSplit = 5;
-                else if (totalParas <= 12) teaserSplit = 6;
-                else if (totalParas <= 14) teaserSplit = 7;
-                else if (totalParas <= 16) teaserSplit = 8;
-                else teaserSplit = Math.ceil(totalParas * 0.5);
+                // Maximize Page 1 fill generously: Page 1 holds ~65-70% of paragraphs (e.g. 8 out of 12)
+                let teaserSplit = 8;
+                if (totalParas <= 6) teaserSplit = 4;
+                else if (totalParas <= 8) teaserSplit = 5;
+                else if (totalParas <= 10) teaserSplit = 7;
+                else if (totalParas <= 12) teaserSplit = 8;
+                else if (totalParas <= 14) teaserSplit = 9;
+                else if (totalParas <= 16) teaserSplit = 10;
+                else teaserSplit = Math.ceil(totalParas * 0.65);
 
                 const teaserP1Paras = data.readingParagraphs.slice(0, teaserSplit);
                 const teaserP2Paras = data.readingParagraphs.slice(teaserSplit);
@@ -1047,30 +1047,27 @@
                 let p2Chars = 0;
                 teaserP2Paras.forEach(p => p2Chars += p.content.length);
 
-                // Adaptive typography for Page 1
-                let scriptP1FontSize = "9.6pt";
-                let scriptP1LineHeight = "1.58";
-                if (p1Chars > 1800) {
+                // Adaptive typography for generous Page 1 fill
+                let scriptP1FontSize = "9.5pt";
+                let scriptP1LineHeight = "1.54";
+                if (p1Chars > 2300) {
                     scriptP1FontSize = "8.6pt";
-                    scriptP1LineHeight = "1.44";
-                } else if (p1Chars > 1300) {
+                    scriptP1LineHeight = "1.42";
+                } else if (p1Chars > 1700) {
                     scriptP1FontSize = "9.0pt";
-                    scriptP1LineHeight = "1.48";
-                } else if (p1Chars > 950) {
-                    scriptP1FontSize = "9.4pt";
-                    scriptP1LineHeight = "1.54";
+                    scriptP1LineHeight = "1.46";
+                } else if (p1Chars > 1200) {
+                    scriptP1FontSize = "9.3pt";
+                    scriptP1LineHeight = "1.50";
                 }
 
                 // Adaptive typography for Page 2
-                let scriptP2FontSize = "9.4pt";
-                let scriptP2LineHeight = "1.56";
-                if (p2Chars > 2200) {
-                    scriptP2FontSize = "8.5pt";
-                    scriptP2LineHeight = "1.42";
-                } else if (p2Chars > 1500) {
+                let scriptP2FontSize = "9.6pt";
+                let scriptP2LineHeight = "1.58";
+                if (p2Chars > 1600) {
                     scriptP2FontSize = "8.8pt";
                     scriptP2LineHeight = "1.46";
-                } else if (p2Chars > 1000) {
+                } else if (p2Chars > 1100) {
                     scriptP2FontSize = "9.2pt";
                     scriptP2LineHeight = "1.52";
                 }
@@ -1126,14 +1123,6 @@
                                 `).join('')}
                             </div>
                         </div>
-
-                        <!-- Simple Footer Note (Kiosk Check-in Notice) -->
-                        <div class="pt-1.5 text-center border-t border-gray-100 mt-auto shrink-0">
-                            <p class="text-[7.8pt] text-gray-500 font-medium font-kr">
-                                오전 10시 전 음료와 함께 현장 키오스크를 터치해주시면 당근 1개가 적립됩니다! 오늘도 반갑습니다😁
-                            </p>
-                        </div>
-
                     </div>
 
                     <div class="sheet-running-footer">
