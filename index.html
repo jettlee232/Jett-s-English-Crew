@@ -3375,6 +3375,7 @@
         let customConfirmCallback = null;
 
         let topicData = {
+            round: "18회차",
             schedule: "8월 29일 (토) 10:00 - 11:50",
             location: "투썸 아리랑힐 호텔점 2층",
             locationUrl: "https://kko.to/eZx7E9kExG",
@@ -3785,9 +3786,14 @@
             const schedule = (topicData && topicData.schedule) ? topicData.schedule : "매주 토요일 10:00 - 11:50";
             const title = (topicData && topicData.title) ? topicData.title.replace(/^["']|["']$/g, '') : "이번 주 스터디 주제";
             const ytUrl = (topicData && topicData.youtubeUrl) ? topicData.youtubeUrl : "";
-            const roundStr = (topicData && topicData.round) ? `[${topicData.round}] ` : "";
+            const roundText = (topicData && topicData.round) ? topicData.round.trim() : "18회차";
+            const roundHeader = roundText ? `[${roundText}] ` : "";
+            const roundBody = roundText ? `${roundText} ` : "";
 
-            const text = `🥕 [성북구/성신여대] 중상급 영어회화 크루 ${roundStr}모임 🗣️✨
+            const text = `🥕 [성북구/성신여대] 중상급 영어회화 크루 ${roundHeader}모임 🗣️✨
+
+안녕하세요! 매주 토요일 오전 함께하는
+중상급 영어회화 크루 ${roundBody}모임입니다. 😊
 
 ⏰ 이번 주 모임 일정 & 장소
 • 일시: ${schedule}
@@ -3801,13 +3807,23 @@
 • 제목: "${title}"
 • 영상: ${ytUrl}
 • 모임 전 영상을 1회 가볍게
-  시청해 오시면 더욱 재미있습니다! 😊
-━━━━━━━━━━━━━━━━━
+  시청해 오시면 더욱 재미있습니다!
 
-💬 스터디 진행 순서 (100% 영어)
-• 1부 (10:00~10:30): 아이스브레이킹 ☕
-• 2부 (10:30~11:40): 주제 프리토킹 🗣️
-• 마무리 (11:40~11:50): 당근 적립 🥕
+━━━━━━━━━━━━━━━━━
+💬 스터디 진행 커리큘럼 (총 110분)
+[Session 1: Input 60분]
+• 1. 워밍업 (15분): 안부 & 입 풀기
+• 2. 집중 리딩 (10분): 스크립트 낭독
+• 3. 내용 확인 (15분): 5가지 Q&A
+• 4. 표현 학습 (10분): 어휘·표현 체크
+
+[Break Time 10분]
+• 중간 휴식 & 테이블 셔플
+
+[Session 2: Output 50분]
+• 5. 영작 빌드업 (15분): 핵심문장 영작
+• 6. 심층 토론 (30분): 주제별 심층 토론
+• 7. 클로징 (5분): 소감 & 당근 적립
 
 ━━━━━━━━━━━━━━━━━
 🎁 당근 포인트 & 무료참가(FREE) 혜택
