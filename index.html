@@ -1017,13 +1017,13 @@
                     </div>
 
                     <!-- Seating Status & Criteria Capsule Badges -->
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <div id="seatingCountBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm"></div>
+                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <div id="seatingCountBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg text-[11px] sm:text-xs text-zinc-300 w-fit shadow-sm whitespace-nowrap"></div>
 
                         <!-- Seating Criteria Capsule Badge -->
-                        <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-300 w-fit shadow-sm">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                            <span class="text-zinc-400 font-medium">1부 매칭:</span>
+                        <div id="seatingCriteriaBadge" class="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg text-[11px] sm:text-xs text-zinc-300 w-fit shadow-sm whitespace-nowrap">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                            <span class="text-zinc-400 font-medium">1부:</span>
                             <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
                         </div>
                     </div>
@@ -5691,14 +5691,8 @@
             const countBadge = document.getElementById('seatingCountBadge');
             if (countBadge) {
                 countBadge.innerHTML = leftEarlyCount > 0
-                    ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                       <span class="text-zinc-400 font-medium">착석</span>
-                       <strong class="text-zinc-100 font-semibold">${totalCount}명</strong>
-                       <span class="text-zinc-600">/</span>
-                       <span class="text-amber-300 font-medium whitespace-nowrap">조기 퇴장 ${leftEarlyCount}명</span>`
-                    : `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                       <span class="text-zinc-400 font-medium">착석</span>
-                       <strong class="text-zinc-100 font-semibold">${totalCount}명</strong>`;
+                    ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span><span class="text-zinc-400 font-medium">착석</span><strong class="text-zinc-100 font-semibold">${totalCount}명</strong><span class="text-zinc-600">/</span><span class="text-amber-300 font-medium whitespace-nowrap">퇴장 ${leftEarlyCount}명</span>`
+                    : `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span><span class="text-zinc-400 font-medium">착석</span><strong class="text-zinc-100 font-semibold">${totalCount}명</strong>`;
             }
 
             if (totalCount === 0) {
@@ -5831,15 +5825,15 @@
             if (criteriaBadge) {
                 if (isShuffle) {
                     criteriaBadge.innerHTML = `
-                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                        <span class="text-zinc-400 font-medium">2부 셔플:</span>
-                        <strong class="text-rose-300 font-semibold">또래 세대 & 공감대 중심</strong>
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+                        <span class="text-zinc-400 font-medium">2부:</span>
+                        <strong class="text-rose-300 font-semibold">또래 세대 & 공감대</strong>
                     `;
                 } else {
                     criteriaBadge.innerHTML = `
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                        <span class="text-zinc-400 font-medium">1부 매칭:</span>
-                        <strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                        <span class="text-zinc-400 font-medium">1부:</span>
+                        <strong class="text-blue-300 font-semibold">첫 만남 & 관점 믹스</strong>
                     `;
                 }
             }
