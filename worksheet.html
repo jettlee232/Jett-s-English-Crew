@@ -2020,6 +2020,7 @@
     <!-- FIREBASE REALTIME SYNC & ONE-CLICK PUBLISH MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -2033,7 +2034,11 @@
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'seongbuk-english-study';
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // Anonymous auth initialization
+        signInAnonymously(auth).catch(err => console.warn("Firebase anonymous auth init warning:", err));
 
         const worksheetDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'worksheet');
         const topicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
@@ -2104,6 +2109,15 @@
                 if (label) label.innerText = "연동 중...";
                 if (btn) btn.disabled = true;
 
+                // Ensure authenticated
+                if (!auth.currentUser) {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.warn("Auth retry warning:", e);
+                    }
+                }
+
                 const parsed = window.parseGemsMarkdown(rawMd);
 
                 // 1. Save to worksheet doc
@@ -2123,8 +2137,8 @@
 
                 showToast("🎉 이번 주 학습자료가 메인 사이트에 1초 만에 연동되었습니다!", "success");
             } catch (error) {
-                console.error("발행 실패:", error);
-                showToast("❌ 연동 중 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+                console.error("발행 실패 상세 에러:", error);
+                showToast("❌ 연동 중 오류가 발생했습니다: " + (error.message || "권한 오류"), "error");
             } finally {
                 if (label) label.innerText = originalText;
                 if (btn) btn.disabled = false;

@@ -120,6 +120,103 @@
             transform: scale(1.02);
         }
 
+        /* YouTube Video Breathing / Pulse Animation */
+        @keyframes yt-breathe {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            }
+            50% {
+                transform: scale(1.016);
+                box-shadow: 0 18px 36px -4px rgba(239, 68, 68, 0.28), 0 0 0 2px rgba(239, 68, 68, 0.45);
+            }
+        }
+
+        .yt-breathing-card {
+            animation: yt-breathe 2.8s ease-in-out infinite;
+            transform-origin: center center;
+            will-change: transform, box-shadow;
+        }
+
+        .yt-breathing-card:hover {
+            animation-play-state: paused;
+            transform: scale(1.025);
+            box-shadow: 0 20px 40px -4px rgba(239, 68, 68, 0.38), 0 0 0 2px rgba(239, 68, 68, 0.6);
+        }
+
+        @keyframes play-pulse {
+            0%, 100% {
+                transform: scale(1);
+                background-color: rgba(220, 38, 38, 0.85);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.65);
+            }
+            50% {
+                transform: scale(1.1);
+                background-color: rgba(239, 68, 68, 0.95);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .play-btn-pulse {
+            animation: play-pulse 2.2s ease-in-out infinite;
+        }
+
+        /* Periodic Wiggle Animation for CTA Button */
+        @keyframes periodic-wiggle {
+            0%, 70%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            72% {
+                transform: rotate(-8deg) scale(1.05);
+            }
+            75% {
+                transform: rotate(7deg) scale(1.05);
+            }
+            78% {
+                transform: rotate(-6deg) scale(1.05);
+            }
+            81% {
+                transform: rotate(5deg) scale(1.04);
+            }
+            84% {
+                transform: rotate(-3deg) scale(1.02);
+            }
+            87% {
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        .btn-periodic-wiggle {
+            animation: periodic-wiggle 3.6s ease-in-out infinite;
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        .btn-periodic-wiggle:hover {
+            animation-play-state: paused;
+            transform: scale(1.05) !important;
+        }
+
+        /* Reward Banner Text Breathing Animation */
+        @keyframes reward-breathe {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(251, 146, 60, 0));
+            }
+            50% {
+                transform: scale(1.045);
+                filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.4));
+            }
+        }
+
+        .reward-breathe-text {
+            animation: reward-breathe 2.4s ease-in-out infinite;
+            display: inline-flex;
+            align-items: center;
+            transform-origin: center center;
+            will-change: transform, filter;
+        }
+
         /* Carrot Slots Visualization Styling */
         .coin-slot {
             width: 16px;
@@ -863,14 +960,14 @@
                         <span class="text-xs font-semibold text-zinc-400 shrink-0 hidden md:inline bg-zinc-800/60 px-2 py-0.5 rounded-md border border-zinc-700/50">TED-Ed Series</span>
                     </div>
 
-                    <!-- YouTube Full Cover Thumbnail Container -->
-                    <div id="topicVideoContainer" onclick="openYoutubeDirect()" class="relative w-full aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl group cursor-pointer">
+                    <!-- YouTube Full Cover Thumbnail Container with Breathing Animation -->
+                    <div id="topicVideoContainer" onclick="openYoutubeDirect()" class="relative w-full aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl group cursor-pointer yt-breathing-card">
                         <img id="topicVideoThumbnail" src="https://img.youtube.com/vi/8Z9FQxcCAZ0/hqdefault.jpg" alt="유튜브 썸네일" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
                         
-                        <!-- Simple Semi-Transparent Center Play Button -->
+                        <!-- Simple Center Play Button with Pulse Effect -->
                         <div id="topicPlayOverlay" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                            <div class="w-12 h-12 sm:w-15 sm:h-15 rounded-full bg-black/40 group-hover:bg-red-600/85 backdrop-blur-[2px] text-white flex items-center justify-center text-lg sm:text-xl shadow-2xl ring-1 ring-white/30 transition duration-200 transform group-hover:scale-110">
-                                <i class="fa-solid fa-play ml-1 text-white/95 group-hover:text-white"></i>
+                            <div class="w-12 h-12 sm:w-15 sm:h-15 rounded-full bg-red-600/90 text-white flex items-center justify-center text-lg sm:text-xl shadow-2xl ring-1 ring-white/40 transition duration-200 transform play-btn-pulse">
+                                <i class="fa-solid fa-play ml-1 text-white"></i>
                             </div>
                         </div>
                     </div>
@@ -906,7 +1003,7 @@
                             </div>
                             <p class="text-xs text-zinc-400 font-normal whitespace-nowrap">당근Pay 일괄 요청 (음료 각자)</p>
                         </div>
-                        <a id="topicCarrotGatheringLink" href="https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK" target="_blank" rel="noopener noreferrer" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5 active:scale-95 shrink-0 whitespace-nowrap">
+                        <a id="topicCarrotGatheringLink" href="https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK" target="_blank" rel="noopener noreferrer" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5 active:scale-95 shrink-0 whitespace-nowrap btn-periodic-wiggle">
                             <span>참가하기</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </a>
@@ -1128,8 +1225,8 @@
                         <span class="px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-bold text-xs shrink-0 whitespace-nowrap">+2 당근</span>
                     </div>
                 </div>
-                <div class="bg-gradient-to-r from-amber-950/50 via-orange-950/50 to-amber-950/50 p-3 sm:p-3.5 rounded-xl border border-orange-500/30 flex items-center justify-center shadow-sm">
-                    <span class="font-bold text-xs sm:text-sm text-orange-200 flex items-center gap-2 whitespace-nowrap">
+                <div class="bg-gradient-to-r from-amber-950/60 via-orange-950/70 to-amber-950/60 p-3 sm:p-3.5 rounded-xl border border-orange-500/40 flex items-center justify-center shadow-md overflow-hidden">
+                    <span class="font-black text-xs sm:text-sm text-orange-200 flex items-center gap-2 whitespace-nowrap reward-breathe-text">
                         <i class="fa-solid fa-crown text-amber-400 text-sm"></i>
                         <span>당근 6개 모으면 1회 무료참가!</span>
                     </span>
@@ -3387,8 +3484,40 @@
         };
 
         window.openYoutubeDirect = function() {
-            const targetUrl = (topicData && topicData.youtubeUrl) ? topicData.youtubeUrl : "https://youtu.be/8Z9FQxcCAZ0?si=YqjzitQ6uYTOVKI_";
-            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            const targetUrl = (topicData && topicData.youtubeUrl) ? topicData.youtubeUrl : "https://youtu.be/PN4moDNE-Kg?si=vwpeo63CGiOEsWP8";
+            const ytId = extractYoutubeId(targetUrl);
+
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /android/i.test(ua);
+
+            if (ytId) {
+                if (isIOS) {
+                    // Try iOS YouTube app scheme: vnd.youtube://{id}
+                    const appUrl = `vnd.youtube://${ytId}`;
+                    const webUrl = `https://www.youtube.com/watch?v=${ytId}`;
+                    
+                    const start = Date.now();
+                    window.location.href = appUrl;
+                    
+                    // Fallback to web browser if app is not installed
+                    setTimeout(() => {
+                        if (Date.now() - start < 1500) {
+                            window.open(webUrl, '_blank');
+                        }
+                    }, 500);
+                    return;
+                } else if (isAndroid) {
+                    // Android Intent URL for YouTube app
+                    const intentUrl = `intent://www.youtube.com/watch?v=${ytId}#Intent;package=com.google.android.youtube;scheme=https;end`;
+                    window.location.href = intentUrl;
+                    return;
+                }
+            }
+
+            // PC / Desktop / Web Fallback
+            const finalWebUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : targetUrl;
+            window.open(finalWebUrl, '_blank', 'noopener,noreferrer');
         };
 
         window.toggleTimelineAccordion = function() {
