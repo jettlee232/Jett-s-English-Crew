@@ -2408,17 +2408,6 @@
                         "lastAction": "정규 회원"
             },
             {
-                        "name": "Joe",
-                        "gender": "M",
-                        "ageGroup": "30대",
-                        "coins": 0,
-                        "totalAttended": 3,
-                        "isNew": false,
-                        "isToday": false,
-                        "isLeader": false,
-                        "lastAction": "정규 회원"
-            },
-            {
                         "name": "Vincent",
                         "gender": "M",
                         "ageGroup": "30대",
@@ -3211,17 +3200,6 @@
                         "lastAction": "신규 참석"
             },
             {
-                        "name": "말차그릭",
-                        "gender": "F",
-                        "ageGroup": "20대",
-                        "coins": 0,
-                        "totalAttended": 0,
-                        "isNew": true,
-                        "isToday": false,
-                        "isLeader": false,
-                        "lastAction": "신규 참석"
-            },
-            {
                         "name": "나나",
                         "gender": "F",
                         "ageGroup": "40대",
@@ -3279,6 +3257,39 @@
             {
                         "name": "수호랑이",
                         "gender": "F",
+                        "ageGroup": "30대",
+                        "coins": 0,
+                        "totalAttended": 0,
+                        "isNew": true,
+                        "isToday": false,
+                        "isLeader": false,
+                        "lastAction": "신규 참석"
+            },
+            {
+                        "name": "필라테스하는빙수",
+                        "gender": "F",
+                        "ageGroup": "30대",
+                        "coins": 0,
+                        "totalAttended": 0,
+                        "isNew": true,
+                        "isToday": false,
+                        "isLeader": false,
+                        "lastAction": "신규 참석"
+            },
+            {
+                        "name": "깜복",
+                        "gender": "F",
+                        "ageGroup": "30대",
+                        "coins": 0,
+                        "totalAttended": 0,
+                        "isNew": true,
+                        "isToday": false,
+                        "isLeader": false,
+                        "lastAction": "신규 참석"
+            },
+            {
+                        "name": "나무",
+                        "gender": "M",
                         "ageGroup": "30대",
                         "coins": 0,
                         "totalAttended": 0,
@@ -4863,6 +4874,42 @@
                             selectedMemberId = null;
                         }
                         renderUI();
+
+                        // 자동 회원 명단 동기화 (Joe, 말차그릭 탈퇴 / 필라테스하는빙수, 깜복, 나무 입단)
+                        if (!localStorage.getItem('roster_sync_20260825_roster_v3')) {
+                            localStorage.setItem('roster_sync_20260825_roster_v3', 'true');
+                            const toRemove = membersData.filter(m => m.name === 'Joe' || m.name === '말차그릭');
+                            toRemove.forEach(m => {
+                                deleteDoc(doc(membersCollectionRef, m.id)).catch(e => console.warn(e));
+                            });
+                            const existingNames = new Set(membersData.map(m => m.name));
+                            const newRoster = [
+                                { name: "필라테스하는빙수", gender: "F", ageGroup: "30대" },
+                                { name: "깜복", gender: "F", ageGroup: "30대" },
+                                { name: "나무", gender: "M", ageGroup: "30대" }
+                            ];
+                            newRoster.forEach(nm => {
+                                if (!existingNames.has(nm.name)) {
+                                    const newDocRef = doc(membersCollectionRef);
+                                    const newMemberObj = {
+                                        id: newDocRef.id,
+                                        name: nm.name,
+                                        gender: nm.gender,
+                                        ageGroup: nm.ageGroup,
+                                        coins: 0,
+                                        totalAttended: 0,
+                                        isNew: true,
+                                        isToday: false,
+                                        isLeader: false,
+                                        lastAction: "신규 참석",
+                                        lastAttendedAt: new Date().toISOString(),
+                                        createdAt: new Date().toISOString(),
+                                        updatedAt: new Date().toISOString()
+                                    };
+                                    setDoc(newDocRef, newMemberObj).catch(e => console.warn(e));
+                                }
+                            });
+                        }
 
                         if (!coinExpiryChecked && membersData.length > 0) {
                             coinExpiryChecked = true;
