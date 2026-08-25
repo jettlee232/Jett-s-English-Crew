@@ -997,36 +997,55 @@
             if (currentEdition === 'teaser') {
                 
                 // Calculate total character weight across all paragraphs
+                // Calculate total character weight across all paragraphs
                 let totalChars = 0;
                 data.readingParagraphs.forEach(p => totalChars += p.content.length);
 
-                // Maximize Page 1 fill: Page 1 holds ~68-70% of paragraphs (8 paragraphs out of 12)
-                let teaserSplit = 8;
-                if (totalParas <= 8) teaserSplit = 5;
-                else if (totalParas <= 10) teaserSplit = 7;
-                else if (totalParas <= 12) teaserSplit = 8;
-                else if (totalParas <= 15) teaserSplit = 10;
-                else teaserSplit = Math.ceil(totalParas * 0.7);
+                // Page 1 has Title, Overview Box, and Kiosk Notice, so it needs ~40-45% of paragraphs.
+                // Page 2 has the remaining script plus Vocabulary & Expressions.
+                let teaserSplit = 5;
+                if (totalParas <= 6) teaserSplit = 3;
+                else if (totalParas <= 8) teaserSplit = 4;
+                else if (totalParas <= 10) teaserSplit = 4;
+                else if (totalParas <= 12) teaserSplit = 5;
+                else if (totalParas <= 15) teaserSplit = 6;
+                else teaserSplit = Math.floor(totalParas * 0.42);
 
                 const teaserP1Paras = data.readingParagraphs.slice(0, teaserSplit);
                 const teaserP2Paras = data.readingParagraphs.slice(teaserSplit);
 
-                // Refined typography: Natural Left Alignment with Compact Comfortable Line Length
-                let scriptFontSize = "10.0pt";
-                let scriptLineHeight = "1.70";
+                let p1Chars = 0;
+                teaserP1Paras.forEach(p => p1Chars += p.content.length);
 
-                if (totalChars > 4500) { // Extremely long script
-                    scriptFontSize = "9.0pt";
-                    scriptLineHeight = "1.50";
-                } else if (totalChars > 3500) { // Long script
-                    scriptFontSize = "9.5pt";
-                    scriptLineHeight = "1.60";
-                } else if (totalChars > 2600) { // Standard script
-                    scriptFontSize = "10.0pt";
-                    scriptLineHeight = "1.70";
-                } else { // Short script
-                    scriptFontSize = "10.5pt";
-                    scriptLineHeight = "1.78";
+                let p2Chars = 0;
+                teaserP2Paras.forEach(p => p2Chars += p.content.length);
+
+                // Adaptive typography for Page 1
+                let scriptP1FontSize = "9.8pt";
+                let scriptP1LineHeight = "1.62";
+                if (p1Chars > 1600) {
+                    scriptP1FontSize = "8.6pt";
+                    scriptP1LineHeight = "1.44";
+                } else if (p1Chars > 1200) {
+                    scriptP1FontSize = "9.0pt";
+                    scriptP1LineHeight = "1.50";
+                } else if (p1Chars > 900) {
+                    scriptP1FontSize = "9.4pt";
+                    scriptP1LineHeight = "1.56";
+                }
+
+                // Adaptive typography for Page 2
+                let scriptP2FontSize = "9.6pt";
+                let scriptP2LineHeight = "1.60";
+                if (p2Chars > 2200) {
+                    scriptP2FontSize = "8.6pt";
+                    scriptP2LineHeight = "1.44";
+                } else if (p2Chars > 1600) {
+                    scriptP2FontSize = "9.0pt";
+                    scriptP2LineHeight = "1.50";
+                } else if (p2Chars > 1100) {
+                    scriptP2FontSize = "9.4pt";
+                    scriptP2LineHeight = "1.56";
                 }
 
                 let teaserHtml = `
@@ -1044,10 +1063,10 @@
                         </div>
                     </div>
 
-                    <div class="sheet-content space-y-4 flex flex-col flex-1">
+                    <div class="sheet-content space-y-3 flex flex-col flex-1">
                         
                         <!-- Topic Title & Overview Box (Subtle Hairline Underline) -->
-                        <div class="space-y-2 shrink-0 pt-1 border-b border-gray-200 pb-3">
+                        <div class="space-y-2 shrink-0 pt-1 border-b border-gray-200 pb-2.5">
                             <div class="text-[7.5pt] font-bold text-gray-400 tracking-widest font-mono uppercase">
                                 THIS WEEK'S TOPIC
                             </div>
@@ -1063,15 +1082,15 @@
                         </div>
 
                         <!-- Intensive Reading Part 1 (Subtle Hairline Header & Box) -->
-                        <div class="space-y-2 pt-1 flex-1 flex flex-col justify-between">
-                            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                        <div class="space-y-1.5 pt-0.5 flex-1 flex flex-col justify-between">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-1 shrink-0 mb-0.5">
                                 <div class="flex items-center gap-2">
                                     <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
-                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${teaserP1Paras.length}] 단락)</span></h2>
+                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${teaserP1Paras.length}] 단락)</span></h2>
                                 </div>
                                 <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
                             </div>
-                            <div class="reading-script-box text-gray-950 space-y-2.5" style="font-size: ${scriptFontSize}; line-height: ${scriptLineHeight};">
+                            <div class="reading-script-box text-gray-950 space-y-2" style="font-size: ${scriptP1FontSize}; line-height: ${scriptP1LineHeight};">
                                 ${teaserP1Paras.map(p => `
                                     <p class="text-left font-medium leading-relaxed">
                                         <span class="font-mono font-black text-gray-900 mr-1 text-[0.9em]">[${p.num}]</span>
@@ -1110,18 +1129,18 @@
                         </div>
                     </div>
 
-                    <div class="sheet-content space-y-4 flex flex-col flex-1">
+                    <div class="sheet-content space-y-3 flex flex-col flex-1">
                         
                         <!-- Intensive Reading Part 2 (Subtle Hairline Header & Box) -->
-                        <div class="space-y-2 shrink-0">
-                            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
+                        <div class="space-y-1.5 shrink-0">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-1 shrink-0 mb-0.5">
                                 <div class="flex items-center gap-2">
                                     <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
-                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${teaserSplit + 1}]~[${totalParas}] 완독)</span></h2>
+                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${teaserSplit + 1}]~[${totalParas}] 완독)</span></h2>
                                 </div>
                                 <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
                             </div>
-                            <div class="reading-script-box text-gray-950 space-y-2.5" style="font-size: ${scriptFontSize}; line-height: ${scriptLineHeight};">
+                            <div class="reading-script-box text-gray-950 space-y-2" style="font-size: ${scriptP2FontSize}; line-height: ${scriptP2LineHeight};">
                                 ${teaserP2Paras.map(p => `
                                     <p class="text-left font-medium leading-relaxed">
                                         <span class="font-mono font-black text-gray-900 mr-1 text-[0.9em]">[${p.num}]</span>
