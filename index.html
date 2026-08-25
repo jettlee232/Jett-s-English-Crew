@@ -823,8 +823,8 @@
                     <!-- Row 1: 스터디 일시 -->
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
-                            <span id="topicScheduleDisplay" class="font-bold text-sm sm:text-base text-zinc-100 flex items-center gap-2 truncate">
-                                <i class="fa-regular fa-clock text-blue-400 text-base shrink-0"></i>8월 22일 (토) 10:00 - 11:50
+                            <span id="topicScheduleDisplay" class="font-bold text-xs sm:text-sm text-zinc-100 flex items-center gap-2 truncate">
+                                <i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>8월 22일 (토) 10:00 - 11:50</span>
                             </span>
                         </div>
                         <span id="topicRoundDisplay" class="bg-blue-600 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg shadow-sm shrink-0 whitespace-nowrap flex items-center justify-center gap-1 min-w-[62px]">
@@ -836,8 +836,8 @@
                     <!-- Row 2: 스터디 장소 & 지도 보기 -->
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
-                            <span id="topicLocationDisplay" class="font-bold text-sm sm:text-base text-zinc-100 flex items-center gap-2 truncate">
-                                <i class="fa-solid fa-location-dot text-rose-400 text-base shrink-0"></i>투썸 아리랑힐 호텔점 2층
+                            <span id="topicLocationDisplay" class="font-bold text-xs sm:text-sm text-zinc-100 flex items-center gap-2 truncate">
+                                <i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>투썸 아리랑힐 호텔점 2층</span>
                             </span>
                         </div>
                         <a id="topicLocationLink" href="https://kko.to/eZx7E9kExG" target="_blank" rel="noopener noreferrer" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold text-[11px] px-2.5 py-1 rounded-lg transition flex items-center justify-center gap-1 shrink-0 shadow-sm active:scale-95 whitespace-nowrap min-w-[62px]">
@@ -3632,8 +3632,8 @@
             const thumbEl = document.getElementById('topicVideoThumbnail');
             const docsEl = document.getElementById('topicDocsLink');
 
-            if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 mr-1"></i>${topicData.schedule}`;
-            if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-pink-400 mr-0.5 shrink-0"></i>${topicData.location}`;
+            if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${topicData.schedule}</span>`;
+            if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${topicData.location}</span>`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
             if (titleEl) titleEl.innerText = topicData.title;
