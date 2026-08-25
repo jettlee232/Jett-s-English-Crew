@@ -45,6 +45,11 @@
     </script>
 
     <style>
+        /* 헤더가 모바일에서 가로로 넘쳐 PDF 버튼을 가리는 문제.
+           뱃지는 JS가 className을 통째로 덮어쓰므로 클래스가 아닌 CSS로 잡는다.
+           좁은 화면에선 숨긴다 - 판형 표시는 툴바 칩과 PDF 버튼 라벨에 이미 있다. */
+        #headerEditionBadge { flex-shrink: 0; }
+        @media (max-width: 640px) { #headerEditionBadge { display: none; } }
         /* 기본 스크롤바 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0f1117; }
@@ -340,17 +345,17 @@
 
     <!-- TOP GLOBAL NAV BAR (No Print) -->
     <header class="no-print h-14 bg-studio-panel border-b border-studio-border px-4 flex items-center justify-between shrink-0 z-30">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 min-w-0">
             <a href="index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-bg border border-studio-border hover:border-studio-hover text-zinc-300 hover:text-white transition text-xs font-semibold whitespace-nowrap">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span class="hidden sm:inline">키오스크</span>
             </a>
             <div class="h-4 w-px bg-studio-border hidden sm:block"></div>
-            <div class="flex items-center gap-2">
-                <img src="logo.png" alt="Logo" class="h-7 w-auto object-contain">
-                <div class="leading-tight">
-                    <h1 class="text-sm font-bold text-white flex items-center gap-1.5 whitespace-nowrap">
-                        <span id="headerBrandTitle">워크시트 스튜디오</span>
+            <div class="flex items-center gap-2 min-w-0">
+                <img src="logo.png" alt="Logo" class="h-7 w-auto object-contain shrink-0">
+                <div class="leading-tight min-w-0">
+                    <h1 class="text-sm font-bold text-white flex items-center gap-1.5 min-w-0">
+                        <span id="headerBrandTitle" class="truncate">워크시트 스튜디오</span>
                         <span id="headerEditionBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap">현장 스터디용 (6p)</span>
                     </h1>
                 </div>
@@ -2017,6 +2022,30 @@
         });
     </script>
 
+    <!-- Leader PIN Modal for Studio Mode Protection -->
+    <div id="worksheetPinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-studio-panel border border-studio-border w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4 text-center">
+            <div class="w-10 h-10 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-600/50 flex items-center justify-center text-base mx-auto mb-1">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm text-white">리더 비밀번호 인증</h3>
+                <p class="text-xs text-zinc-400 mt-0.5 leading-relaxed font-normal">워크시트 편집 및 발행을 위해 PIN을 입력해주세요.</p>
+            </div>
+            <div class="space-y-3">
+                <input id="worksheetPinInput" type="password" inputmode="numeric" placeholder="PIN 입력" class="w-full bg-studio-bg border border-studio-border text-white text-center rounded-xl py-2.5 font-mono text-lg font-bold focus:outline-none focus:border-emerald-500">
+                <label class="flex items-center justify-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+                    <input id="worksheetPinRemember" type="checkbox" class="rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-0">
+                    <span>이 기기를 '리더 기기'로 기억</span>
+                </label>
+                <div class="flex gap-2">
+                    <button type="button" onclick="cancelWorksheetPin()" class="flex-1 py-2 rounded-xl bg-studio-bg hover:bg-zinc-800 text-zinc-400 text-xs font-semibold transition cursor-pointer">학습자료 보기</button>
+                    <button type="button" onclick="submitWorksheetPin()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition cursor-pointer shadow-lg">인증</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FIREBASE REALTIME SYNC & ONE-CLICK PUBLISH MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -2043,19 +2072,24 @@
         const worksheetDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'worksheet');
         const topicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
 
-        // Check if opened in Reader Mode (e.g. from Main Site button)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isReaderMode = urlParams.get('view') === 'reader' || urlParams.get('mode') === 'reader';
-        const requestedEdition = urlParams.get('edition');
+        const DEFAULT_PIN_HASH = "551a3ab454312f5a94a0fe410c9e66e40a8e219177233fca8e6d6bcd5920b9cf";
 
-        if (requestedEdition && (requestedEdition === 'teaser' || requestedEdition === 'full')) {
-            window.setMaterialEdition(requestedEdition);
+        async function hashPin(pin) {
+            if (!pin) return '';
+            const msgUint8 = new TextEncoder().encode(pin.toString().trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        if (isReaderMode) {
+        // Check if opened in Reader Mode (e.g. from Main Site button)
+        const urlParams = new URLSearchParams(window.location.search);
+        let isReaderMode = urlParams.get('view') === 'reader' || urlParams.get('mode') === 'reader';
+        const requestedEdition = urlParams.get('edition');
+
+        function enterReaderMode() {
+            isReaderMode = true;
             document.body.classList.add('reader-mode-active');
             
-            // Adjust UI for Reader: Hide all editor panels and edition switcher buttons
             const leftPanel = document.getElementById('leftControlPanel');
             if (leftPanel) leftPanel.style.display = 'none';
 
@@ -2075,6 +2109,51 @@
             if (btnCopyAnswer) btnCopyAnswer.style.display = 'none';
         }
 
+        // Leader Gate: check if trusted leader device or request PIN
+        if (isReaderMode) {
+            enterReaderMode();
+        } else {
+            const isTrustedLeader = localStorage.getItem('isTrustedLeaderDevice') === 'true';
+            if (!isTrustedLeader) {
+                const modal = document.getElementById('worksheetPinModal');
+                if (modal) modal.classList.remove('hidden');
+                setTimeout(() => {
+                    const pinInput = document.getElementById('worksheetPinInput');
+                    if (pinInput) pinInput.focus();
+                }, 100);
+            }
+        }
+
+        window.submitWorksheetPin = async function() {
+            const pinInput = document.getElementById('worksheetPinInput');
+            const rememberCheckbox = document.getElementById('worksheetPinRemember');
+            const entered = pinInput ? pinInput.value : '';
+            const enteredHash = await hashPin(entered);
+
+            const activeHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
+            if (enteredHash === activeHash) {
+                const modal = document.getElementById('worksheetPinModal');
+                if (modal) modal.classList.add('hidden');
+                
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem('isTrustedLeaderDevice', 'true');
+                    showToast("👑 리더 기기로 등록되었습니다.", "success");
+                } else {
+                    showToast("👑 리더 인증 성공", "success");
+                }
+            } else {
+                showToast("❌ 비밀번호가 올바르지 않습니다.", "error");
+            }
+        };
+
+        window.cancelWorksheetPin = function() {
+            const modal = document.getElementById('worksheetPinModal');
+            if (modal) modal.classList.add('hidden');
+            enterReaderMode();
+            showToast("📖 학습자료 보기 모드로 전환되었습니다.", "info");
+            window.renderLivePreview();
+        };
+
         // Real-time listener for published worksheet
         onSnapshot(worksheetDocRef, (snap) => {
             if (snap.exists()) {
@@ -2082,8 +2161,11 @@
                 if (data && data.markdown) {
                     const currentVal = document.getElementById('markdownInput').value.trim();
                     
-                    // Determine which edition to show
-                    const targetEdition = requestedEdition || data.edition || 'teaser';
+                    const isTrustedLeader = localStorage.getItem('isTrustedLeaderDevice') === 'true';
+                    // In reader mode, strictly use Firestore data.edition to block URL parameter tampering
+                    const targetEdition = (isReaderMode && !isTrustedLeader) 
+                        ? (data.edition || 'teaser') 
+                        : (requestedEdition || data.edition || 'teaser');
 
                     // In reader mode, always sync live and lock edition. In studio mode, sync if empty.
                     if (isReaderMode) {
@@ -2117,6 +2199,12 @@
 
         // 🚀 One-Click Publish to Main Site
         window.publishWorksheetToMainSite = async function() {
+            const isTrustedLeader = localStorage.getItem('isTrustedLeaderDevice') === 'true';
+            if (isReaderMode && !isTrustedLeader) {
+                showToast("⚠️ 리더만 학습자료를 발행할 수 있습니다.", "warning");
+                return;
+            }
+
             const rawMd = document.getElementById('markdownInput').value.trim();
             if (!rawMd) {
                 showToast("⚠️ 먼저 Gems 마크다운 내용을 입력해 주세요!", "warning");
@@ -2141,18 +2229,19 @@
                 }
 
                 const parsed = window.parseGemsMarkdown(rawMd);
+                const activeEdition = window.currentEdition || 'teaser';
 
                 // 1. Save to worksheet doc
                 await setDoc(worksheetDocRef, {
                     markdown: rawMd,
                     title: parsed.title || "이번 주 스터디 주제",
                     overview: parsed.overview || "",
-                    edition: window.currentEdition || 'full',
+                    edition: activeEdition,
                     publishedAt: Date.now()
                 }, { merge: true });
 
                 // 2. Point main site docsUrl to this live reader!
-                const liveDocsUrl = `worksheet.html?view=reader&edition=${window.currentEdition || 'full'}`;
+                const liveDocsUrl = `worksheet.html?view=reader&edition=${activeEdition}`;
                 await setDoc(topicDocRef, {
                     docsUrl: liveDocsUrl
                 }, { merge: true });

@@ -24,6 +24,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="성북구 영어회화">
     <meta name="theme-color" content="#09090c">
@@ -3431,10 +3432,10 @@
         const COIN_WARN_DAYS = 7;      // 만료 며칠 전부터 경고를 띄울지
         let coinExpiryChecked = false;
 
-        const DEFAULT_PIN_HASH = "551a3ab454312f5a94a0fe410c9e66e40a8e219177233fca8e6d6bcd5920b9cf"; // SHA-256 for 'jett2323!'
+        const DEFAULT_PIN_HASH = "551a3ab454312f5a94a0fe410c9e66e40a8e219177233fca8e6d6bcd5920b9cf";
         let leaderPinHash = localStorage.getItem('leaderPinHash') || DEFAULT_PIN_HASH;
 
-        // Upgrade legacy weak 4-digit PIN hashes ('1234', '2323') to new strong default 'jett2323!'
+        // Upgrade legacy weak 4-digit PIN hashes to the current default
         if (leaderPinHash === "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4" || leaderPinHash === "61503690505f84b144e6ac89124540a3eb8d22e77db76500984cfc50a1d8776e") {
             leaderPinHash = DEFAULT_PIN_HASH;
             localStorage.setItem('leaderPinHash', leaderPinHash);
