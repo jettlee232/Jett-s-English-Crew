@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 이 페이지는 자체 다크 테마를 갖는다. 선언하지 않으면 크롬 안드로이드의
+         '자동 다크 테마'가 흰 A4 용지까지 반전시켜 PDF가 검게 나온다. -->
+    <meta name="color-scheme" content="dark">
     <title>성북구 중상급 영어회화 - 워크시트 스튜디오 Pro</title>
     
     <!-- Favicon -->
@@ -45,6 +48,10 @@
     </script>
 
     <style>
+        /* 이 페이지는 자체 다크 테마다(meta color-scheme 와 짝). 선언해두지 않으면
+           크롬 안드로이드 자동 다크 테마가 흰 A4 를 반전시켜 PDF 가 검게 나온다. */
+        :root { color-scheme: dark; }
+
         /* 헤더가 모바일에서 가로로 넘쳐 PDF 버튼을 가리는 문제.
            뱃지는 JS가 className을 통째로 덮어쓰므로 클래스가 아닌 CSS로 잡는다.
            좁은 화면에선 숨긴다 - 판형 표시는 툴바 칩과 PDF 버튼 라벨에 이미 있다. */
@@ -213,6 +220,11 @@
             @page {
                 size: A4 portrait;
                 margin: 0;
+            }
+
+            /* 화면이 다크든 아니든 인쇄 경로는 라이트로 고정 */
+            :root {
+                color-scheme: light !important;
             }
 
             /* 1. 최상위 html, body 순백색 강제 */

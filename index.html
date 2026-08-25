@@ -28,6 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="성북구 영어회화">
     <meta name="theme-color" content="#09090c">
+    <!-- 라이트/다크를 직접 관리한다. 브라우저 강제 다크 반전을 막는다. -->
+    <meta name="color-scheme" content="light dark">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -70,6 +72,9 @@
     </script>
 
     <style>
+        /* 라이트/다크를 직접 토글한다. 브라우저 강제 다크 반전 방지. */
+        :root { color-scheme: light dark; }
+
         body {
             background-color: #09090c;
             color: #f4f4f5;
