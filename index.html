@@ -876,9 +876,9 @@
                     </div>
 
                     <!-- Download Script / Docs Button Directly Below Video -->
-                    <a id="topicDocsLink" href="https://docs.google.com/document/d/1HJVjwGmlh0eT3YWehy7EtAZnHzN2Pp3ZEW2BqVBqM00/mobilebasic" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
-                        <i class="fa-solid fa-file-arrow-down text-emerald-400 text-sm"></i>
-                        <span>이번 주 자료 다운로드</span>
+                    <a id="topicDocsLink" href="material.pdf" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
+                        <i class="fa-solid fa-file-pdf text-emerald-400 text-sm"></i>
+                        <span>이번 주 학습 자료 (PDF) 보기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-emerald-400/80"></i>
                     </a>
 
@@ -1619,10 +1619,10 @@
 
                     <div>
                         <label class="text-xs text-zinc-400 font-medium flex items-center gap-1.5 mb-1">
-                            <i class="fa-solid fa-file-lines text-emerald-400"></i>
-                            <span>학습 자료(구글 문서) 링크</span>
+                            <i class="fa-solid fa-file-pdf text-emerald-400"></i>
+                            <span>학습 자료 (PDF 또는 문서) 링크</span>
                         </label>
-                        <input id="inputTopicDocs" type="text" placeholder="https://docs.google.com/document/d/..." class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <input id="inputTopicDocs" type="text" placeholder="기본값: material.pdf (또는 외부 드라이브 URL)" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                     </div>
 
                     <div>
@@ -3637,7 +3637,7 @@
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
             if (titleEl) titleEl.innerText = topicData.title;
-            if (docsEl) docsEl.href = topicData.docsUrl || "https://docs.google.com";
+            if (docsEl) docsEl.href = topicData.docsUrl || "material.pdf";
 
             const ytId = extractYoutubeId(topicData.youtubeUrl);
             const finalThumbUrl = topicData.customThumbnailUrl && topicData.customThumbnailUrl.trim() !== "" 
