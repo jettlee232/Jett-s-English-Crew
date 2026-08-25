@@ -5032,7 +5032,7 @@
                 ? parseInt(totalAttended) 
                 : 0;
 
-            const baseClass = "px-1.5 py-0.5 rounded text-[10px] sm:text-xs whitespace-nowrap shadow-sm font-semibold shrink-0 text-center";
+            const baseClass = "w-full text-center py-0.5 rounded text-[10px] sm:text-xs whitespace-nowrap shadow-sm font-semibold block";
 
             if (count <= 0) {
                 return `<span class="${baseClass} badge-att-new bg-emerald-950/80 text-emerald-300 border border-emerald-600/40">신규</span>`;
@@ -6827,26 +6827,29 @@
                     : '';
 
                 return `
-                    <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center justify-between gap-1.5 sm:gap-2.5 w-full hover:border-zinc-700 overflow-hidden">
-                        <!-- Left Group: Member Name + Attendance Badge + Free Attendance Badge -->
-                        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 mr-1">
-                            <!-- Member Name -->
-                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate max-w-[62px] sm:max-w-[110px]" title="${esc(m.name || '미지정')}">
+                    <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center gap-1.5 sm:gap-2.5 w-full hover:border-zinc-700 overflow-hidden">
+                        <!-- Col 1: Member Name (Strict Column) -->
+                        <div class="w-[58px] sm:w-[84px] shrink-0 truncate flex items-center">
+                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${esc(m.name || '미지정')}">
                                 ${esc(m.name || '미지정')}
                             </span>
+                        </div>
 
-                            <!-- Attendance Badge -->
+                        <!-- Col 2: Attendance Badge (Strict Column) -->
+                        <div class="w-[44px] sm:w-[50px] shrink-0 flex items-center">
                             ${getAttendanceBadge(m.totalAttended)}
+                        </div>
 
-                            <!-- Free Attendance Badge (Bright & Sparkling Golden Badge) -->
+                        <!-- Col 3: Free Ticket Badge (Strict Column - 무료) -->
+                        <div class="w-[30px] sm:w-[34px] shrink-0 flex items-center justify-center">
                             ${isKing ? `
-                                <span class="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-black text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0 shadow-sm ring-1 ring-yellow-200/90" title="당근 6개 완성! 이번 스터디 무료 참가 쿠폰 대상자입니다.">
-                                    <i class="fa-solid fa-gift text-[8px] text-zinc-900"></i>무료참가
+                                <span class="w-full text-center text-[9px] sm:text-[10px] font-black text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 py-0.5 rounded shadow-sm ring-1 ring-yellow-200/90 whitespace-nowrap" title="당근 6개 완성! 이번 스터디 무료 참가 쿠폰 대상">
+                                    무료
                                 </span>
                             ` : ''}
                         </div>
 
-                        <!-- Right Group: Carrot Coin Slots & Score -->
+                        <!-- Col 4: Carrot Coin Slots & Score (Strict Right-Aligned Column) -->
                         <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
                             ${expiryBadge}
                             <div class="flex items-center gap-0.5 sm:gap-1">
