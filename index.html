@@ -2099,6 +2099,40 @@
         </div>
     </div>
 
+    <!-- Custom Number Input Modal (For Bulk Coins, etc.) -->
+    <div id="customNumberPromptModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#121216] border border-[#23232b] w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div id="numberPromptIconBox" class="w-10 h-10 rounded-xl bg-orange-950/80 text-orange-400 border border-orange-600/50 flex items-center justify-center text-base mx-auto mb-1.5 shadow-sm">
+                    <i id="numberPromptIcon" class="fa-solid fa-carrot"></i>
+                </div>
+                <h3 id="numberPromptTitle" class="font-bold text-sm sm:text-base text-white whitespace-nowrap">당근 수량 입력</h3>
+                <p id="numberPromptSub" class="text-xs text-zinc-400 mt-0.5 leading-relaxed font-normal">수량을 입력해주세요.</p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="stepPromptNumber(-1)" class="w-10 h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 font-bold text-base flex items-center justify-center active:scale-95 transition cursor-pointer">-</button>
+                    <input id="customNumberPromptInput" type="number" inputmode="numeric" placeholder="0" class="flex-1 bg-zinc-950 border border-zinc-700 text-white text-center rounded-xl py-2 font-mono text-xl font-bold focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <button type="button" onclick="stepPromptNumber(1)" class="w-10 h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 font-bold text-base flex items-center justify-center active:scale-95 transition cursor-pointer">+</button>
+                </div>
+                <!-- Quick Suggestion Badges -->
+                <div id="numberPromptPresets" class="flex items-center justify-center gap-1.5 flex-wrap pt-0.5">
+                    <button type="button" onclick="setPromptNumber(1)" class="px-2 py-1 rounded bg-zinc-900 text-zinc-300 border border-zinc-700 text-xs font-semibold hover:bg-zinc-800 active:scale-95 transition cursor-pointer">1</button>
+                    <button type="button" onclick="setPromptNumber(2)" class="px-2 py-1 rounded bg-zinc-900 text-zinc-300 border border-zinc-700 text-xs font-semibold hover:bg-zinc-800 active:scale-95 transition cursor-pointer">2</button>
+                    <button type="button" onclick="setPromptNumber(3)" class="px-2 py-1 rounded bg-zinc-900 text-zinc-300 border border-zinc-700 text-xs font-semibold hover:bg-zinc-800 active:scale-95 transition cursor-pointer">3</button>
+                    <button type="button" onclick="setPromptNumber(5)" class="px-2 py-1 rounded bg-zinc-900 text-zinc-300 border border-zinc-700 text-xs font-semibold hover:bg-zinc-800 active:scale-95 transition cursor-pointer">5</button>
+                    <button type="button" onclick="setPromptNumber(6)" class="px-2.5 py-1 rounded bg-orange-950/80 text-orange-300 border border-orange-600/50 text-xs font-bold hover:bg-orange-900 active:scale-95 transition cursor-pointer">6 ⭐</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="closeCustomNumberPromptModal()" class="w-full bg-zinc-900 text-zinc-400 hover:text-white text-xs sm:text-sm font-medium py-2.5 rounded-xl border border-zinc-800 whitespace-nowrap cursor-pointer">취소</button>
+                <button id="btnNumberPromptConfirm" onclick="confirmCustomNumberPromptModal()" class="w-full bg-orange-600 hover:bg-orange-500 text-white text-xs sm:text-sm font-bold py-2.5 rounded-xl shadow-sm whitespace-nowrap active:scale-95 cursor-pointer">확인</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification (Top Center Semi-Transparent Slim Capsule) -->
     <div id="toast" class="fixed top-3.5 sm:top-4 left-1/2 -translate-x-1/2 bg-zinc-900/60 backdrop-blur-md text-white/95 border border-white/10 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg opacity-0 -translate-y-2 pointer-events-none z-50 flex items-center gap-2 max-w-[90vw] transition-all duration-200 ease-out">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xs sm:text-sm shrink-0"></i>
@@ -4311,6 +4345,64 @@
             customConfirmCallback = null;
         };
 
+        let customNumberPromptCallback = null;
+
+        function openCustomNumberPromptModal(opts) {
+            customNumberPromptCallback = opts.onConfirm;
+            const modal = document.getElementById('customNumberPromptModal');
+            const title = document.getElementById('numberPromptTitle');
+            const sub = document.getElementById('numberPromptSub');
+            const input = document.getElementById('customNumberPromptInput');
+            const icon = document.getElementById('numberPromptIcon');
+            const confirmBtn = document.getElementById('btnNumberPromptConfirm');
+
+            if (title) title.innerText = opts.title || "수량 입력";
+            if (sub) sub.innerHTML = opts.sub || "수량을 입력해주세요.";
+            if (input) {
+                input.value = opts.defaultValue !== undefined ? opts.defaultValue : 1;
+                input.min = opts.min !== undefined ? opts.min : -100;
+                input.max = opts.max !== undefined ? opts.max : 100;
+                setTimeout(() => { 
+                    input.focus(); 
+                    input.select(); 
+                }, 100);
+            }
+            if (icon && opts.icon) icon.className = opts.icon;
+            if (confirmBtn && opts.btnText) confirmBtn.innerText = opts.btnText;
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        window.closeCustomNumberPromptModal = function() {
+            const modal = document.getElementById('customNumberPromptModal');
+            if (modal) modal.classList.add('hidden');
+            customNumberPromptCallback = null;
+        };
+
+        window.stepPromptNumber = function(step) {
+            const input = document.getElementById('customNumberPromptInput');
+            if (input) {
+                const cur = parseInt(input.value, 10) || 0;
+                input.value = cur + step;
+            }
+        };
+
+        window.setPromptNumber = function(val) {
+            const input = document.getElementById('customNumberPromptInput');
+            if (input) input.value = val;
+        };
+
+        window.confirmCustomNumberPromptModal = function() {
+            const input = document.getElementById('customNumberPromptInput');
+            const val = input ? parseInt(input.value, 10) : NaN;
+            if (isNaN(val)) {
+                showToast("올바른 숫자를 입력해주세요.", "warning");
+                return;
+            }
+            const cb = customNumberPromptCallback;
+            closeCustomNumberPromptModal();
+            if (cb) cb(val);
+        };
+
         window.exportMembersCSV = function() {
             if (!membersData || membersData.length === 0) {
                 showToast("내보낼 멤버 데이터가 없습니다.", "warning");
@@ -4543,25 +4635,38 @@
         };
 
         window.promptBulkAdjustCoins = function() {
-            const input = prompt("모든 회원에게 지급(+) 또는 차감(-)할 당근 수량을 입력하세요.\n(예: 6 입력 시 전원 +6개 지급, -2 입력 시 전원 -2개 차감):", "6");
-            if (input === null) return;
-            const deltaNum = parseInt(input.trim(), 10);
-            if (isNaN(deltaNum) || deltaNum === 0) {
-                showToast("0이 아닌 숫자를 올바르게 입력해주세요.", "warning");
-                return;
-            }
-            bulkAdjustMemberCoins(deltaNum);
+            openCustomNumberPromptModal({
+                title: "🥕 전체 당근 지급 / 차감",
+                sub: "모든 회원에게 지급(+) 또는 차감(-)할 수량을 입력하세요.<br><span class='text-xs text-zinc-400'>* 예: 6 입력 시 전원 +6개 지급, -2 입력 시 전원 -2개 차감</span>",
+                defaultValue: 6,
+                icon: "fa-solid fa-plus-minus text-orange-400",
+                btnText: "일괄 적용",
+                onConfirm: (num) => {
+                    if (num === 0) {
+                        showToast("0이 아닌 수량을 입력해주세요.", "warning");
+                        return;
+                    }
+                    bulkAdjustMemberCoins(num);
+                }
+            });
         };
 
         window.promptBulkSetCoins = function() {
-            const input = prompt("모든 회원의 당근 보유 수를 특정 숫자로 일괄 통일 설정합니다.\n모든 회원의 당근을 몇 개로 설정하시겠습니까? (예: 6):", "6");
-            if (input === null) return;
-            const exactNum = parseInt(input.trim(), 10);
-            if (isNaN(exactNum) || exactNum < 0) {
-                showToast("0 이상의 숫자를 올바르게 입력해주세요.", "warning");
-                return;
-            }
-            bulkSetAllMemberCoins(exactNum);
+            openCustomNumberPromptModal({
+                title: "🥕 전체 당근 N개로 통일 설정",
+                sub: "모든 회원의 당근을 정확히 지정한 개수로 일괄 통일 설정합니다.<br><span class='text-xs text-amber-400'>* 예: 6 입력 시 전원 6개로 동일하게 통일</span>",
+                defaultValue: 6,
+                min: 0,
+                icon: "fa-solid fa-equals text-amber-400",
+                btnText: "N개로 통일 설정",
+                onConfirm: (num) => {
+                    if (num < 0) {
+                        showToast("0 이상의 수량을 입력해주세요.", "warning");
+                        return;
+                    }
+                    bulkSetAllMemberCoins(num);
+                }
+            });
         };
 
         window.bulkSetAllMemberCoins = function(exactCoins) {
@@ -4690,6 +4795,13 @@
                 if (customPinInput) {
                     customPinInput.addEventListener('keyup', (e) => {
                         if (e.key === 'Enter') confirmCustomPinModal();
+                    });
+                }
+
+                const customNumInput = document.getElementById('customNumberPromptInput');
+                if (customNumInput) {
+                    customNumInput.addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') confirmCustomNumberPromptModal();
                     });
                 }
 
