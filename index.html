@@ -876,7 +876,7 @@
                     </div>
 
                     <!-- Download Script / Docs Button Directly Below Video -->
-                    <a id="topicDocsLink" href="material.pdf" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
+                    <a id="topicDocsLink" href="worksheet.html?view=reader" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
                         <i class="fa-solid fa-file-pdf text-emerald-400 text-sm"></i>
                         <span>이번 주 학습 자료 (PDF) 보기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-emerald-400/80"></i>
@@ -3718,7 +3718,7 @@
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
             if (titleEl) titleEl.innerText = topicData.title || '';
-            if (docsEl) docsEl.href = topicData.docsUrl || "material.pdf";
+            if (docsEl) docsEl.href = topicData.docsUrl || "worksheet.html?view=reader";
 
             const ytId = extractYoutubeId(topicData.youtubeUrl);
             const finalThumbUrl = topicData.customThumbnailUrl && topicData.customThumbnailUrl.trim() !== "" 

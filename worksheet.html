@@ -183,6 +183,23 @@
             margin-left: 2px;
         }
 
+        /* 모바일 화면 뷰 최적화 (읽기 편한 카드형 뷰) */
+        @media screen and (max-width: 768px) {
+            .a4-page-sheet {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                max-height: none !important;
+                padding: 20px 16px 24px 16px !important;
+                margin-bottom: 20px !important;
+                border-radius: 16px !important;
+                font-size: calc(9.5pt * var(--sheet-font-scale, 1.12));
+            }
+            .reader-mode-active #previewContainerWrapper {
+                padding: 12px 8px !important;
+            }
+        }
+
         /* ========================================================
            🔥 인쇄 및 PDF 저장 전용 스타일 (@media print) 
            어두운 스튜디오 테마 완전 제거 & 순백색 A4 완벽 출력
@@ -315,6 +332,12 @@
 </head>
 <body class="h-full bg-studio-bg text-studio-text flex flex-col font-sans select-none">
 
+    <!-- Toast Notification (Semi-Transparent Slim Capsule) -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur-md text-white border border-white/15 px-4 py-2 rounded-full shadow-2xl opacity-0 -translate-y-3 pointer-events-none z-50 flex items-center gap-2 max-w-[90vw] transition-all duration-300 ease-out">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm shrink-0"></i>
+        <span id="toastMsg" class="text-xs font-bold tracking-tight whitespace-nowrap"></span>
+    </div>
+
     <!-- TOP GLOBAL NAV BAR (No Print) -->
     <header class="no-print h-14 bg-studio-panel border-b border-studio-border px-4 flex items-center justify-between shrink-0 z-30">
         <div class="flex items-center gap-3">
@@ -327,7 +350,7 @@
                 <img src="logo.png" alt="Logo" class="h-7 w-auto object-contain">
                 <div class="leading-tight">
                     <h1 class="text-sm font-bold text-white flex items-center gap-1.5 whitespace-nowrap">
-                        <span>워크시트 스튜디오</span>
+                        <span id="headerBrandTitle">워크시트 스튜디오</span>
                         <span id="headerEditionBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap">현장 스터디용 (6p)</span>
                     </h1>
                 </div>
@@ -344,13 +367,17 @@
             </button>
         </div>
 
-        <!-- Right: Print & Copy Answers Action Buttons -->
+        <!-- Right: Print, Publish & Action Buttons -->
         <div class="flex items-center gap-2 shrink-0">
+            <button id="btnPublishToSite" onclick="publishWorksheetToMainSite()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 border border-emerald-400/30 active:scale-95 transition cursor-pointer whitespace-nowrap" title="클릭 한 번으로 이번 주 메인 사이트 학습자료 버튼에 즉시 연동 및 발행합니다">
+                <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                <span id="publishBtnLabel">사이트에 즉시 연동</span>
+            </button>
             <button id="btnCopyAnswerTop" onclick="copyAnswerKeyToClipboard()" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-amber-300 hover:text-amber-200 text-xs font-bold transition cursor-pointer whitespace-nowrap" title="라이팅 모범답안을 카톡 공유용으로 복사">
                 <i class="fa-solid fa-clipboard-check text-amber-400"></i>
                 <span>모범답안 복사</span>
             </button>
-            <button onclick="loadSampleData()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-zinc-300 hover:text-white text-xs font-medium transition cursor-pointer whitespace-nowrap" title="전문 스크립트 샘플 불러오기">
+            <button id="btnSampleTop" onclick="loadSampleData()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-zinc-300 hover:text-white text-xs font-medium transition cursor-pointer whitespace-nowrap" title="전문 스크립트 샘플 불러오기">
                 <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
                 <span>샘플</span>
             </button>
@@ -1963,13 +1990,157 @@
             renderLivePreview();
         }
 
+        let toastTimeout;
+        window.showToast = function(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.innerText = msg;
+            if (type === "success") {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-sm shrink-0";
+            } else if (type === "warning") {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-sm shrink-0";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-xmark text-rose-400 text-sm shrink-0";
+            }
+
+            toast.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
+            }, 3000);
+        };
+
         // Initialize on load (Restore saved work if exists, or load sample data)
         window.addEventListener('DOMContentLoaded', () => {
             const hasRestored = loadLocalState();
             if (!hasRestored) {
-                loadSampleData();
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('view') !== 'reader') {
+                    loadSampleData();
+                }
             }
         });
+    </script>
+
+    <!-- FIREBASE REALTIME SYNC & ONE-CLICK PUBLISH MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL00lyWf-R4ZDUEzYtFVafyX1HMw8Ebmc",
+            authDomain: "jetts-english-crew-7c2c7.firebaseapp.com",
+            projectId: "jetts-english-crew-7c2c7",
+            storageBucket: "jetts-english-crew-7c2c7.firebasestorage.app",
+            messagingSenderId: "980305327503",
+            appId: "1:980305327503:web:a2eaedf9c8235e64bd47fa"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'seongbuk-english-study';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const worksheetDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'worksheet');
+        const topicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
+
+        // Check if opened in Reader Mode (e.g. from Main Site button)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isReaderMode = urlParams.get('view') === 'reader' || urlParams.get('mode') === 'reader';
+        const requestedEdition = urlParams.get('edition');
+
+        if (requestedEdition && (requestedEdition === 'teaser' || requestedEdition === 'full')) {
+            window.setMaterialEdition(requestedEdition);
+        }
+
+        if (isReaderMode) {
+            document.body.classList.add('reader-mode-active');
+            
+            // Adjust UI for Reader
+            const leftPanel = document.getElementById('leftControlPanel');
+            if (leftPanel) leftPanel.style.display = 'none';
+
+            const brandTitle = document.getElementById('headerBrandTitle');
+            if (brandTitle) brandTitle.innerText = "이번 주 학습 자료";
+
+            const btnPublish = document.getElementById('btnPublishToSite');
+            if (btnPublish) btnPublish.style.display = 'none';
+
+            const btnSample = document.getElementById('btnSampleTop');
+            if (btnSample) btnSample.style.display = 'none';
+
+            const btnCopyAnswer = document.getElementById('btnCopyAnswerTop');
+            if (btnCopyAnswer) btnCopyAnswer.style.display = 'none';
+        }
+
+        // Real-time listener for published worksheet
+        onSnapshot(worksheetDocRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                if (data && data.markdown) {
+                    const currentVal = document.getElementById('markdownInput').value.trim();
+                    // In reader mode, always sync live. In studio mode, sync if empty.
+                    if (isReaderMode || !currentVal) {
+                        document.getElementById('markdownInput').value = data.markdown;
+                        if (data.edition && !requestedEdition) {
+                            window.setMaterialEdition(data.edition);
+                        } else {
+                            window.renderLivePreview();
+                        }
+                    }
+                }
+            }
+        }, (err) => {
+            console.warn("Firestore worksheet read warning:", err);
+        });
+
+        // 🚀 One-Click Publish to Main Site
+        window.publishWorksheetToMainSite = async function() {
+            const rawMd = document.getElementById('markdownInput').value.trim();
+            if (!rawMd) {
+                showToast("⚠️ 먼저 Gems 마크다운 내용을 입력해 주세요!", "warning");
+                return;
+            }
+
+            const btn = document.getElementById('btnPublishToSite');
+            const label = document.getElementById('publishBtnLabel');
+            const originalText = label ? label.innerText : "사이트에 즉시 연동";
+
+            try {
+                if (label) label.innerText = "연동 중...";
+                if (btn) btn.disabled = true;
+
+                const parsed = window.parseGemsMarkdown(rawMd);
+
+                // 1. Save to worksheet doc
+                await setDoc(worksheetDocRef, {
+                    markdown: rawMd,
+                    title: parsed.title || "이번 주 스터디 주제",
+                    overview: parsed.overview || "",
+                    edition: window.currentEdition || 'full',
+                    publishedAt: Date.now()
+                }, { merge: true });
+
+                // 2. Point main site docsUrl to this live reader!
+                const liveDocsUrl = `worksheet.html?view=reader&edition=${window.currentEdition || 'full'}`;
+                await setDoc(topicDocRef, {
+                    docsUrl: liveDocsUrl
+                }, { merge: true });
+
+                showToast("🎉 이번 주 학습자료가 메인 사이트에 1초 만에 연동되었습니다!", "success");
+            } catch (error) {
+                console.error("발행 실패:", error);
+                showToast("❌ 연동 중 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+            } finally {
+                if (label) label.innerText = originalText;
+                if (btn) btn.disabled = false;
+            }
+        };
     </script>
 </body>
 </html>
