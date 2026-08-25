@@ -3279,7 +3279,7 @@
             {
                         "name": "깜복",
                         "gender": "F",
-                        "ageGroup": "30대",
+                        "ageGroup": "20대",
                         "coins": 0,
                         "totalAttended": 0,
                         "isNew": true,
@@ -3289,7 +3289,7 @@
             },
             {
                         "name": "나무",
-                        "gender": "M",
+                        "gender": "F",
                         "ageGroup": "30대",
                         "coins": 0,
                         "totalAttended": 0,
@@ -4875,21 +4875,33 @@
                         }
                         renderUI();
 
-                        // 자동 회원 명단 동기화 (Joe, 말차그릭 탈퇴 / 필라테스하는빙수, 깜복, 나무 입단)
-                        if (!localStorage.getItem('roster_sync_20260825_roster_v3')) {
-                            localStorage.setItem('roster_sync_20260825_roster_v3', 'true');
+                        // 자동 회원 명단 동기화 (Joe, 말차그릭 탈퇴 / 필라테스하는빙수, 깜복, 나무 입단 및 정보 갱신)
+                        if (!localStorage.getItem('roster_sync_20260825_roster_v4')) {
+                            localStorage.setItem('roster_sync_20260825_roster_v4', 'true');
                             const toRemove = membersData.filter(m => m.name === 'Joe' || m.name === '말차그릭');
                             toRemove.forEach(m => {
                                 deleteDoc(doc(membersCollectionRef, m.id)).catch(e => console.warn(e));
                             });
-                            const existingNames = new Set(membersData.map(m => m.name));
+                            const existingMap = new Map(membersData.map(m => [m.name, m]));
                             const newRoster = [
                                 { name: "필라테스하는빙수", gender: "F", ageGroup: "30대" },
-                                { name: "깜복", gender: "F", ageGroup: "30대" },
-                                { name: "나무", gender: "M", ageGroup: "30대" }
+                                { name: "깜복", gender: "F", ageGroup: "20대" },
+                                { name: "나무", gender: "F", ageGroup: "30대" }
                             ];
                             newRoster.forEach(nm => {
-                                if (!existingNames.has(nm.name)) {
+                                const found = existingMap.get(nm.name);
+                                if (found) {
+                                    // 이미 추가된 경우라도 성별/연령대 업데이트
+                                    if (found.gender !== nm.gender || found.ageGroup !== nm.ageGroup) {
+                                        found.gender = nm.gender;
+                                        found.ageGroup = nm.ageGroup;
+                                        updateDoc(doc(membersCollectionRef, found.id), {
+                                            gender: nm.gender,
+                                            ageGroup: nm.ageGroup,
+                                            updatedAt: new Date().toISOString()
+                                        }).catch(e => console.warn(e));
+                                    }
+                                } else {
                                     const newDocRef = doc(membersCollectionRef);
                                     const newMemberObj = {
                                         id: newDocRef.id,
