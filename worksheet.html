@@ -1028,15 +1028,15 @@
                 let totalChars = 0;
                 data.readingParagraphs.forEach(p => totalChars += p.content.length);
 
-                // Page 1 has Title, Overview Box, and Kiosk Notice, so it needs ~40-45% of paragraphs.
-                // Page 2 has the remaining script plus Vocabulary & Expressions.
-                let teaserSplit = 5;
-                if (totalParas <= 6) teaserSplit = 3;
+                // Balanced split between Page 1 (Title + Overview + Script 1) and Page 2 (Script 2 + Vocab 6)
+                let teaserSplit = 6;
+                if (totalParas <= 6) teaserSplit = Math.ceil(totalParas * 0.5);
                 else if (totalParas <= 8) teaserSplit = 4;
-                else if (totalParas <= 10) teaserSplit = 4;
-                else if (totalParas <= 12) teaserSplit = 5;
-                else if (totalParas <= 15) teaserSplit = 6;
-                else teaserSplit = Math.floor(totalParas * 0.42);
+                else if (totalParas <= 10) teaserSplit = 5;
+                else if (totalParas <= 12) teaserSplit = 6;
+                else if (totalParas <= 14) teaserSplit = 7;
+                else if (totalParas <= 16) teaserSplit = 8;
+                else teaserSplit = Math.ceil(totalParas * 0.5);
 
                 const teaserP1Paras = data.readingParagraphs.slice(0, teaserSplit);
                 const teaserP2Paras = data.readingParagraphs.slice(teaserSplit);
@@ -1048,31 +1048,31 @@
                 teaserP2Paras.forEach(p => p2Chars += p.content.length);
 
                 // Adaptive typography for Page 1
-                let scriptP1FontSize = "9.8pt";
-                let scriptP1LineHeight = "1.62";
-                if (p1Chars > 1600) {
+                let scriptP1FontSize = "9.6pt";
+                let scriptP1LineHeight = "1.58";
+                if (p1Chars > 1800) {
                     scriptP1FontSize = "8.6pt";
                     scriptP1LineHeight = "1.44";
-                } else if (p1Chars > 1200) {
+                } else if (p1Chars > 1300) {
                     scriptP1FontSize = "9.0pt";
-                    scriptP1LineHeight = "1.50";
-                } else if (p1Chars > 900) {
+                    scriptP1LineHeight = "1.48";
+                } else if (p1Chars > 950) {
                     scriptP1FontSize = "9.4pt";
-                    scriptP1LineHeight = "1.56";
+                    scriptP1LineHeight = "1.54";
                 }
 
                 // Adaptive typography for Page 2
-                let scriptP2FontSize = "9.6pt";
-                let scriptP2LineHeight = "1.60";
+                let scriptP2FontSize = "9.4pt";
+                let scriptP2LineHeight = "1.56";
                 if (p2Chars > 2200) {
-                    scriptP2FontSize = "8.6pt";
-                    scriptP2LineHeight = "1.44";
-                } else if (p2Chars > 1600) {
-                    scriptP2FontSize = "9.0pt";
-                    scriptP2LineHeight = "1.50";
-                } else if (p2Chars > 1100) {
-                    scriptP2FontSize = "9.4pt";
-                    scriptP2LineHeight = "1.56";
+                    scriptP2FontSize = "8.5pt";
+                    scriptP2LineHeight = "1.42";
+                } else if (p2Chars > 1500) {
+                    scriptP2FontSize = "8.8pt";
+                    scriptP2LineHeight = "1.46";
+                } else if (p2Chars > 1000) {
+                    scriptP2FontSize = "9.2pt";
+                    scriptP2LineHeight = "1.52";
                 }
 
                 let teaserHtml = `
@@ -1090,7 +1090,7 @@
                         </div>
                     </div>
 
-                    <div class="sheet-content space-y-3 flex flex-col flex-1">
+                    <div class="sheet-content space-y-3 flex flex-col flex-1 justify-start">
                         
                         <!-- Topic Title & Overview Box (Subtle Hairline Underline) -->
                         <div class="space-y-2 shrink-0 pt-1 border-b border-gray-200 pb-2.5">
@@ -1108,8 +1108,8 @@
                             </div>` : ''}
                         </div>
 
-                        <!-- Intensive Reading Part 1 (Subtle Hairline Header & Box) -->
-                        <div class="space-y-1.5 pt-0.5 flex-1 flex flex-col justify-between">
+                        <!-- Intensive Reading Part 1 (Direct Top Flow - No Gap) -->
+                        <div class="space-y-2 pt-1 flex-1 flex flex-col justify-start">
                             <div class="flex items-center justify-between border-b border-gray-200 pb-1 shrink-0 mb-0.5">
                                 <div class="flex items-center gap-2">
                                     <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
