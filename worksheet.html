@@ -358,7 +358,7 @@
         </div>
 
         <!-- Center: Material Edition Switcher (Full vs Teaser Preview) -->
-        <div class="flex items-center gap-1 bg-studio-bg p-1 rounded-xl border border-studio-border shrink-0">
+        <div id="editionSwitcherNav" class="flex items-center gap-1 bg-studio-bg p-1 rounded-xl border border-studio-border shrink-0">
             <button id="btnEditionFull" onclick="setMaterialEdition('full')" class="edition-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-600 text-white shadow whitespace-nowrap" title="표지, 웜업, 지문, 내용, 어휘, 영작, 토론 전체 포함">
                 <i class="fa-solid fa-book-open mr-1"></i>현장 스터디용 (6p)
             </button>
@@ -2055,12 +2055,15 @@
         if (isReaderMode) {
             document.body.classList.add('reader-mode-active');
             
-            // Adjust UI for Reader
+            // Adjust UI for Reader: Hide all editor panels and edition switcher buttons
             const leftPanel = document.getElementById('leftControlPanel');
             if (leftPanel) leftPanel.style.display = 'none';
 
+            const editionSwitcher = document.getElementById('editionSwitcherNav');
+            if (editionSwitcher) editionSwitcher.style.display = 'none';
+
             const brandTitle = document.getElementById('headerBrandTitle');
-            if (brandTitle) brandTitle.innerText = "이번 주 학습 자료";
+            if (brandTitle) brandTitle.innerText = "이번 주 스터디 학습 자료";
 
             const btnPublish = document.getElementById('btnPublishToSite');
             if (btnPublish) btnPublish.style.display = 'none';
@@ -2078,8 +2081,27 @@
                 const data = snap.data();
                 if (data && data.markdown) {
                     const currentVal = document.getElementById('markdownInput').value.trim();
-                    // In reader mode, always sync live. In studio mode, sync if empty.
-                    if (isReaderMode || !currentVal) {
+                    
+                    // Determine which edition to show
+                    const targetEdition = requestedEdition || data.edition || 'teaser';
+
+                    // In reader mode, always sync live and lock edition. In studio mode, sync if empty.
+                    if (isReaderMode) {
+                        document.getElementById('markdownInput').value = data.markdown;
+                        window.setMaterialEdition(targetEdition);
+                        
+                        // Update badge in reader mode
+                        const badge = document.getElementById('headerEditionBadge');
+                        if (badge) {
+                            if (targetEdition === 'teaser') {
+                                badge.innerText = "사전 예습용 (2p)";
+                                badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap";
+                            } else {
+                                badge.innerText = "현장 스터디용 (6p)";
+                                badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap";
+                            }
+                        }
+                    } else if (!currentVal) {
                         document.getElementById('markdownInput').value = data.markdown;
                         if (data.edition && !requestedEdition) {
                             window.setMaterialEdition(data.edition);
