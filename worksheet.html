@@ -2150,47 +2150,66 @@
             const modal = document.getElementById('worksheetPinModal');
             if (modal) modal.classList.add('hidden');
             enterReaderMode();
-            showToast("📖 학습자료 보기 모드로 전환되었습니다.", "info");
-            window.renderLivePreview();
+
+            // 이 시점엔 onSnapshot 이 이미 지나갔다. 다시 그리지 않으면 데모 샘플이
+            // 이번 주 학습자료인 것처럼 남는다.
+            if (latestPublished) {
+                showToast("📖 학습자료 보기 모드로 전환되었습니다.", "success");
+                applyPublishedToReader(latestPublished);
+            } else {
+                document.getElementById('markdownInput').value = '';
+                window.renderLivePreview();
+                showToast("학습자료를 불러오지 못했습니다. 새로고침 해주세요.", "warning");
+            }
         };
+
+        // 마지막으로 발행된 학습자료. PIN 취소로 뒤늦게 리더 모드에 들어가는 경우,
+        // onSnapshot 은 이미 지나갔으므로 이 캐시로 다시 그린다.
+        let latestPublished = null;
+
+        function isLeaderDevice() {
+            return localStorage.getItem('isTrustedLeaderDevice') === 'true';
+        }
+
+        function applyPublishedToReader(data) {
+            if (!data || !data.markdown) return;
+            // 회원 리더 화면은 항상 사전 예습용(2p). 발행 판형이나 URL 파라미터로 6p를 열 수 없다.
+            // 리더 기기만 URL/발행 판형을 그대로 따른다.
+            const targetEdition = isLeaderDevice()
+                ? (requestedEdition || data.edition || 'teaser')
+                : 'teaser';
+
+            document.getElementById('markdownInput').value = data.markdown;
+            window.setMaterialEdition(targetEdition);
+
+            const badge = document.getElementById('headerEditionBadge');
+            if (badge) {
+                if (targetEdition === 'teaser') {
+                    badge.innerText = "사전 예습용 (2p)";
+                    badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap";
+                } else {
+                    badge.innerText = "현장 스터디용 (6p)";
+                    badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap";
+                }
+            }
+        }
 
         // Real-time listener for published worksheet
         onSnapshot(worksheetDocRef, (snap) => {
-            if (snap.exists()) {
-                const data = snap.data();
-                if (data && data.markdown) {
-                    const currentVal = document.getElementById('markdownInput').value.trim();
-                    
-                    const isTrustedLeader = localStorage.getItem('isTrustedLeaderDevice') === 'true';
-                    // In reader mode, strictly use Firestore data.edition to block URL parameter tampering
-                    const targetEdition = (isReaderMode && !isTrustedLeader) 
-                        ? (data.edition || 'teaser') 
-                        : (requestedEdition || data.edition || 'teaser');
+            if (!snap.exists()) return;
+            const data = snap.data();
+            if (!data || !data.markdown) return;
 
-                    // In reader mode, always sync live and lock edition. In studio mode, sync if empty.
-                    if (isReaderMode) {
-                        document.getElementById('markdownInput').value = data.markdown;
-                        window.setMaterialEdition(targetEdition);
-                        
-                        // Update badge in reader mode
-                        const badge = document.getElementById('headerEditionBadge');
-                        if (badge) {
-                            if (targetEdition === 'teaser') {
-                                badge.innerText = "사전 예습용 (2p)";
-                                badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap";
-                            } else {
-                                badge.innerText = "현장 스터디용 (6p)";
-                                badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap";
-                            }
-                        }
-                    } else if (!currentVal) {
-                        document.getElementById('markdownInput').value = data.markdown;
-                        if (data.edition && !requestedEdition) {
-                            window.setMaterialEdition(data.edition);
-                        } else {
-                            window.renderLivePreview();
-                        }
-                    }
+            latestPublished = data;
+
+            if (isReaderMode) {
+                applyPublishedToReader(data);
+            } else if (!document.getElementById('markdownInput').value.trim()) {
+                document.getElementById('markdownInput').value = data.markdown;
+                if (data.edition && !requestedEdition) {
+                    window.setMaterialEdition(data.edition);
+                } else {
+                    window.renderLivePreview();
                 }
             }
         }, (err) => {
