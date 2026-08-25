@@ -1696,12 +1696,18 @@
                                 <i class="fa-solid fa-carrot text-xs"></i>
                                 <span>전체 당근:</span>
                             </span>
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-600/50 py-1 px-2.5 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 일괄 지급">
-                                    <i class="fa-solid fa-plus text-[10px]"></i> 1당근
+                            <div class="flex items-center gap-1 shrink-0 flex-wrap">
+                                <button onclick="bulkAdjustMemberCoins(1)" class="bg-orange-950/80 hover:bg-orange-900 text-orange-300 border border-orange-600/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원에게 당근 +1개 일괄 지급">
+                                    +1
                                 </button>
-                                <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-1 px-2.5 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 일괄 차감">
-                                    <i class="fa-solid fa-minus text-[10px]"></i> 1당근
+                                <button onclick="bulkAdjustMemberCoins(-1)" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근 -1개 일괄 차감">
+                                    -1
+                                </button>
+                                <button onclick="promptBulkAdjustCoins()" class="bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-600/50 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="수량을 직접 입력하여 일괄 지급/차감 (예: +6, -3)">
+                                    <i class="fa-solid fa-pen text-[10px]"></i> 수량입력
+                                </button>
+                                <button onclick="promptBulkSetCoins()" class="bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 py-1 px-2 rounded-lg text-[11px] font-bold transition active:scale-95 whitespace-nowrap shadow-sm cursor-pointer" title="모든 회원의 당근을 특정 개수로 일괄 통일 (예: 전원 6개로 맞춤)">
+                                    <i class="fa-solid fa-equals text-[10px]"></i> N개로통일
                                 </button>
                             </div>
                         </div>
@@ -2102,7 +2108,7 @@
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase 웹 설정값은 공개되어도 되는 정보다. 실제 접근 제어는 Firestore 규칙이 담당한다.
         const firebaseConfig = {
@@ -4418,91 +4424,197 @@
             reader.readAsText(file, 'UTF-8');
         };
 
+        let isBulkOperationPending = false;
+
+        async function commitBatchUpdates(updates) {
+            if (!updates || updates.length === 0) return;
+            const BATCH_SIZE = 400;
+            for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+                const chunk = updates.slice(i, i + BATCH_SIZE);
+                const batch = writeBatch(db);
+                chunk.forEach(u => {
+                    const memberRef = doc(membersCollectionRef, u.id);
+                    batch.update(memberRef, u.data);
+                });
+                await batch.commit();
+            }
+        }
+
         window.openWeeklyResetModal = function() {
+            if (isBulkOperationPending) {
+                showToast("이전 작업을 처리 중입니다. 잠시 후 다시 시도해주세요.", "warning");
+                return;
+            }
             openConfirmModal({
                 title: "🧹 다음 주 스터디 준비 (출석 & 적립 초기화)",
                 msg: "오늘의 <strong>참석자 명단(출석부)과 적립 완료 상태를 모두 비우고 초기화</strong>하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>* 회원 정보, 누적 당근 수, 총 참석 회차는 안전하게 보존됩니다.</span>",
                 showOption: true,
                 onConfirm: async (shouldIncrementAttended) => {
-                    const now = new Date().toISOString();
-                    const updates = [];
-                    membersData.forEach(m => {
-                        const wasToday = !!m.isToday;
-                        const curTotal = (m.totalAttended !== undefined && m.totalAttended !== null && !isNaN(m.totalAttended)) ? parseInt(m.totalAttended, 10) : 0;
-                        const newTotal = (shouldIncrementAttended && wasToday) ? curTotal + 1 : curTotal;
-                        m.checkedInOnTime = false;
-                        m.checkedInReview = false;
-                        m.leftEarly = false;
-                        m.totalAttended = newTotal;
-                        m.isNew = newTotal <= 1;
-                        if (shouldIncrementAttended && wasToday) {
-                            m.lastAttendedAt = now;
-                        }
-                        m.isToday = false; // 오늘 참석자 상태 모두 비우기
-                        m.updatedAt = now;
-                        const updateObj = {
-                            isToday: false,
-                            checkedInOnTime: false,
-                            checkedInReview: false,
-                            leftEarly: false,
-                            totalAttended: newTotal,
-                            isNew: m.isNew,
-                            updatedAt: now
-                        };
-                        if (shouldIncrementAttended && wasToday) {
-                            updateObj.lastAttendedAt = now;
-                        }
-                        updates.push({
-                            id: m.id,
-                            data: updateObj
-                        });
-                    });
-                    selectedMemberId = null;
-                    part1SeatingSnapshot = null;
-                    part2SeatingSnapshot = null;
-                    seatingSnapshotSig = '';
-                    persistMembers([...membersData]);
-                    renderUI();
-                    showToast("🧹 금주 출석 및 적립 상태가 초기화되었습니다. 다음 주 준비 완료!", "success");
-
+                    if (isBulkOperationPending) return;
+                    isBulkOperationPending = true;
                     try {
-                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                        const now = new Date().toISOString();
+                        const updates = [];
+                        membersData.forEach(m => {
+                            const wasToday = !!m.isToday;
+                            const curTotal = (m.totalAttended !== undefined && m.totalAttended !== null && !isNaN(m.totalAttended)) ? parseInt(m.totalAttended, 10) : 0;
+                            const newTotal = (shouldIncrementAttended && wasToday) ? curTotal + 1 : curTotal;
+                            m.checkedInOnTime = false;
+                            m.checkedInReview = false;
+                            m.leftEarly = false;
+                            m.totalAttended = newTotal;
+                            m.isNew = newTotal <= 1;
+                            if (shouldIncrementAttended && wasToday) {
+                                m.lastAttendedAt = now;
+                            }
+                            m.isToday = false; // 오늘 참석자 상태 모두 비우기
+                            m.updatedAt = now;
+                            const updateObj = {
+                                isToday: false,
+                                checkedInOnTime: false,
+                                checkedInReview: false,
+                                leftEarly: false,
+                                totalAttended: newTotal,
+                                isNew: m.isNew,
+                                updatedAt: now
+                            };
+                            if (shouldIncrementAttended && wasToday) {
+                                updateObj.lastAttendedAt = now;
+                            }
+                            updates.push({
+                                id: m.id,
+                                data: updateObj
+                            });
+                        });
+                        selectedMemberId = null;
+                        part1SeatingSnapshot = null;
+                        part2SeatingSnapshot = null;
+                        seatingSnapshotSig = '';
+                        persistMembers([...membersData]);
+                        renderUI();
+                        showToast("🧹 금주 출석 및 적립 상태가 초기화되었습니다. 다음 주 준비 완료!", "success");
+
+                        await commitBatchUpdates(updates);
                     } catch (e) {
                         console.warn("금주 적립 초기화 동기화 실패 (로컬은 저장됨):", e);
+                        showToast("서버 동기화 중 오류가 발생했습니다.", "error");
+                    } finally {
+                        isBulkOperationPending = false;
                     }
                 }
             });
         };
 
         window.openResetAllCoinsModal = function() {
+            if (isBulkOperationPending) {
+                showToast("이전 작업을 처리 중입니다. 잠시 후 다시 시도해주세요.", "warning");
+                return;
+            }
             openCustomPinModal("🔒 전체 당근 0개 초기화 (비밀번호 확인)", () => {
                 openConfirmModal({
                     title: "🥕 전체 당근 0개 초기화 실행",
                     msg: "등록된 <strong>모든 회원의 당근 보유 수를 0개로 완전히 초기화</strong>하시겠습니까?<br><span class='text-xs text-rose-400 font-semibold'>* 이 작업은 되돌릴 수 없습니다. (회원 정보 및 참석 회차는 보존)</span>",
                     showOption: false,
                     onConfirm: async () => {
-                        const now = new Date().toISOString();
-                        const updates = [];
-                        membersData.forEach(m => {
-                            m.coins = 0;
-                            m.updatedAt = now;
-                            updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
-                        });
-                        persistMembers([...membersData]);
-                        renderUI();
-                        showToast("🥕 모든 회원의 당근이 0개로 초기화되었습니다.", "success");
-
+                        if (isBulkOperationPending) return;
+                        isBulkOperationPending = true;
                         try {
-                            await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                            const now = new Date().toISOString();
+                            const updates = [];
+                            membersData.forEach(m => {
+                                m.coins = 0;
+                                m.updatedAt = now;
+                                updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
+                            });
+                            persistMembers([...membersData]);
+                            renderUI();
+                            showToast("🥕 모든 회원의 당근이 0개로 초기화되었습니다.", "success");
+
+                            await commitBatchUpdates(updates);
                         } catch (e) {
                             console.warn("당근 일괄 초기화 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                            showToast("서버 동기화 중 오류가 발생했습니다.", "error");
+                        } finally {
+                            isBulkOperationPending = false;
                         }
                     }
                 });
             });
         };
 
+        window.promptBulkAdjustCoins = function() {
+            const input = prompt("모든 회원에게 지급(+) 또는 차감(-)할 당근 수량을 입력하세요.\n(예: 6 입력 시 전원 +6개 지급, -2 입력 시 전원 -2개 차감):", "6");
+            if (input === null) return;
+            const deltaNum = parseInt(input.trim(), 10);
+            if (isNaN(deltaNum) || deltaNum === 0) {
+                showToast("0이 아닌 숫자를 올바르게 입력해주세요.", "warning");
+                return;
+            }
+            bulkAdjustMemberCoins(deltaNum);
+        };
+
+        window.promptBulkSetCoins = function() {
+            const input = prompt("모든 회원의 당근 보유 수를 특정 숫자로 일괄 통일 설정합니다.\n모든 회원의 당근을 몇 개로 설정하시겠습니까? (예: 6):", "6");
+            if (input === null) return;
+            const exactNum = parseInt(input.trim(), 10);
+            if (isNaN(exactNum) || exactNum < 0) {
+                showToast("0 이상의 숫자를 올바르게 입력해주세요.", "warning");
+                return;
+            }
+            bulkSetAllMemberCoins(exactNum);
+        };
+
+        window.bulkSetAllMemberCoins = function(exactCoins) {
+            if (isBulkOperationPending) {
+                showToast("이전 작업을 처리 중입니다. 잠시 후 다시 시도해주세요.", "warning");
+                return;
+            }
+            const targetCoins = parseInt(exactCoins, 10);
+            if (isNaN(targetCoins) || targetCoins < 0) {
+                showToast("설정할 당근 수량을 올바르게 입력해주세요.", "warning");
+                return;
+            }
+
+            openConfirmModal({
+                title: `🥕 전체 당근 ${targetCoins}개로 일괄 통일 설정`,
+                msg: `등록된 <strong>모든 회원의 당근을 정확히 ${targetCoins}개로 일괄 통일 설정</strong>하시겠습니까?<br><span class='text-xs text-amber-400'>* 모든 회원이 오차 없이 ${targetCoins}개로 동일하게 맞춰집니다.</span>`,
+                showOption: false,
+                onConfirm: async () => {
+                    if (isBulkOperationPending) return;
+                    isBulkOperationPending = true;
+                    try {
+                        const now = new Date().toISOString();
+                        const updates = [];
+                        membersData.forEach(m => {
+                            m.coins = targetCoins;
+                            m.updatedAt = now;
+                            const payload = { coins: targetCoins, updatedAt: now };
+                            if (targetCoins > 0) {
+                                m.lastAttendedAt = now;
+                                payload.lastAttendedAt = now;
+                            }
+                            updates.push({ id: m.id, data: payload });
+                        });
+                        persistMembers([...membersData]);
+                        renderUI();
+                        showToast(`🥕 모든 회원의 당근이 ${targetCoins}개로 일괄 설정되었습니다!`, "success");
+
+                        await commitBatchUpdates(updates);
+                    } catch (e) {
+                        console.warn("당근 일괄 설정 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                        showToast("서버 동기화 중 오류가 발생했습니다.", "error");
+                    } finally {
+                        isBulkOperationPending = false;
+                    }
+                }
+            });
+        };
+
         window.bulkAdjustMemberCoins = function(delta) {
+            if (isBulkOperationPending) {
+                showToast("이전 작업을 처리 중입니다. 잠시 후 다시 시도해주세요.", "warning");
+                return;
+            }
             const deltaNum = parseInt(delta, 10);
             if (isNaN(deltaNum) || deltaNum === 0) {
                 showToast("변경할 당근 수량을 올바르게 입력해주세요.", "warning");
@@ -4519,28 +4631,33 @@
                 msg: confirmMsg,
                 showOption: false,
                 onConfirm: async () => {
-                    const now = new Date().toISOString();
-                    const updates = [];
-                    membersData.forEach(m => {
-                        const cur = parseInt(m.coins, 10) || 0;
-                        const updatedCoins = Math.max(0, cur + deltaNum);
-                        m.coins = updatedCoins;
-                        m.updatedAt = now;
-                        const payload = { coins: updatedCoins, updatedAt: now };
-                        if (deltaNum > 0) {
-                            m.lastAttendedAt = now;
-                            payload.lastAttendedAt = now;
-                        }
-                        updates.push({ id: m.id, data: payload });
-                    });
-                    persistMembers([...membersData]);
-                    renderUI();
-                    showToast(`🥕 모든 회원에게 당근 ${actionName} 완료!`, "success");
-
+                    if (isBulkOperationPending) return;
+                    isBulkOperationPending = true;
                     try {
-                        await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
+                        const now = new Date().toISOString();
+                        const updates = [];
+                        membersData.forEach(m => {
+                            const cur = parseInt(m.coins, 10) || 0;
+                            const updatedCoins = Math.max(0, cur + deltaNum);
+                            m.coins = updatedCoins;
+                            m.updatedAt = now;
+                            const payload = { coins: updatedCoins, updatedAt: now };
+                            if (deltaNum > 0) {
+                                m.lastAttendedAt = now;
+                                payload.lastAttendedAt = now;
+                            }
+                            updates.push({ id: m.id, data: payload });
+                        });
+                        persistMembers([...membersData]);
+                        renderUI();
+                        showToast(`🥕 모든 회원에게 당근 ${actionName} 완료!`, "success");
+
+                        await commitBatchUpdates(updates);
                     } catch (e) {
                         console.warn("당근 일괄 조정 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                        showToast("서버 동기화 중 오류가 발생했습니다.", "error");
+                    } finally {
+                        isBulkOperationPending = false;
                     }
                 }
             });
