@@ -771,7 +771,7 @@
 
             <!-- Top Right: Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[100px] justify-end">
-                <a id="btnWorksheetStudio" href="worksheet.html" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-blue-950/70 hover:bg-blue-900/80 text-blue-300 border border-blue-500/50 shadow active:scale-95 transition cursor-pointer" title="워크시트 스튜디오 & A4 PDF 생성 (📄)">
+                <a id="btnWorksheetStudio" href="worksheet.html" target="_blank" rel="noopener" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-blue-950/70 hover:bg-blue-900/80 text-blue-300 border border-blue-500/50 shadow active:scale-95 transition cursor-pointer" title="워크시트 스튜디오 & A4 PDF 생성 (📄)">
                     <i class="fa-solid fa-file-lines text-xs sm:text-sm"></i>
                 </a>
                 <button id="btnLeaderLock" onclick="lockLeaderAuth()" class="hidden w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl bg-amber-950/70 hover:bg-amber-900/80 text-amber-300 border border-amber-500/50 shadow-md ring-1 ring-amber-400/30 active:scale-95 transition cursor-pointer" title="리더 모드 잠그기 (🔒)">
@@ -3439,6 +3439,9 @@
         };
 
         window.switchTab = function(tabNum, updateUrl = true) {
+            if (tabNum === 5 && !isLeaderAuthenticated) {
+                tabNum = 1;
+            }
             activeTab = tabNum;
             for (let i = 1; i <= 5; i++) {
                 const content = document.getElementById(`tab-content-${i}`);
@@ -3616,11 +3619,11 @@
             const thumbEl = document.getElementById('topicVideoThumbnail');
             const docsEl = document.getElementById('topicDocsLink');
 
-            if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${topicData.schedule}</span>`;
-            if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${topicData.location}</span>`;
+            if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${esc(topicData.schedule || '')}</span>`;
+            if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
-            if (titleEl) titleEl.innerText = topicData.title;
+            if (titleEl) titleEl.innerText = topicData.title || '';
             if (docsEl) docsEl.href = topicData.docsUrl || "material.pdf";
 
             const ytId = extractYoutubeId(topicData.youtubeUrl);
@@ -3727,6 +3730,10 @@
         }
 
         window.setLeaderMode = function(mode) {
+            if (!isLeaderAuthenticated) {
+                showToast("🔒 리더 전용 기능입니다 (🔑 상단 인증 필요)", "warning");
+                return;
+            }
             activeMode = mode;
             localStorage.setItem('activeMode', activeMode);
             updateLockUIState();
@@ -4032,7 +4039,10 @@
 
         let isLeaderAuthenticated = false;
 
-        function requireLeaderAuth(title, callback) {
+        function requireLeaderAuth(callback) {
+            if (typeof callback !== 'function' && typeof arguments[1] === 'function') {
+                callback = arguments[1];
+            }
             if (isLeaderAuthenticated) {
                 if (callback) callback();
                 return;
@@ -4184,8 +4194,13 @@
             if (titleEl) titleEl.innerText = title || "확인 요청";
             if (msgEl) msgEl.innerHTML = msg || "";
             if (optBox) {
-                if (showOption) optBox.classList.remove('hidden');
-                else optBox.classList.add('hidden');
+                if (showOption) {
+                    optBox.classList.remove('hidden');
+                    const incCheckbox = document.getElementById('incrementAttendedCheckbox');
+                    if (incCheckbox) incCheckbox.checked = true;
+                } else {
+                    optBox.classList.add('hidden');
+                }
             }
 
             if (modal) modal.classList.remove('hidden');
@@ -4325,16 +4340,18 @@
                     const now = new Date().toISOString();
                     const updates = [];
                     membersData.forEach(m => {
-                        const newTotal = (shouldIncrementAttended && m.isToday) ? (m.totalAttended || 1) + 1 : (m.totalAttended || 1);
+                        const wasToday = !!m.isToday;
+                        const curTotal = (m.totalAttended !== undefined && m.totalAttended !== null && !isNaN(m.totalAttended)) ? parseInt(m.totalAttended, 10) : 0;
+                        const newTotal = (shouldIncrementAttended && wasToday) ? curTotal + 1 : curTotal;
                         m.checkedInOnTime = false;
                         m.checkedInReview = false;
                         m.leftEarly = false;
                         m.totalAttended = newTotal;
-                        m.isNew = newTotal > 1 ? false : (m.isNew || false);
-                        if (shouldIncrementAttended && m.isToday) {
+                        m.isNew = newTotal <= 1;
+                        if (shouldIncrementAttended && wasToday) {
                             m.lastAttendedAt = now;
                         }
-                        m.isToday = false; // 오늘 참석자 상태 모두 비우기!
+                        m.isToday = false; // 오늘 참석자 상태 모두 비우기
                         m.updatedAt = now;
                         const updateObj = {
                             isToday: false,
@@ -4345,7 +4362,7 @@
                             isNew: m.isNew,
                             updatedAt: now
                         };
-                        if (shouldIncrementAttended && m.isToday) {
+                        if (shouldIncrementAttended && wasToday) {
                             updateObj.lastAttendedAt = now;
                         }
                         updates.push({
@@ -4422,7 +4439,12 @@
                         const updatedCoins = Math.max(0, cur + deltaNum);
                         m.coins = updatedCoins;
                         m.updatedAt = now;
-                        updates.push({ id: m.id, data: { coins: updatedCoins, updatedAt: now } });
+                        const payload = { coins: updatedCoins, updatedAt: now };
+                        if (deltaNum > 0) {
+                            m.lastAttendedAt = now;
+                            payload.lastAttendedAt = now;
+                        }
+                        updates.push({ id: m.id, data: payload });
                     });
                     persistMembers([...membersData]);
                     renderUI();
@@ -5018,9 +5040,9 @@
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
                 const updatePayload = {
-                    coins: member.coins,
-                    isToday: member.isToday,
-                    leftEarly: member.leftEarly || false,
+                    coins: member.coins || 0,
+                    isToday: !!member.isToday,
+                    leftEarly: !!member.leftEarly,
                     lastAction: member.lastAction,
                     updatedAt: member.updatedAt
                 };
@@ -5045,11 +5067,21 @@
                 return;
             }
 
+            const now = new Date().toISOString();
             const currentCoins = member.coins || 0;
             const newCoins = Math.max(0, currentCoins + amount);
             member.coins = newCoins;
             member.lastAction = actionLabel;
-            member.updatedAt = new Date().toISOString();
+            member.updatedAt = now;
+            const updatePayload = {
+                coins: newCoins,
+                lastAction: actionLabel,
+                updatedAt: now
+            };
+            if (amount > 0) {
+                member.lastAttendedAt = now;
+                updatePayload.lastAttendedAt = now;
+            }
 
             persistMembers([...membersData]);
             loadAdminActionPanel();
@@ -5060,11 +5092,7 @@
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                await updateDoc(docRef, {
-                    coins: newCoins,
-                    lastAction: actionLabel,
-                    updatedAt: member.updatedAt
-                });
+                await updateDoc(docRef, updatePayload);
             } catch (e) {
                 console.warn(e);
             }
@@ -5086,12 +5114,15 @@
 
             const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
             if (idx !== -1) {
+                const now = new Date().toISOString();
+                const isNew = totalAttended <= 1;
+                const isLeader = name.includes('Jett');
                 membersData[idx] = {
                     ...membersData[idx],
                     name, gender, ageGroup, totalAttended, coins,
-                    isNew: totalAttended <= 1,
-                    isLeader: name.includes('Jett'),
-                    updatedAt: new Date().toISOString()
+                    isNew,
+                    isLeader,
+                    updatedAt: now
                 };
                 persistMembers([...membersData]);
                 loadAdminActionPanel();
@@ -5101,7 +5132,16 @@
 
                 try {
                     const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                    await updateDoc(docRef, membersData[idx]);
+                    await updateDoc(docRef, {
+                        name,
+                        gender,
+                        ageGroup,
+                        totalAttended,
+                        coins,
+                        isNew,
+                        isLeader,
+                        updatedAt: now
+                    });
                 } catch (e) {
                     console.warn(e);
                 }
@@ -5939,7 +5979,7 @@
 
                                 return `
                                     <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none group">
-                                        ${(isLeaderAuthenticated && !isLeader) ? `
+                                        ${(isLeaderAuthenticated && !isLeader && !isSeatMoveMode) ? `
                                             <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 오늘 자리에서 제외">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
@@ -5965,7 +6005,7 @@
         }
 
         window.toggleLeaderFreshnessWithPin = function() {
-            requireLeaderAuth("🔑 리더 전용 신선도 지수 확인", () => {
+            requireLeaderAuth(() => {
                 showLeaderFreshness = !showLeaderFreshness;
                 renderSeatingPlan(isPart2Shuffle);
                 showToast(showLeaderFreshness ? "👁️ 리더 전용 신선도 지수가 표시됩니다." : "🔒 신선도 지수가 숨김 처리되었습니다.", "info");
@@ -5981,20 +6021,26 @@
             if (!member) return;
 
             openConfirmModal({
-                title: "👤 좌석 배치에서 제외",
-                msg: `<strong>${esc(member.name)}</strong>님을 오늘 스터디 자리 배치에서 제외(미참석 처리)하시겠습니까?`,
+                title: "👋 조기 퇴장 처리",
+                msg: `<strong>${esc(member.name)}</strong>님을 오늘 스터디에서 조기 퇴장(좌석 제외) 처리하시겠습니까?<br><span class='text-xs text-zinc-500'>* 출석 및 적립 이력은 보존되며 좌석 배치에서만 제외됩니다.</span>`,
                 showOption: false,
                 onConfirm: async () => {
-                    member.isToday = false;
-                    member.updatedAt = new Date().toISOString();
+                    const now = new Date().toISOString();
+                    member.leftEarly = true;
+                    member.lastAction = '조기 퇴장';
+                    member.updatedAt = now;
                     persistMembers([...membersData]);
                     renderUI();
-                    showToast(`👋 ${member.name}님이 오늘 자리에서 제외되었습니다.`, "info");
+                    showToast(`👋 ${member.name}님이 조기 퇴장 처리되었습니다.`, "info");
 
                     try {
-                        await updateDoc(doc(membersCollectionRef, member.id), { isToday: false, updatedAt: member.updatedAt });
+                        await updateDoc(doc(membersCollectionRef, member.id), {
+                            leftEarly: true,
+                            lastAction: '조기 퇴장',
+                            updatedAt: now
+                        });
                     } catch (e) {
-                        console.warn("좌석 제외 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                        console.warn("조기 퇴장 Firestore 동기화 실패 (로컬은 저장됨):", e);
                     }
                 }
             });
@@ -6182,7 +6228,7 @@
                 renderSeatingPlan(isPart2Shuffle);
                 showToast("🔒 자리 이동 모드가 종료되었습니다.", "info");
             } else {
-                requireLeaderAuth("🔑 자리 이동 모드", () => {
+                requireLeaderAuth(() => {
                     isSeatMoveMode = true;
                     selectedSeatMemberId = null;
                     renderSeatingPlan(isPart2Shuffle);
@@ -6225,7 +6271,7 @@
         };
 
         window.requestShuffleWithPin = function() {
-            requireLeaderAuth("🔑 2부 테이블 셔플 비밀번호 확인", () => {
+            requireLeaderAuth(() => {
                 playShuffleSound();
                 renderSeatingPlan(true, true);
                 showToast("🔀 비슷한 세대끼리 모은 2부 배치가 완료되었습니다!", "info");
@@ -6243,7 +6289,7 @@
                 return;
             }
 
-            requireLeaderAuth("🔑 오늘 테이블 확정 & 만남 이력 저장", async () => {
+            requireLeaderAuth(async () => {
                 const sessionDocId = crypto.randomUUID();
                 const newSession = {
                     id: sessionDocId,
@@ -6283,7 +6329,7 @@
         };
 
         window.openClearHistoryModal = function() {
-            requireLeaderAuth("🔑 만남 이력 전체 초기화 비밀번호 확인", () => {
+            requireLeaderAuth(() => {
                 openConfirmModal({
                     title: "⚠️ 만남 이력 전체 초기화",
                     msg: `현재까지 누적된 ${tableSessionsData.length}회의 모든 테이블 만남 이력을 영구 삭제하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>(회원 정보나 당근 포인트는 보존됩니다)</span>`,
