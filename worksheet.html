@@ -138,6 +138,15 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
+        /* 텍스트 줄바꿈 & 밸런스 유틸리티 */
+        .break-keep {
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+        .text-balance {
+            text-wrap: balance;
+        }
+
         /* 미니멀 영작 필기 라인 (단정한 노트 스타일) */
         .clean-writing-card {
             padding-bottom: 2px;
@@ -765,60 +774,115 @@
                 }
             }
 
-            // 6. Extract Vocabulary (3 items)
-            const vocabSection = md.match(/\*\*4\.\s*Vocabulary[\s\S]+?(?=\n\*\*5\.\s*Expression|\n\*\*5\.)/i);
-            if (vocabSection) {
-                const itemBlocks = vocabSection[0].split(/\n\s*\*\s*\*\*/).filter(b => b.trim() && !b.includes('Vocabulary'));
-                for (const block of itemBlocks) {
-                    const cleanBlock = '**' + block;
-                    const wordMatch = cleanBlock.match(/\*\*\[?([^\]]+?)\]?\*\*\s*(\[.+?\])?\s*\((.+?)\)/);
-                    const synMatch = cleanBlock.match(/Synonyms:\*?\s*(.+)/i);
-                    const exMatch = cleanBlock.match(/Example:\*?\s*(.+)/i);
+            // Helper: Flexible extractor for Vocabulary and Expression blocks
+            function parseVocabOrExprItems(sectionText) {
+                if (!sectionText) return [];
+                const items = [];
+                // Split by bullets: * **, - **, 1. **, • **, etc.
+                const blocks = sectionText.split(/\n\s*(?:[\*\-\•]|\d+\.)\s*(?=\*\*|\[|[A-Za-z])/).filter(b => b.trim());
 
-                    if (wordMatch) {
-                        data.vocabList.push({
-                            word: wordMatch[1].replace(/\[|\]/g, '').trim(),
-                            phonetic: wordMatch[2] ? wordMatch[2].trim() : '',
-                            meaning: wordMatch[3] ? wordMatch[3].trim() : '',
-                            synonyms: synMatch ? synMatch[1].replace(/\*/g, '').trim() : '',
-                            example: exMatch ? exMatch[1].replace(/\*/g, '').trim() : ''
-                        });
+                for (let rawBlock of blocks) {
+                    // Skip header-only lines
+                    if (/^(?:#{1,4}\s*)?(?:\*\*)?(?:Vocabulary|Expression|Core|Session|\d+\.)/i.test(rawBlock.trim()) && !rawBlock.includes('\n')) {
+                        continue;
                     }
+
+                    const lines = rawBlock.trim().split('\n');
+                    const firstLine = lines[0].trim();
+
+                    let term = '';
+                    let phonetic = '';
+                    let meaning = '';
+                    let synonyms = '';
+                    let example = '';
+
+                    // Match term: **[Word]** or **Word** or [Word] or Word
+                    const termMatch = firstLine.match(/\*\*\[?([^\]*]+?)\]?\*\*/);
+                    if (termMatch) {
+                        term = termMatch[1].trim();
+                    } else {
+                        const bracketMatch = firstLine.match(/^\[([A-Za-z\s\-']+)\]/);
+                        if (bracketMatch) {
+                            term = bracketMatch[1].trim();
+                        } else {
+                            const simpleMatch = firstLine.match(/^([A-Za-z\s\-']+)(?=\s*[\(\[\:\-])/);
+                            if (simpleMatch) term = simpleMatch[1].trim();
+                        }
+                    }
+
+                    if (!term) continue;
+
+                    // Match phonetic: [ɪˈroʊd] or /ɪˈroʊd/
+                    const restOfFirstLine = firstLine.replace(termMatch ? termMatch[0] : term, '').trim();
+                    const phoneticMatch = restOfFirstLine.match(/(\[[^\]]+\]|\/[^\/]+\/)/);
+                    if (phoneticMatch && !phoneticMatch[1].includes(term)) {
+                        phonetic = phoneticMatch[1].trim();
+                    }
+
+                    // Match meaning: in (뜻) or after : or after - or after ➔
+                    const meaningParenMatch = restOfFirstLine.match(/\(([^)]+)\)/);
+                    if (meaningParenMatch) {
+                        meaning = meaningParenMatch[1].trim();
+                    } else {
+                        const colonMatch = restOfFirstLine.match(/(?::|➔|-)\s*(.+)/);
+                        if (colonMatch) {
+                            meaning = colonMatch[1].trim();
+                        }
+                    }
+
+                    // Search remaining lines for Synonyms and Example
+                    const blockText = lines.slice(1).join('\n');
+                    const synMatch = blockText.match(/(?:Synonyms?|유의어|유사|동의어):?\*?\s*([^\n]+)/i);
+                    if (synMatch) {
+                        synonyms = synMatch[1].replace(/[\*_]/g, '').trim();
+                    }
+
+                    const exMatch = blockText.match(/(?:Examples?|예문):?\*?\s*([^\n]+)/i);
+                    if (exMatch) {
+                        example = exMatch[1].replace(/[\*_]/g, '').trim();
+                    }
+
+                    items.push({
+                        word: term,
+                        expr: term,
+                        phonetic: phonetic,
+                        meaning: meaning,
+                        synonyms: synonyms,
+                        example: example
+                    });
                 }
+
+                return items;
             }
 
-            // 7. Extract Expressions (3 items)
-            const exprSection = md.match(/\*\*5\.\s*Expression[\s\S]+?(?=\n---\n\s*\*\*☕|\n###\s*\[\s*Session 2|\n\*\*6\.\s*Writing)/i);
-            if (exprSection) {
-                const itemBlocks = exprSection[0].split(/\n\s*\*\s*\*\*/).filter(b => b.trim() && !b.includes('Expression'));
-                for (const block of itemBlocks) {
-                    const cleanBlock = '**' + block;
-                    const exprMatch = cleanBlock.match(/\*\*\[?([^\]]+?)\]?\*\*\s*\((.+?)\)/);
-                    const synMatch = cleanBlock.match(/Synonyms:\*?\s*(.+)/i);
-                    const exMatch = cleanBlock.match(/Example:\*?\s*(.+)/i);
+            // 6. Extract Vocabulary (Core 3 items)
+            const vocabSection = md.match(/(?:(?:\*\*|#{1,4}\s*|\b)4\.?\s*Vocab[\s\S]+?)(?=(?:(?:\*\*|#{1,4}\s*|\b)5\.?\s*Express|(?:\*\*|#{1,4}\s*|\b)6\.?\s*Writing|---\n\s*☕|###\s*\[\s*Session 2|$))/i) ||
+                                 md.match(/(?:\*\*Vocabulary\*\*[\s\S]+?)(?=(?:\*\*Expression|###|---\n\s*☕|###\s*\[\s*Session 2|$))/i);
+            if (vocabSection) {
+                data.vocabList = parseVocabOrExprItems(vocabSection[0]);
+            }
 
-                    if (exprMatch) {
-                        data.expressionList.push({
-                            expr: exprMatch[1].replace(/\[|\]/g, '').trim(),
-                            meaning: exprMatch[2] ? exprMatch[2].trim() : '',
-                            synonyms: synMatch ? synMatch[1].replace(/\*/g, '').trim() : '',
-                            example: exMatch ? exMatch[1].replace(/\*/g, '').trim() : ''
-                        });
-                    }
-                }
+            // 7. Extract Expressions (Core 3 items)
+            const exprSection = md.match(/(?:(?:\*\*|#{1,4}\s*|\b)5\.?\s*Express[\s\S]+?)(?=(?:(?:\*\*|#{1,4}\s*|\b)6\.?\s*Writing|---\n\s*☕|###\s*\[\s*Session 2|$))/i) ||
+                                md.match(/(?:\*\*Expression\*\*[\s\S]+?)(?=(?:\*\*Writing|###|---\n\s*☕|###\s*\[\s*Session 2|$))/i);
+            if (exprSection) {
+                data.expressionList = parseVocabOrExprItems(exprSection[0]);
             }
 
             // 8. Extract Writing Build-up Questions (5 items)
-            const writingSection = md.match(/\*\*6\.\s*Writing Build-up[\s\S]+?(?=\n---\n\s*\*\*7|\n\*\*7\.\s*In-depth)/i);
+            const writingSection = md.match(/(?:(?:\*\*|#{1,4}\s*|\b)6\.?\s*Writing Build-up[\s\S]+?)(?=(?:\n---\n\s*\*\*7|\n\*\*7\.\s*In-depth|###\s*\[\s*Answer|$))/i);
             if (writingSection) {
-                const qRegex = /\*\*(\d+)\.\*\*\s*(.+)/g;
+                const qRegex = /(?:\*\*(\d+)\.\*\*|^\s*(\d+)\.)\s*([^\n]+)/gm;
                 let match;
                 while ((match = qRegex.exec(writingSection[0])) !== null) {
-                    const line = match[2].trim();
-                    const hintMatch = line.match(/\((?:힌트|Hint):\s*([^\)]+)\)/i);
-                    const korean = line.replace(/\((?:힌트|Hint):[^\)]+\)/gi, '').trim();
+                    const num = match[1] || match[2];
+                    const line = match[3].trim();
+                    if (!line || line.toLowerCase().includes('questions') || line.toLowerCase().includes('writing build-up')) continue;
+                    
+                    const hintMatch = line.match(/\((?:힌트|Hint):\s*([^\)]+)\)/i) || line.match(/\[(?:힌트|Hint):\s*([^\]]+)\]/i);
+                    const korean = line.replace(/\((?:힌트|Hint):[^\)]+\)/gi, '').replace(/\[(?:힌트|Hint):[^\]]+\]/gi, '').trim();
                     data.writingList.push({
-                        num: match[1],
+                        num: num,
                         korean: korean,
                         hint: hintMatch ? hintMatch[1].trim() : ''
                     });
@@ -983,17 +1047,19 @@
                     <div class="sheet-content space-y-4 flex flex-col flex-1">
                         
                         <!-- Topic Title & Overview Box (Subtle Hairline Underline) -->
-                        <div class="space-y-1.5 shrink-0 pt-1 border-b border-gray-200 pb-3">
+                        <div class="space-y-2 shrink-0 pt-1 border-b border-gray-200 pb-3">
                             <div class="text-[7.5pt] font-bold text-gray-400 tracking-widest font-mono uppercase">
                                 THIS WEEK'S TOPIC
                             </div>
-                            <h1 class="text-xl font-black text-gray-950 tracking-tight leading-snug">
+                            <h1 class="text-xl font-black text-gray-950 tracking-tight leading-snug break-keep text-balance">
                                 ${data.title}
                             </h1>
                             ${data.overview ? `
-                            <p class="text-[9.8pt] text-gray-600 leading-relaxed font-kr font-normal pt-0.5">
-                                ${data.overview}
-                            </p>` : ''}
+                            <div class="bg-gray-50/90 border border-gray-200/80 rounded-xl p-2.5 text-left">
+                                <p class="text-[8.8pt] text-gray-600 leading-relaxed font-kr font-normal break-keep">
+                                    ${data.overview}
+                                </p>
+                            </div>` : ''}
                         </div>
 
                         <!-- Intensive Reading Part 1 (Subtle Hairline Header & Box) -->
@@ -1222,17 +1288,19 @@
                     </div>
 
                     <!-- Topic Title & Overview (Pure Typographic Art) -->
-                    <div class="space-y-3 px-2">
+                    <div class="space-y-3 px-2 w-full">
                         <div class="text-[8pt] font-bold text-gray-400 tracking-[0.25em] font-mono uppercase">
                             THIS WEEK'S TOPIC
                         </div>
-                        <h1 class="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-snug">
+                        <h1 class="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-snug break-keep text-balance max-w-lg mx-auto">
                             ${data.title}
                         </h1>
                         ${data.overview ? `
-                        <p class="text-[10.5pt] text-gray-600 leading-relaxed font-kr font-normal pt-1 max-w-md mx-auto">
-                            ${data.overview}
-                        </p>` : ''}
+                        <div class="bg-gray-50/90 border border-gray-200/80 rounded-xl p-3.5 text-left max-w-md mx-auto shadow-sm">
+                            <p class="text-[9.2pt] text-gray-600 leading-relaxed font-kr font-normal break-keep">
+                                ${data.overview}
+                            </p>
+                        </div>` : ''}
                     </div>
 
                     <!-- Clean Member & Date Input -->
@@ -1509,20 +1577,19 @@
                     </div>
 
                     <!-- 5 Clean Writing Cards with Soft Typography Q-Numbers (No Heavy Black Block) -->
-                    <div class="space-y-4 flex-1 flex flex-col justify-between">
+                    <div class="space-y-3.5 flex-1 flex flex-col justify-between">
                         ${data.writingList.map(w => `
-                            <div class="clean-writing-card pb-1">
-                                <div class="flex items-baseline justify-between gap-3">
-                                    <div class="flex items-baseline gap-2">
-                                        <span class="font-mono font-black text-[11pt] text-gray-400 shrink-0">Q${w.num}.</span>
-                                        <span class="font-bold text-[10.8pt] text-gray-950 leading-snug">${w.korean}</span>
-                                    </div>
-                                    ${w.hint ? `
-                                    <span class="text-[8.5pt] text-gray-500 font-mono font-medium shrink-0 tracking-tight">
-                                        [Hint: ${w.hint}]
-                                    </span>` : ''}
+                            <div class="clean-writing-card pb-1 space-y-1">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="font-mono font-black text-[10.5pt] text-gray-400 shrink-0">Q${w.num}.</span>
+                                    <span class="font-bold text-[10.5pt] text-gray-950 leading-snug break-keep flex-1">${w.korean}</span>
                                 </div>
-                                <div class="clean-ruled-lines w-full"></div>
+                                ${w.hint ? `
+                                <div class="pl-6 text-[8pt] text-gray-500 font-mono flex items-center gap-1 leading-tight">
+                                    <span class="font-bold text-gray-400">💡 Hint:</span>
+                                    <span class="text-gray-600">${w.hint}</span>
+                                </div>` : ''}
+                                <div class="clean-ruled-lines w-full pt-1"></div>
                             </div>
                         `).join('')}
                     </div>
@@ -1637,11 +1704,11 @@
                     </div>
 
                     <!-- Clean Simple Outro (Floating Footer Note) -->
-                    <div class="pt-3 mt-auto shrink-0 flex items-center justify-between text-[8.5pt] text-gray-500 font-medium">
-                        <div class="flex items-center gap-2">
-                            <span>스터디 참여 후 소중한 리뷰를 남겨주시면 포인트가 적립됩니다. 수고하셨습니다.</span>
+                    <div class="pt-3 mt-auto shrink-0 flex items-center justify-between text-[8.2pt] text-gray-500 font-medium border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span>스터디 후기를 남겨주신 후, 현장 키오스크를 터치해주시면 당근 1개가 적립됩니다! 오늘도 반가웠습니다 😁</span>
                         </div>
-                        <span class="font-mono text-[8pt] text-gray-400 font-semibold tracking-wider uppercase">SEONGBUK CREW</span>
+                        <span class="font-mono text-[7.5pt] text-gray-400 font-semibold tracking-wider uppercase shrink-0">SEONGBUK CREW</span>
                     </div>
 
                 </div>
