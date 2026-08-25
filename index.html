@@ -1886,14 +1886,14 @@
                 <div class="bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 space-y-3">
                     <label class="block font-bold text-zinc-300 flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
                         <i class="fa-solid fa-arrows-rotate text-rose-400 text-base"></i>
-                        <span>다음 주 스터디 준비 (금주 적립 상태 리셋)</span>
+                        <span>다음 주 스터디 준비 (금주 출석 & 적립 상태 초기화)</span>
                     </label>
                     <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
-                        누적 당근 수와 총 참석 회차는 보존되며, 당일 적립 상태(제시간/후기)만 초기화합니다.
+                        오늘 참석자 명단(출석부)과 적립 상태(제시간/후기)를 모두 비워 다음 주 스터디를 준비합니다. (누적 당근 수와 총 참석 회차는 안전하게 보존됩니다)
                     </p>
                     <button onclick="openWeeklyResetModal()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold py-2.5 rounded-xl text-xs sm:text-sm transition shadow flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap">
                         <i class="fa-solid fa-broom text-zinc-400"></i>
-                        <span>금주 적립 상태 리셋</span>
+                        <span>금주 출석 & 적립 초기화 (다음 주 준비)</span>
                     </button>
                 </div>
 
@@ -4334,8 +4334,8 @@
 
         window.openWeeklyResetModal = function() {
             openConfirmModal({
-                title: "🧹 금주 적립 상태 리셋",
-                msg: "오늘의 적립 완료 상태(제시간/후기)를 초기화하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>(누적 당근 수는 보존됩니다)</span>",
+                title: "🧹 다음 주 스터디 준비 (출석 & 적립 초기화)",
+                msg: "오늘의 <strong>참석자 명단(출석부)과 적립 완료 상태를 모두 비우고 초기화</strong>하시겠습니까?<br><span class='text-zinc-400 text-xs sm:text-sm'>* 회원 정보, 누적 당근 수, 총 참석 회차는 안전하게 보존됩니다.</span>",
                 showOption: true,
                 onConfirm: async (shouldIncrementAttended) => {
                     const now = new Date().toISOString();
@@ -4350,8 +4350,10 @@
                         if (shouldIncrementAttended && m.isToday) {
                             m.lastAttendedAt = now;
                         }
+                        m.isToday = false; // 오늘 참석자 상태 모두 비우기!
                         m.updatedAt = now;
                         const updateObj = {
+                            isToday: false,
                             checkedInOnTime: false,
                             checkedInReview: false,
                             leftEarly: false,
@@ -4367,9 +4369,13 @@
                             data: updateObj
                         });
                     });
+                    selectedMemberId = null;
+                    part1SeatingSnapshot = null;
+                    part2SeatingSnapshot = null;
+                    seatingSnapshotSig = '';
                     persistMembers([...membersData]);
                     renderUI();
-                    showToast("🧹 금주 적립 상태가 초기화되었습니다!", "success");
+                    showToast("🧹 금주 출석 및 적립 상태가 초기화되었습니다. 다음 주 준비 완료!", "success");
 
                     try {
                         await Promise.all(updates.map(u => updateDoc(doc(membersCollectionRef, u.id), u.data)));
