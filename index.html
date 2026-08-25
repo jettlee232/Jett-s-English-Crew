@@ -4040,9 +4040,6 @@
         let isLeaderAuthenticated = false;
 
         function requireLeaderAuth(callback) {
-            if (typeof callback !== 'function' && typeof arguments[1] === 'function') {
-                callback = arguments[1];
-            }
             if (isLeaderAuthenticated) {
                 if (callback) callback();
                 return;
@@ -5980,7 +5977,7 @@
                                 return `
                                     <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none group">
                                         ${(isLeaderAuthenticated && !isLeader && !isSeatMoveMode) ? `
-                                            <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 오늘 자리에서 제외">
+                                            <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 조기 퇴장 처리">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         ` : ''}
@@ -6502,7 +6499,7 @@
                     ? COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(m.lastAttendedAt).getTime()) / 86400000)
                     : null;
                 const expiryBadge = ((m.coins || 0) > 0 && daysLeft !== null && daysLeft <= COIN_WARN_DAYS)
-                    ? `<span class="badge-expiry text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/40 whitespace-nowrap mr-1 shrink-0" title="출석하면 갱신됩니다">⏳ ${daysLeft <= 0 ? '소멸 임박' : `D-${daysLeft}`}</span>`
+                    ? `<span class="badge-expiry text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/40 whitespace-nowrap mr-1 shrink-0" title="출석하거나 당근을 지급받으면 갱신됩니다">⏳ ${daysLeft <= 0 ? '소멸 임박' : `D-${daysLeft}`}</span>`
                     : '';
 
                 return `
