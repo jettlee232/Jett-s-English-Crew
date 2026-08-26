@@ -3860,6 +3860,7 @@
 
         function updateTopicUI() {
             const schEl = document.getElementById('topicScheduleDisplay');
+            const roundEl = document.getElementById('topicRoundDisplay');
             const locEl = document.getElementById('topicLocationDisplay');
             const locLinkEl = document.getElementById('topicLocationLink');
             const carrotLinkEl = document.getElementById('topicCarrotGatheringLink');
@@ -3868,6 +3869,7 @@
             const docsEl = document.getElementById('topicDocsLink');
 
             if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${esc(topicData.schedule || '')}</span>`;
+            if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '18회차')}</span>`;
             if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
