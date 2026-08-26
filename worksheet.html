@@ -2103,7 +2103,6 @@
         signInAnonymously(auth).catch(err => console.warn("Firebase anonymous auth init warning:", err));
 
         const worksheetDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'worksheet');
-        const topicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
 
         const DEFAULT_PIN_HASH = "551a3ab454312f5a94a0fe410c9e66e40a8e219177233fca8e6d6bcd5920b9cf";
 
@@ -2292,13 +2291,10 @@
                     publishedAt: Date.now()
                 }, { merge: true });
 
-                // 2. Point main site docsUrl to this live reader!
-                const liveDocsUrl = `worksheet.html?view=reader&edition=${activeEdition}`;
-                await setDoc(topicDocRef, {
-                    docsUrl: liveDocsUrl
-                }, { merge: true });
-
-                showToast("🎉 이번 주 학습자료가 메인 사이트에 1초 만에 연동되었습니다!", "success");
+                // docsUrl 은 건드리지 않는다. 회원 배포용 링크는 구글 드라이브 PDF 고정이고
+                // (당근·카톡 인앱 브라우저는 window.print() 가 안 먹는다), 여기서 덮어쓰면
+                // 발행할 때마다 리더 화면으로 되돌아간다. 링크 변경은 키오스크 관리 패널에서.
+                showToast("🎉 학습자료가 저장되었습니다. (회원 배포는 드라이브 PDF 링크)", "success");
             } catch (error) {
                 console.error("발행 실패 상세 에러:", error);
                 showToast("❌ 연동 중 오류가 발생했습니다: " + (error.message || "권한 오류"), "error");
