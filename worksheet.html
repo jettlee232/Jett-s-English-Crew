@@ -638,15 +638,36 @@
         }
 
         // Print Trigger with safe zoom reset and restoration
+        // 카톡·당근·인스타 인앱 브라우저(WebView)는 window.print() 가 무반응이다(에러도 안 남).
+        // 외부 브라우저로 탈출시키고, 탈출이 막힌 경우엔 안내만 띄운다.
+        // ponytail: UA 스니핑. 새 인앱 브라우저가 나오면 정규식에 추가.
+        const IN_APP_BROWSER_RE = /KAKAOTALK|DaumApps|NAVER\(inapp|Instagram|FB_IAB|FBAN|FBAV|Line\/|Towneers|daangn|karrot/i;
+
+        function escapeInAppBrowser() {
+            const ua = navigator.userAgent;
+            if (!IN_APP_BROWSER_RE.test(ua)) return false;
+
+            showToast("앱 안의 브라우저에선 PDF 저장이 안 돼요. Chrome/Safari로 열어주세요.", "warning");
+
+            if (/Android/i.test(ua)) {
+                // 안드로이드 WebView 표준 탈출: 기본 브라우저로 넘긴다.
+                location.href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;end';
+            } else if (/KAKAOTALK/i.test(ua)) {
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+            }
+            return true;
+        }
+
         function triggerA4Print() {
+            if (escapeInAppBrowser()) return;
+
+            // 탭 제스처 컨텍스트를 유지해야 iOS Safari 가 인쇄를 무시하지 않는다.
             const container = document.getElementById('printPreviewContainer');
             const originalTransform = container.style.transform;
             container.style.transform = 'none';
-            
-            setTimeout(() => {
-                window.print();
-                container.style.transform = originalTransform;
-            }, 50);
+            container.offsetHeight; // 인쇄 전 레이아웃 강제 반영
+            window.print();
+            container.style.transform = originalTransform;
         }
 
         // LocalStorage auto-save & auto-restore for convenient local workflow
