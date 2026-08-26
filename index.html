@@ -3397,7 +3397,7 @@
                         "name": "필라테스하는빙수",
                         "gender": "F",
                         "ageGroup": "30대",
-                        "coins": 0,
+                        "coins": 6,
                         "totalAttended": 0,
                         "isNew": true,
                         "isToday": false,
@@ -3408,7 +3408,7 @@
                         "name": "깜복",
                         "gender": "F",
                         "ageGroup": "20대",
-                        "coins": 0,
+                        "coins": 6,
                         "totalAttended": 0,
                         "isNew": true,
                         "isToday": false,
@@ -3419,7 +3419,7 @@
                         "name": "나무",
                         "gender": "F",
                         "ageGroup": "30대",
-                        "coins": 0,
+                        "coins": 6,
                         "totalAttended": 0,
                         "isNew": true,
                         "isToday": false,
@@ -5141,27 +5141,28 @@ ${ytUrl}
                         }
                         renderUI();
 
-                        // 자동 회원 명단 동기화 (Joe, 말차그릭 탈퇴 / 필라테스하는빙수, 깜복, 나무 입단 및 정보 갱신)
-                        if (!localStorage.getItem('roster_sync_20260825_roster_v4')) {
-                            localStorage.setItem('roster_sync_20260825_roster_v4', 'true');
+                        // 자동 회원 명단 및 당근 포인트 동기화 (Joe, 말차그릭 탈퇴 / 필라테스하는빙수, 깜복, 나무 당근 6개 설정)
+                        if (!localStorage.getItem('roster_sync_20260826_coins_v5')) {
+                            localStorage.setItem('roster_sync_20260826_coins_v5', 'true');
                             const toRemove = membersData.filter(m => m.name === 'Joe' || m.name === '말차그릭');
                             toRemove.forEach(m => {
                                 deleteDoc(doc(membersCollectionRef, m.id)).catch(e => console.warn(e));
                             });
                             const existingMap = new Map(membersData.map(m => [m.name, m]));
                             const newRoster = [
-                                { name: "필라테스하는빙수", gender: "F", ageGroup: "30대" },
-                                { name: "깜복", gender: "F", ageGroup: "20대" },
-                                { name: "나무", gender: "F", ageGroup: "30대" }
+                                { name: "필라테스하는빙수", gender: "F", ageGroup: "30대", coins: 6 },
+                                { name: "깜복", gender: "F", ageGroup: "20대", coins: 6 },
+                                { name: "나무", gender: "F", ageGroup: "30대", coins: 6 }
                             ];
                             newRoster.forEach(nm => {
                                 const found = existingMap.get(nm.name);
                                 if (found) {
-                                    // 이미 추가된 경우라도 성별/연령대 업데이트
-                                    if (found.gender !== nm.gender || found.ageGroup !== nm.ageGroup) {
+                                    if (found.coins !== nm.coins || found.gender !== nm.gender || found.ageGroup !== nm.ageGroup) {
+                                        found.coins = nm.coins;
                                         found.gender = nm.gender;
                                         found.ageGroup = nm.ageGroup;
                                         updateDoc(doc(membersCollectionRef, found.id), {
+                                            coins: nm.coins,
                                             gender: nm.gender,
                                             ageGroup: nm.ageGroup,
                                             updatedAt: new Date().toISOString()
@@ -5174,7 +5175,7 @@ ${ytUrl}
                                         name: nm.name,
                                         gender: nm.gender,
                                         ageGroup: nm.ageGroup,
-                                        coins: 0,
+                                        coins: nm.coins,
                                         totalAttended: 0,
                                         isNew: true,
                                         isToday: false,
