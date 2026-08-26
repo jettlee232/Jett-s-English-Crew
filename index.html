@@ -5190,6 +5190,24 @@ ${ytUrl}
                             });
                         }
 
+                        // 정확한 누적 출석 횟수 및 신규(0회차) 뱃지 자동 복구 동기화
+                        if (!localStorage.getItem('roster_attendance_fix_20260826_v1')) {
+                            localStorage.setItem('roster_attendance_fix_20260826_v1', 'true');
+                            const seedMap = new Map(INITIAL_SEED_MEMBERS.map(m => [m.name, m]));
+                            membersData.forEach(m => {
+                                const seed = seedMap.get(m.name);
+                                if (seed && seed.totalAttended !== undefined && m.totalAttended !== seed.totalAttended) {
+                                    m.totalAttended = seed.totalAttended;
+                                    m.isNew = seed.isNew;
+                                    updateDoc(doc(membersCollectionRef, m.id), {
+                                        totalAttended: seed.totalAttended,
+                                        isNew: seed.isNew,
+                                        updatedAt: new Date().toISOString()
+                                    }).catch(e => console.warn(e));
+                                }
+                            });
+                        }
+
                         if (!coinExpiryChecked && membersData.length > 0) {
                             coinExpiryChecked = true;
                             backfillLastAttended().then(() => expireStaleCoins());
