@@ -968,7 +968,7 @@
 
                     <!-- YouTube Full Cover Thumbnail Container with Breathing Animation -->
                     <div id="topicVideoContainer" onclick="openYoutubeDirect()" class="relative w-full aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl group cursor-pointer yt-breathing-card">
-                        <img id="topicVideoThumbnail" src="https://img.youtube.com/vi/8Z9FQxcCAZ0/hqdefault.jpg" alt="유튜브 썸네일" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                        <img id="topicVideoThumbnail" src="https://img.youtube.com/vi/PN4moDNE-Kg/hqdefault.jpg" alt="유튜브 썸네일" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
                         
                         <!-- Simple Center Play Button with Pulse Effect -->
                         <div id="topicPlayOverlay" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
@@ -977,6 +977,25 @@
                             </div>
                         </div>
                     </div>
+                    <script>
+                        (function() {
+                            try {
+                                const saved = localStorage.getItem('localTopicData');
+                                if (saved) {
+                                    const p = JSON.parse(saved);
+                                    const thumb = document.getElementById('topicVideoThumbnail');
+                                    if (thumb && p) {
+                                        if (p.customThumbnailUrl && p.customThumbnailUrl.trim()) {
+                                            thumb.src = p.customThumbnailUrl;
+                                        } else if (p.youtubeUrl) {
+                                            const m = p.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
+                                            if (m && m[1]) thumb.src = 'https://img.youtube.com/vi/' + m[1] + '/hqdefault.jpg';
+                                        }
+                                    }
+                                }
+                            } catch(e) {}
+                        })();
+                    </script>
 
                     <!-- Download Script / Docs Button Directly Below Video -->
                     <a id="topicDocsLink" href="worksheet.html?view=reader" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
