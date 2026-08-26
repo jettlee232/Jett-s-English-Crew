@@ -1028,7 +1028,7 @@
                             </div>
                             <p class="text-xs text-zinc-400 font-normal whitespace-nowrap">당근Pay 일괄 요청 (음료 각자)</p>
                         </div>
-                        <a id="topicCarrotGatheringLink" href="https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK" target="_blank" rel="noopener noreferrer" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5 active:scale-95 shrink-0 whitespace-nowrap btn-periodic-wiggle">
+                        <a id="topicCarrotGatheringLink" href="https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno" target="_blank" rel="noopener noreferrer" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5 active:scale-95 shrink-0 whitespace-nowrap btn-periodic-wiggle">
                             <span>참가하기</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </a>
@@ -3505,7 +3505,7 @@
             youtubeUrl: "https://youtu.be/PN4moDNE-Kg?si=vwpeo63CGiOEsWP8",
             customThumbnailUrl: "",
             docsUrl: "https://docs.google.com/document/d/1HJVjwGmlh0eT3YWehy7EtAZnHzN2Pp3ZEW2BqVBqM00/mobilebasic",
-            carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK"
+            carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno"
         };
 
         window.openYoutubeDirect = function() {
@@ -5084,9 +5084,9 @@ ${ytUrl}
                     } catch(e) {}
                 }
 
-                // 자동 새 주제 동기화 (우주 쓰레기 TED-Ed)
-                if (!localStorage.getItem('topic_sync_20260825_trash_space_v2')) {
-                    localStorage.setItem('topic_sync_20260825_trash_space_v2', 'true');
+                // 자동 새 주제 및 당근 모임 링크 동기화
+                if (!localStorage.getItem('topic_sync_20260826_daangn_v3')) {
+                    localStorage.setItem('topic_sync_20260826_daangn_v3', 'true');
                     const newTopic = {
                         schedule: "8월 29일 (토) 10:00 - 11:50",
                         location: "투썸 아리랑힐 호텔점 2층",
@@ -5094,8 +5094,8 @@ ${ytUrl}
                         title: '"지구의 쓰레기를 우주로 날려버리지 못하는 이유 🚀🗑️"',
                         youtubeUrl: "https://youtu.be/PN4moDNE-Kg?si=vwpeo63CGiOEsWP8",
                         customThumbnailUrl: "",
-                        docsUrl: "https://docs.google.com/document/d/1HJVjwGmlh0eT3YWehy7EtAZnHzN2Pp3ZEW2BqVBqM00/mobilebasic",
-                        carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bc0Xm4FumCK",
+                        docsUrl: "worksheet.html?view=reader",
+                        carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno",
                         updatedAt: new Date().toISOString()
                     };
                     topicData = { ...topicData, ...newTopic };
