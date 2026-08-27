@@ -1117,11 +1117,11 @@
                         <div id="leaderSeatingActions" class="hidden items-center gap-1 opacity-90 hover:opacity-100 transition-opacity flex-wrap">
                             <button id="btnSeatingOrderModeToggle" onclick="requestToggleSeatingOrderWithPin()" class="flex items-center justify-center px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/80 font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap gap-1 cursor-pointer" title="1부/2부 매칭 순서 전환 (믹스우선 ⇄ 또래우선)">
                                 <i class="fa-solid fa-arrows-split-up-and-left text-[10px] text-amber-400"></i>
-                                <span id="seatingModeBtnText">순서: 믹스→또래</span>
+                                <span id="seatingModeBtnText">믹스→또래</span>
                             </button>
                             <button id="btnSeatingAddMember" onclick="openSeatingAddMemberModal()" class="flex items-center justify-center px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap gap-1 cursor-pointer" title="오늘 참석자 추가 / 게스트 등록">
                                 <i class="fa-solid fa-user-plus text-[10px]"></i>
-                                <span>참석자 추가</span>
+                                <span>추가</span>
                             </button>
 
                             <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition active:scale-95" title="1부 배치 복원">
@@ -3956,7 +3956,7 @@
                         modeTag.innerText = "또래우선 모드";
                         modeTag.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/60";
                     }
-                    if (modeBtnText) modeBtnText.innerText = "순서: 1부 또래→2부 믹스";
+                    if (modeBtnText) modeBtnText.innerText = "또래→믹스";
                 } else {
                     btnMix.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow active:scale-95";
                     btnPeer.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-transparent text-zinc-400 hover:text-zinc-200 active:scale-95";
@@ -3965,7 +3965,7 @@
                         modeTag.innerText = "기본 모드";
                         modeTag.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/60";
                     }
-                    if (modeBtnText) modeBtnText.innerText = "순서: 1부 믹스→2부 또래";
+                    if (modeBtnText) modeBtnText.innerText = "믹스→또래";
                 }
             }
         }
