@@ -5325,8 +5325,8 @@ ${ytUrl}
                         }
 
                         // 8월 29일 스터디 참석자 12명 확정 및 당근 무료참가(0개) 동기화
-                        if (!localStorage.getItem('study_attendees_sync_20260829_v6')) {
-                            localStorage.setItem('study_attendees_sync_20260829_v6', 'true');
+                        if (!localStorage.getItem('study_attendees_sync_20260829_v7')) {
+                            localStorage.setItem('study_attendees_sync_20260829_v7', 'true');
                             part1SeatingSnapshot = null;
                             part2SeatingSnapshot = null;
                             seatingSnapshotSig = '';
@@ -6249,6 +6249,23 @@ ${ytUrl}
             return m.ageGroup.includes('20') || m.ageGroup.includes('10');
         }
 
+        // 동반인 / 커플 등 가급적 다른 테이블 배치가 권장되는 조합 (1부·2부 공통 분리)
+        const AVOID_COUPLE_PAIRS = [
+            ["눅눅", "펠메니"]
+        ];
+
+        function isAvoidPair(m1, m2) {
+            if (!m1 || !m2) return false;
+            const n1 = m1.name || "";
+            const n2 = m2.name || "";
+            for (const [a, b] of AVOID_COUPLE_PAIRS) {
+                if ((n1.includes(a) && n2.includes(b)) || (n1.includes(b) && n2.includes(a))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // =========================================================================
         // 🎯 스마트 테이블 배치 마스터 알고리즘 (3단계 우선순위 체계)
         // =========================================================================
@@ -6311,6 +6328,7 @@ ${ytUrl}
                 cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
 
                 for (const existing of tbl) {
+                    if (isAvoidPair(existing, member)) cost += 9000;
                     cost += getPairMeetingCount(existing, member) * 800;
                     if (isPart2 && part1SeatingSnapshot) {
                         for (const p1T of part1SeatingSnapshot) {
@@ -6367,6 +6385,7 @@ ${ytUrl}
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
+                        if (isAvoidPair(tbl[i], tbl[j])) p += 9000;
                         p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
                         if (isPart2 && part1SeatingSnapshot) {
                             for (const p1T of part1SeatingSnapshot) {
@@ -6490,6 +6509,7 @@ ${ytUrl}
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
+                        if (isAvoidPair(tbl[i], tbl[j])) score += 9000;
                         const genDiff = Math.abs(getGenNum(tbl[i].ageGroup) - getGenNum(tbl[j].ageGroup));
                         score += genDiff * 70;
                         score += getPairMeetingCount(tbl[i], tbl[j]) * 300;
