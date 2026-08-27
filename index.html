@@ -1115,6 +1115,10 @@
 
                         <!-- Discreet Action Buttons for Leader (Visible only in Leader Mode) -->
                         <div id="leaderSeatingActions" class="hidden items-center gap-1 opacity-90 hover:opacity-100 transition-opacity flex-wrap">
+                            <button id="btnSeatingOrderModeToggle" onclick="requestToggleSeatingOrderWithPin()" class="flex items-center justify-center px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/80 font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap gap-1 cursor-pointer" title="1부/2부 매칭 순서 전환 (믹스우선 ⇄ 또래우선)">
+                                <i class="fa-solid fa-arrows-split-up-and-left text-[10px] text-amber-400"></i>
+                                <span id="seatingModeBtnText">순서: 믹스→또래</span>
+                            </button>
                             <button id="btnSeatingAddMember" onclick="openSeatingAddMemberModal()" class="flex items-center justify-center px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap gap-1 cursor-pointer" title="오늘 참석자 추가 / 게스트 등록">
                                 <i class="fa-solid fa-user-plus text-[10px]"></i>
                                 <span>참석자 추가</span>
@@ -1746,6 +1750,29 @@
                             <span>당근 모임 참가 신청 링크</span>
                         </label>
                         <input id="inputTopicCarrotLink" type="text" placeholder="https://daangn.com/kr/share/community/..." class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+                                <i class="fa-solid fa-shuffle text-indigo-400"></i>
+                                <span>테이블 매칭 순서 모드</span>
+                            </label>
+                            <span id="seatingOrderModeTag" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/60">기본 모드</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 bg-zinc-950 p-1.5 rounded-xl border border-zinc-800">
+                            <button type="button" id="btnModeMixFirst" onclick="setSeatingOrderMode('mix_first')" class="py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow active:scale-95">
+                                <i class="fa-solid fa-network-wired text-[11px]"></i>
+                                <span>1부 믹스 ➔ 2부 또래</span>
+                            </button>
+                            <button type="button" id="btnModePeerFirst" onclick="setSeatingOrderMode('peer_first')" class="py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-transparent text-zinc-400 hover:text-zinc-200 active:scale-95">
+                                <i class="fa-solid fa-user-group text-[11px]"></i>
+                                <span>1부 또래 ➔ 2부 믹스</span>
+                            </button>
+                        </div>
+                        <p id="seatingOrderModeDesc" class="text-[11px] text-zinc-500 mt-1 pl-1">
+                            • 1부는 다양한 세대를 골고루 섞고, 2부는 또래끼리 모여 토론합니다.
+                        </p>
                     </div>
 
                     <button onclick="saveTopicSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition shadow-md whitespace-nowrap active:scale-95">
@@ -3516,7 +3543,8 @@
             youtubeUrl: "https://youtu.be/PN4moDNE-Kg?si=vwpeo63CGiOEsWP8",
             customThumbnailUrl: "",
             docsUrl: "https://drive.google.com/file/d/1HmAkO_hY9FnoE7hDv1kfcfc6UIHFXOy1/view?usp=sharing",
-            carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno"
+            carrotGatheringUrl: "https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno",
+            seatingOrderMode: "mix_first"
         };
 
         window.openYoutubeDirect = function() {
@@ -3911,7 +3939,64 @@
             if (inYt) inYt.value = topicData.youtubeUrl || '';
             if (inDocs) inDocs.value = topicData.docsUrl || '';
             if (inCarrot) inCarrot.value = topicData.carrotGatheringUrl || '';
+
+            const isPeerFirst = (topicData && topicData.seatingOrderMode === 'peer_first');
+            const btnMix = document.getElementById('btnModeMixFirst');
+            const btnPeer = document.getElementById('btnModePeerFirst');
+            const modeDesc = document.getElementById('seatingOrderModeDesc');
+            const modeTag = document.getElementById('seatingOrderModeTag');
+            const modeBtnText = document.getElementById('seatingModeBtnText');
+
+            if (btnMix && btnPeer) {
+                if (isPeerFirst) {
+                    btnMix.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-transparent text-zinc-400 hover:text-zinc-200 active:scale-95";
+                    btnPeer.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow active:scale-95";
+                    if (modeDesc) modeDesc.innerText = "• 1부는 또래끼리 편안하게 모이고, 2부는 다양한 세대를 골고루 섞습니다.";
+                    if (modeTag) {
+                        modeTag.innerText = "또래우선 모드";
+                        modeTag.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/60";
+                    }
+                    if (modeBtnText) modeBtnText.innerText = "순서: 1부 또래→2부 믹스";
+                } else {
+                    btnMix.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow active:scale-95";
+                    btnPeer.className = "py-2 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-transparent text-zinc-400 hover:text-zinc-200 active:scale-95";
+                    if (modeDesc) modeDesc.innerText = "• 1부는 다양한 세대를 골고루 섞고, 2부는 또래끼리 모여 토론합니다.";
+                    if (modeTag) {
+                        modeTag.innerText = "기본 모드";
+                        modeTag.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/60";
+                    }
+                    if (modeBtnText) modeBtnText.innerText = "순서: 1부 믹스→2부 또래";
+                }
+            }
         }
+
+        window.setSeatingOrderMode = function(mode) {
+            topicData.seatingOrderMode = mode;
+            updateTopicUI();
+        };
+
+        window.requestToggleSeatingOrderWithPin = function() {
+            requireLeaderAuth(async () => {
+                const currentMode = (topicData && topicData.seatingOrderMode === 'peer_first') ? 'peer_first' : 'mix_first';
+                const nextMode = currentMode === 'mix_first' ? 'peer_first' : 'mix_first';
+                topicData.seatingOrderMode = nextMode;
+                part1SeatingSnapshot = null;
+                part2SeatingSnapshot = null;
+                seatingSnapshotSig = '';
+                updateTopicUI();
+                localStorage.setItem('localTopicData', JSON.stringify(topicData));
+                renderSeatingPlan(isPart2Shuffle, true);
+
+                const label = nextMode === 'peer_first' ? '1부 또래 ➔ 2부 믹스' : '1부 믹스 ➔ 2부 또래';
+                showToast("🔄 매칭 순서가 [" + label + "] 모드로 전환되었습니다!", "info");
+
+                try {
+                    await setDoc(settingsDocRef, { seatingOrderMode: nextMode }, { merge: true });
+                } catch(e) {
+                    console.warn("Firestore sync error:", e);
+                }
+            });
+        };
 
         window.saveTopicSettings = async function() {
             const schInput = document.getElementById('inputTopicSchedule');
@@ -3937,7 +4022,11 @@
             };
 
             topicData = newObj;
+            part1SeatingSnapshot = null;
+            part2SeatingSnapshot = null;
+            seatingSnapshotSig = '';
             updateTopicUI();
+            renderSeatingPlan(isPart2Shuffle, true);
             localStorage.setItem('localTopicData', JSON.stringify(newObj));
 
             try {
@@ -5145,9 +5234,16 @@ ${ytUrl}
 
                 onSnapshot(settingsDocRef, (snap) => {
                     if (snap.exists()) {
+                        const oldMode = topicData.seatingOrderMode;
                         topicData = { ...topicData, ...snap.data() };
                         localStorage.setItem('localTopicData', JSON.stringify(topicData));
                         updateTopicUI();
+                        if (oldMode !== topicData.seatingOrderMode) {
+                            part1SeatingSnapshot = null;
+                            part2SeatingSnapshot = null;
+                            seatingSnapshotSig = '';
+                            renderSeatingPlan(isPart2Shuffle, true);
+                        }
                     } else {
                         updateTopicUI();
                     }
@@ -6156,11 +6252,9 @@ ${ytUrl}
         // =========================================================================
         // 🎯 스마트 테이블 배치 마스터 알고리즘 (3단계 우선순위 체계)
         // =========================================================================
-        function calculateSmartSeatingPlan(todayMembers, isShuffle = false) {
+        function generateMixSeatingPlan(todayMembers, isPart2 = false) {
             const totalCount = todayMembers.length;
             if (totalCount === 0) return [];
-
-            // 3인 테이블 우선 배정 규칙 (12명 -> 4개 테이블, 10명 -> 3개 테이블)
             const numTables = Math.max(1, Math.floor(totalCount / 3));
             const tables = Array.from({ length: numTables }, () => []);
 
@@ -6175,7 +6269,6 @@ ${ytUrl}
                 return 35;
             }
 
-            const totalYoung = todayMembers.filter(isYoungMember).length;
             const totalAgeSum = todayMembers.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
             const overallAvgAge = totalCount > 0 ? (totalAgeSum / totalCount) : 40;
 
@@ -6183,149 +6276,51 @@ ${ytUrl}
             const remainder = totalCount % numTables;
             const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
 
-            // -------------------------------------------------------------------------
-            // 🔀 [2부 스마트 셔플 알고리즘] (3대 핵심 엔진)
-            // 1순위: 정원 준수 & 리더/신규 T1 고정
-            // 2순위: 비슷한 세대끼리 묶기 (getAgeNum이 세대 대표값이라 한 세대 차 = 550점)
-            // 3순위: 같은 세대 안에서 오늘 1부 대화 상대와 겹치지 않게 (500점)
-            // 4순위: 같은 세대 안에서 과거 모임 만남 회피 (300점) & 20대 고립 방지
-            // 5순위: 남녀 성비 균형
-            // -------------------------------------------------------------------------
-            if (isShuffle) {
-                let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
-                if (leader) tables[0].push(leader);
-
-                const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
-
-                // 20~60대 나이순 정렬하여 앞 테이블부터 채워 자연스러운 또래 결합 유도 (신규 회원도 2부에는 또래 그룹으로 셔플)
-                const sortedByAge = [...restMembers].sort((a, b) => {
-                    const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
-                    return diff !== 0 ? diff : (Math.random() - 0.5);
-                });
-
-                let ageIdx = 0;
-                for (let t = 0; t < numTables; t++) {
-                    while (tables[t].length < capacities[t] && ageIdx < sortedByAge.length) {
-                        tables[t].push(sortedByAge[ageIdx++]);
-                    }
-                }
-                while (ageIdx < sortedByAge.length) {
-                    const minT = tables.reduce((minI, t, i, arr) => t.length < arr[minI].length ? i : minI, 0);
-                    tables[minT].push(sortedByAge[ageIdx++]);
-                }
-
-                // 2부 로컬 최적화 스왑
-                function evaluateTablePart2(tbl) {
-                    let score = 0;
-                    if (tbl.length === 0) return 0;
-
-                    for (let i = 0; i < tbl.length; i++) {
-                        for (let j = i + 1; j < tbl.length; j++) {
-                            // [2순위] 세대 묶기 — 한 세대 벌어질 때마다 550점, 아래 항목들을 전부 이긴다
-                            const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
-                            score += ageDiff * 55;
-
-                            // [4순위] 세대가 같을 때의 2차 기준: 과거 모임에서 만난 횟수
-                            score += getPairMeetingCount(tbl[i], tbl[j]) * 300;
-
-                            // [3순위] 세대가 같을 때의 1차 기준: 오늘 1부에서 이미 만난 사이는 피한다
-                            if (part1SeatingSnapshot) {
-                                for (const p1T of part1SeatingSnapshot) {
-                                    if (p1T.some(m => m.id === tbl[i].id) && p1T.some(m => m.id === tbl[j].id)) {
-                                        score += 500;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // [5순위] 남녀 성비 균형
-                    const mCount = tbl.filter(m => m.gender === "M").length;
-                    const fCount = tbl.filter(m => m.gender !== "M").length;
-                    score += Math.abs(mCount - fCount) * 80;
-
-                    return score;
-                }
-
-                for (let iter = 0; iter < 80; iter++) {
-                    let improved = false;
-                    for (let t1 = 0; t1 < numTables; t1++) {
-                        for (let t2 = t1 + 1; t2 < numTables; t2++) {
-                            for (let i = 0; i < tables[t1].length; i++) {
-                                const m1 = tables[t1][i];
-                                if (m1.isLeader || (m1.name || "").includes("Jett")) continue;
-
-                                for (let j = 0; j < tables[t2].length; j++) {
-                                    const m2 = tables[t2][j];
-                                    if (m2.isLeader || (m2.name || "").includes("Jett")) continue;
-
-                                    const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
-
-                                    tables[t1][i] = m2;
-                                    tables[t2][j] = m1;
-
-                                    const newScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
-                                    if (newScore < curScore) {
-                                        improved = true;
-                                        break;
-                                    } else {
-                                        tables[t1][i] = m1;
-                                        tables[t2][j] = m2;
-                                    }
-                                }
-                                if (improved) break;
-                            }
-                            if (improved) break;
-                        }
-                        if (improved) break;
-                    }
-                    if (!improved) break;
-                }
-
-                return tables;;
-            }
-
-            // -------------------------------------------------------------------------
-            // 📌 [1부 스마트 배치 알고리즘]
-            // 1순위: 정원 준수 + 신규/리더 T1 고정
-            // 2순위: 테이블별 평균 연령 균등화 (20~60대 골고루 믹스)
-            // 3순위: 과거 만남 회피 (같은 조합 반복 차단)
-            // 4순위: 남녀 성비 균형
-            // -------------------------------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
             if (!leader) leader = todayMembers[0];
 
-            const newMembers = todayMembers.filter(m => m.id !== leader.id && isNewbieMember(m));
-            let regularMembers = todayMembers.filter(m => m.id !== leader.id && !isNewbieMember(m));
-
+            const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
             tables[0].push(leader);
-            for (const nm of newMembers) {
-                if (tables[0].length < capacities[0]) {
-                    tables[0].push(nm);
-                } else {
-                    regularMembers.push(nm);
+
+            let unassignedPool = [];
+            if (!isPart2) {
+                const newMembers = restMembers.filter(m => isNewbieMember(m));
+                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
+                for (const nm of newMembers) {
+                    if (tables[0].length < capacities[0]) {
+                        tables[0].push(nm);
+                    } else {
+                        regularMembers.push(nm);
+                    }
                 }
+                unassignedPool = regularMembers;
+            } else {
+                unassignedPool = restMembers;
             }
 
-            let males = regularMembers.filter(m => m.gender === "M").sort(() => Math.random() - 0.5);
-            let females = regularMembers.filter(m => m.gender !== "M").sort(() => Math.random() - 0.5);
+            let males = unassignedPool.filter(m => m.gender === "M").sort(() => Math.random() - 0.5);
+            let females = unassignedPool.filter(m => m.gender !== "M").sort(() => Math.random() - 0.5);
 
-            function getPart1Cost(tbl, member) {
+            function getMixCost(tbl, member) {
                 let cost = 0;
                 cost += tbl.length * 70;
 
-                // [2순위] 테이블 평균 연령 균등화
                 const nextCount = tbl.length + 1;
                 const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
                 const nextAvgAge = nextAgeSum / nextCount;
                 cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
 
-                // [3순위] 과거 만남 회피
                 for (const existing of tbl) {
                     cost += getPairMeetingCount(existing, member) * 800;
+                    if (isPart2 && part1SeatingSnapshot) {
+                        for (const p1T of part1SeatingSnapshot) {
+                            if (p1T.some(x => x.id === existing.id) && p1T.some(x => x.id === member.id)) {
+                                cost += 1000;
+                            }
+                        }
+                    }
                 }
 
-                // [4순위] 성비 균형
                 const mCount = tbl.filter(m => m.gender === "M").length;
                 const fCount = tbl.filter(m => m.gender !== "M").length;
                 if (member.gender === "M" && mCount > fCount) cost += 45;
@@ -6347,7 +6342,7 @@ ${ytUrl}
 
                 for (let t = 0; t < numTables; t++) {
                     if (tables[t].length >= capacities[t]) continue;
-                    const cost = getPart1Cost(tables[t], member);
+                    const cost = getMixCost(tables[t], member);
                     if (cost < minCost) {
                         minCost = cost;
                         bestTableIdx = t;
@@ -6364,23 +6359,25 @@ ${ytUrl}
                 }
             }
 
-            // 1부 로컬 최적화 스왑
-            function evaluateTablePart1(tbl) {
+            function evaluateTableMix(tbl) {
                 let p = 0;
-
-                // [2순위] 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
                 const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
                 const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
                 p += Math.abs(tblAvgAge - overallAvgAge) * 200;
 
-                // [3순위] 과거 만남 회피
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
                         p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
+                        if (isPart2 && part1SeatingSnapshot) {
+                            for (const p1T of part1SeatingSnapshot) {
+                                if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
+                                    p += 1000;
+                                }
+                            }
+                        }
                     }
                 }
 
-                // [4순위] 남녀 성비 균형
                 const mCount = tbl.filter(m => m.gender === "M").length;
                 const fCount = tbl.filter(m => m.gender !== "M").length;
                 p += Math.abs(mCount - fCount) * 50;
@@ -6394,18 +6391,18 @@ ${ytUrl}
                     for (let t2 = t1 + 1; t2 < numTables; t2++) {
                         for (let i = 0; i < tables[t1].length; i++) {
                             const m1 = tables[t1][i];
-                            if (m1.isLeader || (m1.name || "").includes("Jett") || isNewbieMember(m1)) continue;
+                            if (m1.isLeader || (m1.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m1))) continue;
 
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
-                                if (m2.isLeader || (m2.name || "").includes("Jett") || isNewbieMember(m2)) continue;
+                                if (m2.isLeader || (m2.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m2))) continue;
 
-                                const curCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
+                                const curCost = evaluateTableMix(tables[t1]) + evaluateTableMix(tables[t2]);
 
                                 tables[t1][i] = m2;
                                 tables[t2][j] = m1;
 
-                                const newCost = evaluateTablePart1(tables[t1]) + evaluateTablePart1(tables[t2]);
+                                const newCost = evaluateTableMix(tables[t1]) + evaluateTableMix(tables[t2]);
                                 if (newCost < curCost) {
                                     improved = true;
                                     break;
@@ -6418,7 +6415,7 @@ ${ytUrl}
                         }
                         if (improved) break;
                     }
-                    if (improved) break;
+                    if (!improved) break;
                 }
                 if (!improved) break;
             }
@@ -6426,7 +6423,144 @@ ${ytUrl}
             return tables;
         }
 
-        function renderSeatingPlan(isShuffle = false, forceNew = false) {
+        function generatePeerSeatingPlan(todayMembers, isPart2 = false) {
+            const totalCount = todayMembers.length;
+            if (totalCount === 0) return [];
+            const numTables = Math.max(1, Math.floor(totalCount / 3));
+            const tables = Array.from({ length: numTables }, () => []);
+
+            function getAgeNum(ageStr) {
+                if (!ageStr) return 35;
+                if (ageStr.includes("10")) return 18;
+                if (ageStr.includes("20")) return 25;
+                if (ageStr.includes("30")) return 35;
+                if (ageStr.includes("40")) return 45;
+                if (ageStr.includes("50")) return 55;
+                if (ageStr.includes("60")) return 65;
+                return 35;
+            }
+
+            const baseCapacity = Math.floor(totalCount / numTables);
+            const remainder = totalCount % numTables;
+            const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
+
+            let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
+            if (!leader) leader = todayMembers[0];
+
+            const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
+            tables[0].push(leader);
+
+            let unassignedPool = [];
+            if (!isPart2) {
+                const newMembers = restMembers.filter(m => isNewbieMember(m));
+                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
+                for (const nm of newMembers) {
+                    if (tables[0].length < capacities[0]) {
+                        tables[0].push(nm);
+                    } else {
+                        regularMembers.push(nm);
+                    }
+                }
+                unassignedPool = regularMembers;
+            } else {
+                unassignedPool = restMembers;
+            }
+
+            const sortedByAge = [...unassignedPool].sort((a, b) => {
+                const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
+                return diff !== 0 ? diff : (Math.random() - 0.5);
+            });
+
+            let ageIdx = 0;
+            for (let t = 0; t < numTables; t++) {
+                while (tables[t].length < capacities[t] && ageIdx < sortedByAge.length) {
+                    tables[t].push(sortedByAge[ageIdx++]);
+                }
+            }
+            while (ageIdx < sortedByAge.length) {
+                const minT = tables.reduce((minI, t, i, arr) => t.length < arr[minI].length ? i : minI, 0);
+                tables[minT].push(sortedByAge[ageIdx++]);
+            }
+
+            function evaluateTablePeer(tbl) {
+                let score = 0;
+                if (tbl.length === 0) return 0;
+
+                for (let i = 0; i < tbl.length; i++) {
+                    for (let j = i + 1; j < tbl.length; j++) {
+                        const ageDiff = Math.abs(getAgeNum(tbl[i].ageGroup) - getAgeNum(tbl[j].ageGroup));
+                        score += ageDiff * 55;
+                        score += getPairMeetingCount(tbl[i], tbl[j]) * 300;
+
+                        if (isPart2 && part1SeatingSnapshot) {
+                            for (const p1T of part1SeatingSnapshot) {
+                                if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
+                                    score += 500;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const mCount = tbl.filter(m => m.gender === "M").length;
+                const fCount = tbl.filter(m => m.gender !== "M").length;
+                score += Math.abs(mCount - fCount) * 80;
+
+                return score;
+            }
+
+            for (let iter = 0; iter < 80; iter++) {
+                let improved = false;
+                for (let t1 = 0; t1 < numTables; t1++) {
+                    for (let t2 = t1 + 1; t2 < numTables; t2++) {
+                        for (let i = 0; i < tables[t1].length; i++) {
+                            const m1 = tables[t1][i];
+                            if (m1.isLeader || (m1.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m1))) continue;
+
+                            for (let j = 0; j < tables[t2].length; j++) {
+                                const m2 = tables[t2][j];
+                                if (m2.isLeader || (m2.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m2))) continue;
+
+                                const curScore = evaluateTablePeer(tables[t1]) + evaluateTablePeer(tables[t2]);
+
+                                tables[t1][i] = m2;
+                                tables[t2][j] = m1;
+
+                                const newScore = evaluateTablePeer(tables[t1]) + evaluateTablePeer(tables[t2]);
+                                if (newScore < curScore) {
+                                    improved = true;
+                                    break;
+                                } else {
+                                    tables[t1][i] = m1;
+                                    tables[t2][j] = m2;
+                                }
+                            }
+                            if (improved) break;
+                        }
+                        if (improved) break;
+                    }
+                    if (!improved) break;
+                }
+                if (!improved) break;
+            }
+
+            return tables;
+        }
+
+        // =========================================================================
+        // 🎯 스마트 테이블 배치 마스터 디스패처 (믹스 ⇄ 또래 모드 스위치 지원)
+        // =========================================================================
+        function calculateSmartSeatingPlan(todayMembers, isShuffle = false) {
+            const isPeerFirst = (topicData && topicData.seatingOrderMode === "peer_first");
+            if (!isShuffle) {
+                // 1부
+                return isPeerFirst ? generatePeerSeatingPlan(todayMembers, false) : generateMixSeatingPlan(todayMembers, false);
+            } else {
+                // 2부 (셔플)
+                return isPeerFirst ? generateMixSeatingPlan(todayMembers, true) : generatePeerSeatingPlan(todayMembers, true);
+            }
+        }
+function renderSeatingPlan(isShuffle = false, forceNew = false) {
             const container = document.getElementById('seatingGrid');
             if (!container) return;
 
@@ -6578,18 +6712,19 @@ ${ytUrl}
             // Update Seating Criteria Badge
             const criteriaBadge = document.getElementById('seatingCriteriaBadge');
             if (criteriaBadge) {
-                if (isShuffle) {
-                    criteriaBadge.innerHTML = `
-                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
-                        <span class="text-zinc-400 font-medium">2부:</span>
-                        <strong class="text-rose-300 font-semibold">또래 세대 & 공감대</strong>
-                    `;
+                const isPeerFirst = (topicData && topicData.seatingOrderMode === 'peer_first');
+                if (!isShuffle) {
+                    if (isPeerFirst) {
+                        criteriaBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span><span class="text-zinc-400 font-medium">1부:</span><strong class="text-indigo-300 font-semibold">또래 공감 & 편안한 워밍업</strong>';
+                    } else {
+                        criteriaBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span><span class="text-zinc-400 font-medium">1부:</span><strong class="text-blue-300 font-semibold">첫 만남 & 다양한 관점 믹스</strong>';
+                    }
                 } else {
-                    criteriaBadge.innerHTML = `
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
-                        <span class="text-zinc-400 font-medium">1부:</span>
-                        <strong class="text-blue-300 font-semibold">첫 만남 & 관점 믹스</strong>
-                    `;
+                    if (isPeerFirst) {
+                        criteriaBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span><span class="text-zinc-400 font-medium">2부:</span><strong class="text-blue-300 font-semibold">다양한 관점 믹스 & 심층 토론</strong>';
+                    } else {
+                        criteriaBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span><span class="text-zinc-400 font-medium">2부:</span><strong class="text-indigo-300 font-semibold">또래 공감 & 심층 토론</strong>';
+                    }
                 }
             }
 
