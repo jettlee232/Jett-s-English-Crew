@@ -5229,7 +5229,7 @@ ${ytUrl}
                         }
 
                         // 8월 29일 스터디 참석자 12명 확정 및 당근 무료참가(0개) 동기화
-                        if (!localStorage.getItem('study_attendees_sync_20260829_v3')) {
+                        if (!localStorage.getItem('study_attendees_sync_20260829_v4')) {
                             localStorage.setItem('study_attendees_sync_20260829_v3', 'true');
                             part1SeatingSnapshot = null;
                             part2SeatingSnapshot = null;
@@ -6196,19 +6196,9 @@ ${ytUrl}
                 if (leader) tables[0].push(leader);
 
                 const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
-                const newMembers = restMembers.filter(m => isNewbieMember(m));
-                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
 
-                for (const nm of newMembers) {
-                    if (tables[0].length < capacities[0]) {
-                        tables[0].push(nm);
-                    } else {
-                        regularMembers.push(nm);
-                    }
-                }
-
-                // 20~60대 나이순 정렬하여 앞 테이블부터 채워 자연스러운 또래 결합 유도
-                const sortedByAge = [...regularMembers].sort((a, b) => {
+                // 20~60대 나이순 정렬하여 앞 테이블부터 채워 자연스러운 또래 결합 유도 (신규 회원도 2부에는 또래 그룹으로 셔플)
+                const sortedByAge = [...restMembers].sort((a, b) => {
                     const diff = getAgeNum(a.ageGroup) - getAgeNum(b.ageGroup);
                     return diff !== 0 ? diff : (Math.random() - 0.5);
                 });
@@ -6228,14 +6218,6 @@ ${ytUrl}
                 function evaluateTablePart2(tbl) {
                     let score = 0;
                     if (tbl.length === 0) return 0;
-
-                    const tblYoungOnly = tbl.filter(isYoungMember).length;
-                    const hasLeader = tbl.some(m => m.isLeader || (m.name || "").includes("Jett"));
-
-                    // [4순위] 20대 단독 고립 방지
-                    if (tblYoungOnly === 1 && !hasLeader && totalYoung >= 2) {
-                        score += 3000;
-                    }
 
                     for (let i = 0; i < tbl.length; i++) {
                         for (let j = i + 1; j < tbl.length; j++) {
@@ -6271,11 +6253,11 @@ ${ytUrl}
                         for (let t2 = t1 + 1; t2 < numTables; t2++) {
                             for (let i = 0; i < tables[t1].length; i++) {
                                 const m1 = tables[t1][i];
-                                if (m1.isLeader || (m1.name || "").includes("Jett") || isNewbieMember(m1)) continue;
+                                if (m1.isLeader || (m1.name || "").includes("Jett")) continue;
 
                                 for (let j = 0; j < tables[t2].length; j++) {
                                     const m2 = tables[t2][j];
-                                    if (m2.isLeader || (m2.name || "").includes("Jett") || isNewbieMember(m2)) continue;
+                                    if (m2.isLeader || (m2.name || "").includes("Jett")) continue;
 
                                     const curScore = evaluateTablePart2(tables[t1]) + evaluateTablePart2(tables[t2]);
 
@@ -6295,11 +6277,12 @@ ${ytUrl}
                             }
                             if (improved) break;
                         }
+                        if (improved) break;
                     }
                     if (!improved) break;
                 }
 
-                return tables;
+                return tables;;
             }
 
             // -------------------------------------------------------------------------
