@@ -7323,25 +7323,14 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             }
 
             nonLeaderMembers.sort((a, b) => {
+                const aAtt = a.totalAttended || 0;
+                const bAtt = b.totalAttended || 0;
+                if (bAtt !== aAtt) return bAtt - aAtt;
+
                 const aCoins = a.coins || 0;
                 const bCoins = b.coins || 0;
-                const aFull = aCoins >= 6 ? 1 : 0;
-                const bFull = bCoins >= 6 ? 1 : 0;
-
-                if (bFull !== aFull) return bFull - aFull;
-
-                if (aFull && bFull) {
-                    if ((b.totalAttended || 0) !== (a.totalAttended || 0)) {
-                        return (b.totalAttended || 0) - (a.totalAttended || 0);
-                    }
-                    if (bCoins !== aCoins) return bCoins - aCoins;
-                    return (a.name || '').localeCompare(b.name || '', 'ko');
-                }
-
                 if (bCoins !== aCoins) return bCoins - aCoins;
-                if ((b.totalAttended || 0) !== (a.totalAttended || 0)) {
-                    return (b.totalAttended || 0) - (a.totalAttended || 0);
-                }
+
                 return (a.name || '').localeCompare(b.name || '', 'ko');
             });
 
