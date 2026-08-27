@@ -846,7 +846,7 @@
             border-color: #f97316 !important;
             box-shadow: 0 4px 20px -4px rgba(249, 115, 22, 0.2) !important;
         }
-        html.light-theme .rainbow-super-card span {
+        html.light-theme .rainbow-super-card .member-name-text {
             color: #0f172a !important;
         }
     </style>
@@ -7366,7 +7366,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                     <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center gap-1.5 sm:gap-2.5 w-full hover:border-zinc-700 overflow-hidden">
                         <!-- Col 1: Member Name (Strict Column) -->
                         <div class="w-[58px] sm:w-[84px] shrink-0 truncate flex items-center">
-                            <span class="font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${esc(m.name || '미지정')}">
+                            <span class="member-name-text font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${esc(m.name || '미지정')}">
                                 ${esc(m.name || '미지정')}
                             </span>
                         </div>
