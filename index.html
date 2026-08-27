@@ -5229,8 +5229,8 @@ ${ytUrl}
                         }
 
                         // 8월 29일 스터디 참석자 12명 확정 및 당근 무료참가(0개) 동기화
-                        if (!localStorage.getItem('study_attendees_sync_20260829_v2')) {
-                            localStorage.setItem('study_attendees_sync_20260829_v2', 'true');
+                        if (!localStorage.getItem('study_attendees_sync_20260829_v3')) {
+                            localStorage.setItem('study_attendees_sync_20260829_v3', 'true');
                             part1SeatingSnapshot = null;
                             part2SeatingSnapshot = null;
                             seatingSnapshotSig = '';
@@ -6305,9 +6305,9 @@ ${ytUrl}
             // -------------------------------------------------------------------------
             // 📌 [1부 스마트 배치 알고리즘]
             // 1순위: 정원 준수 + 신규/리더 T1 고정
-            // 2순위: 과거 만남 회피 (같은 조합 반복 차단) — 세대/성비보다 항상 우선
-            // 3순위: 20대가 1명뿐이면 30대와 같은 테이블
-            // 4순위: 테이블 평균 연령 균등화 & 남녀 성비 균형
+            // 2순위: 테이블별 평균 연령 균등화 (20~60대 골고루 믹스)
+            // 3순위: 과거 만남 회피 (같은 조합 반복 차단)
+            // 4순위: 남녀 성비 균형
             // -------------------------------------------------------------------------
             let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
             if (!leader) leader = todayMembers[0];
@@ -6331,31 +6331,22 @@ ${ytUrl}
                 let cost = 0;
                 cost += tbl.length * 70;
 
-                // [2순위] 테이블 평균 연령 균등화 (마스터 공식: 세대 믹스 자동 완성)
+                // [2순위] 테이블 평균 연령 균등화
                 const nextCount = tbl.length + 1;
                 const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
                 const nextAvgAge = nextAgeSum / nextCount;
-                cost += Math.abs(nextAvgAge - overallAvgAge) * 18;
+                cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
 
-                // [3순위] 20대 배치 규칙: 2명 이상이면 버디로 묶고, 1명뿐이면 반드시 30대 옆
-                const tblYoungs = tbl.filter(isYoungMember).length;
-                const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
-
-                if (isYoungMember(member)) {
-                    if (totalYoung >= 2 && tblYoungs === 1) cost -= 250;
-                    if (totalYoung === 1 && !has30) cost += 1200;
+                // [3순위] 과거 만남 회피
+                for (const existing of tbl) {
+                    cost += getPairMeetingCount(existing, member) * 800;
                 }
 
-                // [3순위] 성비 균형
+                // [4순위] 성비 균형
                 const mCount = tbl.filter(m => m.gender === "M").length;
                 const fCount = tbl.filter(m => m.gender !== "M").length;
                 if (member.gender === "M" && mCount > fCount) cost += 45;
                 if (member.gender !== "M" && fCount > mCount) cost += 45;
-
-                // [2순위] 과거 만남 회피 — 1회 재만남(2000)이 어떤 나이/성비 편차보다 비싸다
-                for (const existing of tbl) {
-                    cost += getPairMeetingCount(existing, member) * 2000;
-                }
 
                 return cost;
             }
@@ -6393,33 +6384,24 @@ ${ytUrl}
             // 1부 로컬 최적화 스왑
             function evaluateTablePart1(tbl) {
                 let p = 0;
-                const tblYoungs = tbl.filter(isYoungMember).length;
-
-                // [3순위] 20대 배치 규칙
-                const has30 = tbl.some(m => (m.ageGroup || "").includes("30"));
-
-                if (tblYoungs === 1 && totalYoung >= 2) {
-                    p += 1500; // 20대가 여럿인데 혼자 떨어지는 것 방지 (버디 결합)
-                } else if (tblYoungs === 1 && totalYoung === 1 && !has30) {
-                    p += 1800; // 20대가 1명뿐이면 30대가 없는 테이블에는 앉히지 않는다
-                }
 
                 // [2순위] 테이블 평균 연령 균등화 (전체 평균 연령과의 편차 최소화)
                 const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
                 const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
-                p += Math.abs(tblAvgAge - overallAvgAge) * 65;
+                p += Math.abs(tblAvgAge - overallAvgAge) * 200;
 
-                // [3순위] 남녀 성비 균형
-                const mCount = tbl.filter(m => m.gender === "M").length;
-                const fCount = tbl.filter(m => m.gender !== "M").length;
-                p += Math.abs(mCount - fCount) * 60;
-
-                // [2순위] 과거 만남 회피 (최우선) — 나이 편차 1살=65점, 성비 1명=60점보다 압도적으로 비싸게
+                // [3순위] 과거 만남 회피
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 2000;
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
                     }
                 }
+
+                // [4순위] 남녀 성비 균형
+                const mCount = tbl.filter(m => m.gender === "M").length;
+                const fCount = tbl.filter(m => m.gender !== "M").length;
+                p += Math.abs(mCount - fCount) * 50;
+
                 return p;
             }
 
