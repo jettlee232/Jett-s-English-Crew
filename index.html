@@ -5229,8 +5229,11 @@ ${ytUrl}
                         }
 
                         // 8월 29일 스터디 참석자 12명 확정 및 당근 무료참가(0개) 동기화
-                        if (!localStorage.getItem('study_attendees_sync_20260829_v1')) {
-                            localStorage.setItem('study_attendees_sync_20260829_v1', 'true');
+                        if (!localStorage.getItem('study_attendees_sync_20260829_v2')) {
+                            localStorage.setItem('study_attendees_sync_20260829_v2', 'true');
+                            part1SeatingSnapshot = null;
+                            part2SeatingSnapshot = null;
+                            seatingSnapshotSig = '';
                             const todayAttendeeNames = new Set([
                                 'Jett', 'Emilia', '눅눅', 'Sunny', 'EK', '펠메니',
                                 'Hyun', '천연암반수', '표토르', 'Richard', '대니', '대니얼'
@@ -5278,6 +5281,7 @@ ${ytUrl}
                                     updateDoc(doc(membersCollectionRef, m.id), updatePayload).catch(e => console.warn(e));
                                 }
                             });
+                            renderUI();
                         }
 
                         // 정확한 누적 출석 횟수 및 신규(0회차) 뱃지 자동 복구 동기화
@@ -6485,6 +6489,8 @@ ${ytUrl}
 
             isPart2Shuffle = isShuffle;
 
+            const expectedTables = Math.max(1, Math.floor(todayMembers.length / 3));
+
             // 참석자 명단이 바뀌어도 기존 배치를 버리지 않고 증분 반영한다.
             // (통째로 다시 뽑으면 1부 복원이 깨지고, 2부의 "1부 회피" 규칙이 무력화된다)
             const todaySig = todayMembers.map(m => m.id).sort().join(',');
@@ -6492,6 +6498,9 @@ ${ytUrl}
                 const todayIds = new Set(todayMembers.map(m => m.id));
                 const patchSnapshot = (snap) => {
                     if (!snap || snap.length === 0) return null;
+                    if (snap.length !== expectedTables) return null;
+                    if (snap.some(tbl => tbl.length > 5 && todayMembers.length >= 6)) return null;
+
                     // 1) 빠진 사람 제거 + 남은 사람은 최신 회원 정보로 갱신
                     const patched = snap.map(tbl =>
                         tbl.filter(m => todayIds.has(m.id))
@@ -6517,7 +6526,9 @@ ${ytUrl}
             // Generate or restore smart seating plan
             let tables;
             const snapshot = isShuffle ? part2SeatingSnapshot : part1SeatingSnapshot;
-            if (!forceNew && snapshot && snapshot.length > 0) {
+            const isSnapshotValid = !forceNew && snapshot && snapshot.length === expectedTables && !snapshot.some(tbl => tbl.length > 5 && todayMembers.length >= 6);
+
+            if (isSnapshotValid) {
                 tables = JSON.parse(JSON.stringify(snapshot));
             } else {
                 tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
