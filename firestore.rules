@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// ── 붙여넣는 곳: Firebase 콘솔 > Firestore Database > 규칙 탭 > 게시 ──
+//
+// 현재 상태(2026-08-25 실측): 규칙이 완전히 열려 있다.
+// 사이트를 연 아무나 회원 103명 + 당근 600개를 통째로 지울 수 있고,
+// 아무 경로에나 문서를 새로 만들 수 있다.
+//
+// 아래 규칙이 막는 것:
+//   - 앱이 쓰지 않는 경로에 대한 모든 쓰기 (낙서/스팸 컬렉션 생성)
+//   - settings 문서 삭제 (이번 주 주제/학습자료 링크가 날아가는 사고)
+//   - 로그인 세션 없는 순수 익명 요청
+//
+// 아래 규칙이 못 막는 것 (정직하게):
+//   익명 로그인은 누구나 즉석에서 발급받을 수 있다. 마음먹은 사람이
+//   members 문서를 고치거나 지우는 건 여전히 가능하다. 그걸 진짜로 막으려면
+//   리더 계정(이메일/비번) 로그인을 붙이고 아래 request.auth.uid 조건을
+//   리더 uid로 좁혀야 한다. 그건 오픈 이후에 해도 된다.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /artifacts/seongbuk-english-study/public/data/{col}/{docId} {
+
+      // 회원 명단 / 이번 주 주제 / 자리 기록은 모두가 읽어야 앱이 돈다
+      allow read: if true;
+
+      // 쓰기는 앱이 실제로 쓰는 3개 컬렉션에만
+      allow create, update: if request.auth != null
+        && col in ['members', 'settings', 'table_sessions'];
+
+      // 삭제는 탈퇴 처리(members)와 이력 정리(table_sessions)에만 필요하다.
+      // settings 는 삭제할 일이 없으므로 막는다.
+      allow delete: if request.auth != null
+        && col in ['members', 'table_sessions'];
+    }
+
+    // 그 외 모든 경로 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
