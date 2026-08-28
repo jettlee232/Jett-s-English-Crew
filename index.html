@@ -6340,7 +6340,7 @@ ${ytUrl}
                 const newMembers = restMembers.filter(m => isNewbieMember(m));
                 const regularMembers = restMembers.filter(m => !isNewbieMember(m));
                 for (const nm of newMembers) {
-                    if (tables[0].length < capacities[0]) {
+                    if (tables[0].length < capacities[0] && !tables[0].some(x => x.ageGroup === nm.ageGroup)) {
                         tables[0].push(nm);
                     } else {
                         regularMembers.push(nm);
@@ -6355,9 +6355,6 @@ ${ytUrl}
             const lockedIds = new Set(isPart2 ? [] : tables[0].map(m => m.id));
             lockedIds.add(leader.id);
 
-            let males = unassignedPool.filter(m => m.gender === "M").sort(() => Math.random() - 0.5);
-            let females = unassignedPool.filter(m => m.gender !== "M").sort(() => Math.random() - 0.5);
-
             function getMixCost(tbl, member) {
                 let cost = 0;
                 cost += tbl.length * 70;
@@ -6365,11 +6362,13 @@ ${ytUrl}
                 const nextCount = tbl.length + 1;
                 const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
                 const nextAvgAge = nextAgeSum / nextCount;
-                cost += Math.abs(nextAvgAge - overallAvgAge) * 1500;
+                cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
+                // 같은 연령대끼리 앉으면 2부 또래 배치에서 또 만난다 — 최우선 회피
+                cost += tbl.filter(x => (x.ageGroup || '') === (member.ageGroup || '')).length * 50000;
 
                 for (const existing of tbl) {
                     if (isAvoidPair(existing, member)) cost += 9000;
-                    cost += getPairMeetingCount(existing, member) * 600;
+                    cost += getPairMeetingCount(existing, member) * 800;
                     if (isPart2 && part1SeatingSnapshot) {
                         for (const p1T of part1SeatingSnapshot) {
                             if (p1T.some(x => x.id === existing.id) && p1T.some(x => x.id === member.id)) {
@@ -6387,11 +6386,18 @@ ${ytUrl}
                 return cost;
             }
 
+            // 같은 연령대가 연달아 배치되지 않도록 연령대별 라운드로빈으로 투입 순서를 만든다
+            const byGen = {};
+            for (const m of unassignedPool) {
+                const g = m.ageGroup || '기타';
+                (byGen[g] = byGen[g] || []).push(m);
+            }
+            const genGroups = Object.values(byGen)
+                .sort((a, b) => b.length - a.length)
+                .map(g => g.sort(() => Math.random() - 0.5));
             const unassigned = [];
-            let mi = 0, fi = 0;
-            while (mi < males.length || fi < females.length) {
-                if (fi < females.length) unassigned.push(females[fi++]);
-                if (mi < males.length) unassigned.push(males[mi++]);
+            for (let k = 0; unassigned.length < unassignedPool.length; k++) {
+                for (const g of genGroups) if (g[k]) unassigned.push(g[k]);
             }
 
             for (const member of unassigned) {
@@ -6421,12 +6427,13 @@ ${ytUrl}
                 let p = 0;
                 const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
                 const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
-                p += Math.abs(tblAvgAge - overallAvgAge) * 2500;
+                p += Math.abs(tblAvgAge - overallAvgAge) * 200;
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
+                        if ((tbl[i].ageGroup || '') === (tbl[j].ageGroup || '')) p += 50000;
                         if (isAvoidPair(tbl[i], tbl[j])) p += 9000;
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 600;
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
                         if (isPart2 && part1SeatingSnapshot) {
                             for (const p1T of part1SeatingSnapshot) {
                                 if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
