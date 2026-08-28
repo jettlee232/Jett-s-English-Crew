@@ -6248,7 +6248,8 @@ ${ytUrl}
 
         function isNewbieMember(m) {
             if (!m) return false;
-            return m.isNew === true || (m.totalAttended !== undefined && m.totalAttended <= 1) || m.lastAction === '신규 참석';
+            // T1 고정은 "첫 참석" 단 1회만. 출석 마감을 한 번이라도 거치면 일반 회원으로 본다.
+            return (m.totalAttended || 0) === 0;
         }
 
         // 동반인 / 커플 등 가급적 다른 테이블 배치가 권장되는 조합 (1부·2부 공통 분리)
@@ -7094,7 +7095,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 gender: genderSelect ? genderSelect.value : 'F',
                 ageGroup: ageSelect ? ageSelect.value : '30대',
                 coins: 0,
-                totalAttended: 1,
+                totalAttended: 0,
                 isNew: true,
                 isToday: true,
                 leftEarly: false,
@@ -7454,7 +7455,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 id: newId,
                 name: name,
                 coins: 0,
-                totalAttended: 1,
+                totalAttended: 0,
                 gender: gender,
                 ageGroup: ageGroup,
                 isToday: true,
