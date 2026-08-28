@@ -6251,11 +6251,6 @@ ${ytUrl}
             return m.isNew === true || (m.totalAttended !== undefined && m.totalAttended <= 1) || m.lastAction === '신규 참석';
         }
 
-        function isYoungMember(m) {
-            if (!m || !m.ageGroup) return false;
-            return m.ageGroup.includes('20') || m.ageGroup.includes('10');
-        }
-
         // 동반인 / 커플 등 가급적 다른 테이블 배치가 권장되는 조합 (1부·2부 공통 분리)
         const AVOID_COUPLE_PAIRS = [
             ["눅눅", "펠메니"]
@@ -7178,7 +7173,11 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             requireLeaderAuth(() => {
                 playShuffleSound();
                 renderSeatingPlan(true, true);
-                showToast("🔀 비슷한 세대끼리 모은 2부 배치가 완료되었습니다!", "info");
+                const isPeerFirst = (topicData && topicData.seatingOrderMode === 'peer_first');
+                const toastMsg = isPeerFirst 
+                    ? "🔀 다양한 세대를 섞은 2부 배치가 완료되었습니다!" 
+                    : "🔀 비슷한 세대끼리 모은 2부 배치가 완료되었습니다!";
+                showToast(toastMsg, "info");
             });
         };
 
