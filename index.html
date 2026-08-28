@@ -1128,6 +1128,10 @@
                                 <i class="fa-solid fa-rotate-left text-[11px]"></i>
                             </button>
 
+                            <button id="btnPart1Reroll" onclick="requestRerollPart1WithPin()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-violet-300 transition active:scale-95" title="1부 배치 다시 뽑기">
+                                <i class="fa-solid fa-dice text-xs"></i>
+                            </button>
+
                             <button id="btnSeatMoveToggle" onclick="toggleSeatMoveMode()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-amber-300 transition active:scale-95" title="자리 수동 이동">
                                 <i class="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
                             </button>
@@ -6665,8 +6669,6 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
 
             isPart2Shuffle = isShuffle;
 
-            const expectedTables = Math.max(1, Math.floor(todayMembers.length / 3));
-
             // 참석자 명단이 바뀌어도 기존 배치를 버리지 않고 증분 반영한다.
             // (통째로 다시 뽑으면 1부 복원이 깨지고, 2부의 "1부 회피" 규칙이 무력화된다)
             const todaySig = todayMembers.map(m => m.id).sort().join(',');
@@ -6724,6 +6726,17 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 } else {
                     restoreBtn.classList.remove('flex');
                     restoreBtn.classList.add('hidden');
+                }
+            }
+
+            const rerollBtn = document.getElementById('btnPart1Reroll');
+            if (rerollBtn) {
+                if (isShuffle) {
+                    rerollBtn.classList.remove('flex');
+                    rerollBtn.classList.add('hidden');
+                } else {
+                    rerollBtn.classList.remove('hidden');
+                    rerollBtn.classList.add('flex');
                 }
             }
 
@@ -6807,6 +6820,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 }
             }
 
+            tables = tables.filter(t => t.length > 0);
             container.innerHTML = tables.map((members, idx) => {
                 const tableNo = idx + 1;
                 const capacity = members.length;
@@ -7230,6 +7244,14 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
         window.restorePart1Seating = function() {
             renderSeatingPlan(false);
             showToast("↩️ 1부 테이블 배치로 복원되었습니다.", "info");
+        };
+
+        window.requestRerollPart1WithPin = function() {
+            requireLeaderAuth(() => {
+                playShuffleSound();
+                renderSeatingPlan(false, true);
+                showToast("🎲 1부 배치를 새로 뽑았습니다.", "info");
+            });
         };
 
         window.requestSaveSeatingHistory = function() {
