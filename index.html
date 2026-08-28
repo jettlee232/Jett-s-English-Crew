@@ -3971,8 +3971,8 @@
         }
 
         window.setSeatingOrderMode = function(mode) {
-            topicData.seatingOrderMode = mode;
-            updateTopicUI();
+            const cur = (topicData && topicData.seatingOrderMode === 'peer_first') ? 'peer_first' : 'mix_first';
+            if (mode !== cur) requestToggleSeatingOrderWithPin();
         };
 
         window.requestToggleSeatingOrderWithPin = function() {
@@ -4008,6 +4008,8 @@
             const docsInput = document.getElementById('inputTopicDocs');
             const carrotInput = document.getElementById('inputTopicCarrotLink');
 
+            const prevMode = (topicData && topicData.seatingOrderMode) || 'mix_first';
+
             const newObj = {
                 ...topicData,
                 schedule: schInput ? schInput.value.trim() : (topicData.schedule || ""),
@@ -4021,12 +4023,15 @@
                 updatedAt: new Date().toISOString()
             };
 
+            const modeChanged = prevMode !== newObj.seatingOrderMode;
             topicData = newObj;
-            part1SeatingSnapshot = null;
-            part2SeatingSnapshot = null;
-            seatingSnapshotSig = '';
+            if (modeChanged) {
+                part1SeatingSnapshot = null;
+                part2SeatingSnapshot = null;
+                seatingSnapshotSig = '';
+            }
             updateTopicUI();
-            renderSeatingPlan(isPart2Shuffle, true);
+            renderSeatingPlan(isPart2Shuffle, modeChanged);
             localStorage.setItem('localTopicData', JSON.stringify(newObj));
 
             try {
@@ -6627,7 +6632,6 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 const todayIds = new Set(todayMembers.map(m => m.id));
                 const patchSnapshot = (snap) => {
                     if (!snap || snap.length === 0) return null;
-                    if (snap.some(tbl => tbl.length > 5 && todayMembers.length >= 6)) return null;
 
                     // 1) 빠진 사람 제거 + 남은 사람은 최신 회원 정보로 갱신
                     const patched = snap.map(tbl =>
@@ -6654,7 +6658,10 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             // Generate or restore smart seating plan
             let tables;
             const snapshot = isShuffle ? part2SeatingSnapshot : part1SeatingSnapshot;
-            const isSnapshotValid = !forceNew && snapshot && !snapshot.some(tbl => tbl.length > 5 && todayMembers.length >= 6);
+            const seatedIds = snapshot ? snapshot.flat().map(m => m.id) : [];
+            const isSnapshotValid = !forceNew && snapshot &&
+                seatedIds.length === todayMembers.length &&
+                new Set(seatedIds).size === seatedIds.length;
 
             if (isSnapshotValid) {
                 tables = JSON.parse(JSON.stringify(snapshot));
