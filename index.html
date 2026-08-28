@@ -6627,7 +6627,6 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 const todayIds = new Set(todayMembers.map(m => m.id));
                 const patchSnapshot = (snap) => {
                     if (!snap || snap.length === 0) return null;
-                    if (snap.length !== expectedTables) return null;
                     if (snap.some(tbl => tbl.length > 5 && todayMembers.length >= 6)) return null;
 
                     // 1) 빠진 사람 제거 + 남은 사람은 최신 회원 정보로 갱신
@@ -6655,7 +6654,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             // Generate or restore smart seating plan
             let tables;
             const snapshot = isShuffle ? part2SeatingSnapshot : part1SeatingSnapshot;
-            const isSnapshotValid = !forceNew && snapshot && snapshot.length === expectedTables && !snapshot.some(tbl => tbl.length > 5 && todayMembers.length >= 6);
+            const isSnapshotValid = !forceNew && snapshot && !snapshot.some(tbl => tbl.length > 5 && todayMembers.length >= 6);
 
             if (isSnapshotValid) {
                 tables = JSON.parse(JSON.stringify(snapshot));
