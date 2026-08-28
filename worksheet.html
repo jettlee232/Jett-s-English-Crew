@@ -386,9 +386,9 @@
 
         <!-- Right: Print, Publish & Action Buttons -->
         <div class="flex items-center gap-2 shrink-0">
-            <button id="btnPublishToSite" onclick="publishWorksheetToMainSite()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 border border-emerald-400/30 active:scale-95 transition cursor-pointer whitespace-nowrap" title="클릭 한 번으로 이번 주 메인 사이트 학습자료 버튼에 즉시 연동 및 발행합니다">
+            <button id="btnPublishToSite" onclick="publishWorksheetToMainSite()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 border border-emerald-400/30 active:scale-95 transition cursor-pointer whitespace-nowrap" title="작성한 워크시트와 서식을 클라우드에 저장하여 다른 PC나 기기에서 동기화합니다">
                 <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                <span id="publishBtnLabel">사이트에 즉시 연동</span>
+                <span id="publishBtnLabel">클라우드에 저장</span>
             </button>
             <button id="btnFetchCloud" onclick="fetchWorksheetFromCloud(true)" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-cyan-300 hover:text-cyan-200 text-xs font-bold transition cursor-pointer whitespace-nowrap border border-cyan-500/30 shadow-sm" title="서버에 저장된 최신 워크시트 불러오기">
                 <i class="fa-solid fa-cloud-arrow-down text-cyan-400"></i>
@@ -2333,10 +2333,10 @@
 
             const btn = document.getElementById('btnPublishToSite');
             const label = document.getElementById('publishBtnLabel');
-            const originalText = label ? label.innerText : "사이트에 즉시 연동";
+            const originalText = label ? label.innerText : "클라우드에 저장";
 
             try {
-                if (label) label.innerText = "연동 중...";
+                if (label) label.innerText = "저장 중...";
                 if (btn) btn.disabled = true;
 
                 // Ensure authenticated
