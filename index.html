@@ -6213,8 +6213,10 @@ ${ytUrl}
             let count = 0;
             const id1 = m1.id, id2 = m2.id;
             const name1 = m1.name || '', name2 = m2.name || '';
+            const todayStr = new Date().toISOString().slice(0, 10);
             
             for (const session of tableSessionsData) {
+                if (session.date === todayStr) continue;
                 if (!session.tables || !Array.isArray(session.tables)) continue;
                 for (const tbl of session.tables) {
                     if (!Array.isArray(tbl)) continue;
@@ -6518,7 +6520,7 @@ ${ytUrl}
 
                 // 20대가 한 테이블에 몰리지 않도록 2030 방 간의 자연스러운 분산 유도
                 const youngCount = tbl.filter(m => (m.ageGroup || "").includes("20")).length;
-                if (youngCount >= 2) score += 400;
+                score += Math.max(0, youngCount - 1) * 400;
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
@@ -7192,17 +7194,19 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             }
 
             requireLeaderAuth(async () => {
-                const sessionDocId = crypto.randomUUID();
+                const dateStr = new Date().toISOString().slice(0, 10);
+                const part = isPart2Shuffle ? 2 : 1;
+                const sessionDocId = `${dateStr}-p${part}`;
                 const newSession = {
                     id: sessionDocId,
-                    date: new Date().toISOString().slice(0, 10),
-                    part: isPart2Shuffle ? 2 : 1,
+                    date: dateStr,
+                    part: part,
                     tables: currentSeatingTables.map(tbl => tbl.map(m => m.id || m.name)),
                     tableNames: currentSeatingTables.map(tbl => tbl.map(m => m.name)),
                     createdAt: new Date().toISOString()
                 };
 
-                const updatedSessions = [newSession, ...tableSessionsData];
+                const updatedSessions = [newSession, ...tableSessionsData.filter(s => s.id !== sessionDocId)];
                 persistTableSessions(updatedSessions);
                 showToast(`💾 오늘 ${newSession.part}부 테이블 구성이 만남 이력에 성공적으로 저장되었습니다!`, "success");
 
