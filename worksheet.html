@@ -390,11 +390,15 @@
                 <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
                 <span id="publishBtnLabel">사이트에 즉시 연동</span>
             </button>
+            <button id="btnFetchCloud" onclick="fetchWorksheetFromCloud(true)" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-cyan-300 hover:text-cyan-200 text-xs font-bold transition cursor-pointer whitespace-nowrap border border-cyan-500/30 shadow-sm" title="서버에 저장된 최신 워크시트 불러오기">
+                <i class="fa-solid fa-cloud-arrow-down text-cyan-400"></i>
+                <span>최신 불러오기</span>
+            </button>
             <button id="btnCopyAnswerTop" onclick="copyAnswerKeyToClipboard()" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-amber-300 hover:text-amber-200 text-xs font-bold transition cursor-pointer whitespace-nowrap" title="라이팅 모범답안을 카톡 공유용으로 복사">
                 <i class="fa-solid fa-clipboard-check text-amber-400"></i>
                 <span>모범답안 복사</span>
             </button>
-            <button id="btnSampleTop" onclick="loadSampleData()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-zinc-300 hover:text-white text-xs font-medium transition cursor-pointer whitespace-nowrap" title="전문 스크립트 샘플 불러오기">
+            <button id="btnSampleTop" onclick="loadSampleData()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-studio-border/70 hover:bg-studio-border text-zinc-300 hover:text-white text-xs font-medium transition cursor-pointer whitespace-nowrap" title="전문 스크립트 샘플 불러오기">
                 <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
                 <span>샘플</span>
             </button>
@@ -711,10 +715,13 @@
             return false;
         }
 
+        window.isSampleDataLoaded = false;
+
         async function pasteFromClipboard() {
             try {
                 const text = await navigator.clipboard.readText();
                 if (text) {
+                    window.isSampleDataLoaded = false;
                     document.getElementById('markdownInput').value = text;
                     renderLivePreview();
                     saveLocalState();
@@ -726,6 +733,7 @@
 
         function clearMarkdownInput() {
             if (confirm('입력창을 비우시겠습니까?')) {
+                window.isSampleDataLoaded = false;
                 document.getElementById('markdownInput').value = '';
                 try { localStorage.removeItem('worksheet_markdown_cache'); } catch(e){}
                 renderLivePreview();
@@ -749,6 +757,7 @@
         // Debounce Render
         let renderTimeout = null;
         function debounceRender() {
+            window.isSampleDataLoaded = false;
             clearTimeout(renderTimeout);
             renderTimeout = setTimeout(() => {
                 renderLivePreview();
@@ -2013,6 +2022,7 @@
 **4.** Tech industry leaders are stepping up to take responsible measures in tackling the adverse side effects of AI.
 **5.** If we consistently avoid the cognitive friction of solving complex problems ourselves, our critical thinking skills will inevitably atrophy over time.`;
 
+            window.isSampleDataLoaded = true;
             document.getElementById('markdownInput').value = sampleMd;
             renderLivePreview();
         }
@@ -2173,6 +2183,13 @@
                 } else {
                     showToast("👑 리더 인증 성공", "success");
                 }
+
+                // 리더 인증 성공 시 최신 서버 워크시트가 있으면 자동 반영
+                if (latestPublished) {
+                    applyPublishedToStudio(latestPublished, false);
+                } else {
+                    fetchWorksheetFromCloud(false);
+                }
             } else {
                 showToast("❌ 비밀번호가 올바르지 않습니다.", "error");
             }
@@ -2195,8 +2212,7 @@
             }
         };
 
-        // 마지막으로 발행된 학습자료. PIN 취소로 뒤늦게 리더 모드에 들어가는 경우,
-        // onSnapshot 은 이미 지나갔으므로 이 캐시로 다시 그린다.
+        // 마지막으로 발행된 학습자료 캐시
         let latestPublished = null;
 
         function isLeaderDevice() {
@@ -2226,6 +2242,60 @@
             }
         }
 
+        function applyPublishedToStudio(data, showNotification = false) {
+            if (!data || !data.markdown) return;
+            window.isSampleDataLoaded = false;
+            document.getElementById('markdownInput').value = data.markdown;
+            
+            if (data.fontSize) {
+                const fsEl = document.getElementById('fontSizeSelector');
+                if (fsEl) {
+                    fsEl.value = data.fontSize;
+                    window.changeFontSize(data.fontSize);
+                }
+            }
+            if (data.watermark) {
+                const wmEl = document.getElementById('watermarkSelector');
+                if (wmEl) {
+                    wmEl.value = data.watermark;
+                    window.changeWatermark(data.watermark);
+                }
+            }
+            if (data.edition) {
+                window.setMaterialEdition(data.edition);
+            } else {
+                window.renderLivePreview();
+            }
+            window.saveLocalState();
+            if (showNotification) {
+                showToast("☁️ 서버에 저장된 최신 워크시트를 불러왔습니다.", "success");
+            }
+        }
+
+        window.fetchWorksheetFromCloud = async function(notify = true) {
+            const btn = document.getElementById('btnFetchCloud');
+            try {
+                if (btn) btn.classList.add('opacity-50', 'pointer-events-none');
+                const snap = await getDoc(worksheetDocRef);
+                if (snap.exists() && snap.data()?.markdown) {
+                    const data = snap.data();
+                    latestPublished = data;
+                    if (isReaderMode) {
+                        applyPublishedToReader(data);
+                    } else {
+                        applyPublishedToStudio(data, notify);
+                    }
+                } else {
+                    if (notify) showToast("⚠️ 서버에 저장된 워크시트가 없습니다.", "warning");
+                }
+            } catch (err) {
+                console.warn("Cloud fetch error:", err);
+                if (notify) showToast("❌ 워크시트 불러오기 실패: " + (err.message || "오류"), "error");
+            } finally {
+                if (btn) btn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        };
+
         // Real-time listener for published worksheet
         onSnapshot(worksheetDocRef, (snap) => {
             if (!snap.exists()) return;
@@ -2236,12 +2306,11 @@
 
             if (isReaderMode) {
                 applyPublishedToReader(data);
-            } else if (!document.getElementById('markdownInput').value.trim()) {
-                document.getElementById('markdownInput').value = data.markdown;
-                if (data.edition && !requestedEdition) {
-                    window.setMaterialEdition(data.edition);
-                } else {
-                    window.renderLivePreview();
+            } else {
+                const currentInput = document.getElementById('markdownInput').value.trim();
+                // 입력창이 비어있거나 샘플 데이터 상태이거나 로컬 캐시가 없으면 서버 최신본 자동 로드
+                if (!currentInput || window.isSampleDataLoaded || !localStorage.getItem('worksheet_markdown_cache')) {
+                    applyPublishedToStudio(data, false);
                 }
             }
         }, (err) => {
@@ -2281,20 +2350,21 @@
 
                 const parsed = window.parseGemsMarkdown(rawMd);
                 const activeEdition = window.currentEdition || 'teaser';
+                const fs = document.getElementById('fontSizeSelector')?.value || '1.12';
+                const wm = document.getElementById('watermarkSelector')?.value || 'none';
 
-                // 1. Save to worksheet doc
+                // 1. Save to worksheet doc (마크다운, 판형, 글자크기, 워터마크 통째로 클라우드 저장)
                 await setDoc(worksheetDocRef, {
                     markdown: rawMd,
                     title: parsed.title || "이번 주 스터디 주제",
                     overview: parsed.overview || "",
                     edition: activeEdition,
+                    fontSize: fs,
+                    watermark: wm,
                     publishedAt: Date.now()
                 }, { merge: true });
 
-                // docsUrl 은 건드리지 않는다. 회원 배포용 링크는 구글 드라이브 PDF 고정이고
-                // (당근·카톡 인앱 브라우저는 window.print() 가 안 먹는다), 여기서 덮어쓰면
-                // 발행할 때마다 리더 화면으로 되돌아간다. 링크 변경은 키오스크 관리 패널에서.
-                showToast("🎉 학습자료가 저장되었습니다. (회원 배포는 드라이브 PDF 링크)", "success");
+                showToast("🎉 학습자료가 클라우드에 저장/연동되었습니다.", "success");
             } catch (error) {
                 console.error("발행 실패 상세 에러:", error);
                 showToast("❌ 연동 중 오류가 발생했습니다: " + (error.message || "권한 오류"), "error");
