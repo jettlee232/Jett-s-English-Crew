@@ -3489,6 +3489,39 @@
         let showLeaderFreshness = false;
         let isSeatMoveMode = false;
         let selectedSeatMemberId = null;
+        let seatingCacheLoaded = false;
+        const SEATING_CACHE_KEY = 'seatingSnapshots_v1';
+
+        // 좌석 배치는 메모리 변수라 새로고침하면 사라진다. 오늘 날짜로만 캐시해 자리 흔들림을 막는다.
+        function persistSeatingSnapshots() {
+            try {
+                const ids = snap => snap ? snap.map(tbl => tbl.map(m => m.id)) : null;
+                localStorage.setItem(SEATING_CACHE_KEY, JSON.stringify({
+                    date: new Date().toISOString().slice(0, 10),
+                    isPart2Shuffle,
+                    p1: ids(part1SeatingSnapshot),
+                    p2: ids(part2SeatingSnapshot)
+                }));
+            } catch (e) { /* 용량 초과 등은 무시 — 캐시는 있으면 좋은 것 */ }
+        }
+
+        function loadSeatingSnapshots() {
+            try {
+                const raw = JSON.parse(localStorage.getItem(SEATING_CACHE_KEY) || 'null');
+                if (!raw || raw.date !== new Date().toISOString().slice(0, 10)) {
+                    localStorage.removeItem(SEATING_CACHE_KEY);
+                    return false;
+                }
+                const hydrate = snap => snap
+                    ? snap.map(tbl => tbl.map(id => membersData.find(m => m.id === id)).filter(Boolean))
+                    : null;
+                part1SeatingSnapshot = hydrate(raw.p1);
+                part2SeatingSnapshot = hydrate(raw.p2);
+                isPart2Shuffle = !!raw.isPart2Shuffle;
+                seatingSnapshotSig = '';   // 참석자 명단 변동은 patchSnapshot 이 다시 맞춘다
+                return !!(part1SeatingSnapshot || part2SeatingSnapshot);
+            } catch (e) { return false; }
+        }
 
         const COIN_EXPIRY_DAYS = 30;   // 당근 유효기간
         const COIN_WARN_DAYS = 7;      // 만료 며칠 전부터 경고를 띄울지
@@ -6619,6 +6652,14 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 return;
             }
 
+            // 새로고침으로 메모리 스냅샷이 사라졌으면 오늘자 캐시에서 복원한다
+            if (!seatingCacheLoaded) {
+                seatingCacheLoaded = true;
+                if (loadSeatingSnapshots() && isPart2Shuffle !== isShuffle) {
+                    return renderSeatingPlan(isPart2Shuffle, false);
+                }
+            }
+
             isPart2Shuffle = isShuffle;
 
             const expectedTables = Math.max(1, Math.floor(todayMembers.length / 3));
@@ -6669,6 +6710,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 if (isShuffle) part2SeatingSnapshot = saved; else part1SeatingSnapshot = saved;
             }
             currentSeatingTables = tables;
+            persistSeatingSnapshots();
 
             // Update Restore Button
             const restoreBtn = document.getElementById('btnPart1Restore');
