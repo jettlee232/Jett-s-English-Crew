@@ -6554,10 +6554,6 @@ ${ytUrl}
                 let score = 0;
                 if (tbl.length === 0) return 0;
 
-                // 20대가 한 테이블에 몰리지 않도록 2030 방 간의 자연스러운 분산 유도
-                const youngCount = tbl.filter(m => (m.ageGroup || "").includes("20")).length;
-                score += Math.max(0, youngCount - 1) * 400;
-
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
                         if (isAvoidPair(tbl[i], tbl[j])) score += 9000;
