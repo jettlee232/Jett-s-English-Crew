@@ -6765,6 +6765,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 const saved = JSON.parse(JSON.stringify(tables));
                 if (isShuffle) part2SeatingSnapshot = saved; else part1SeatingSnapshot = saved;
             }
+            tables = tables.filter(t => t.length > 0);
             currentSeatingTables = tables;
             persistSeatingSnapshots();
             publishSeatingPlan();
@@ -6872,7 +6873,6 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 }
             }
 
-            tables = tables.filter(t => t.length > 0);
             container.innerHTML = tables.map((members, idx) => {
                 const tableNo = idx + 1;
                 const capacity = members.length;
