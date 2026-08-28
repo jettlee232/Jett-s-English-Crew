@@ -6344,7 +6344,7 @@ ${ytUrl}
                 const newMembers = restMembers.filter(m => isNewbieMember(m));
                 const regularMembers = restMembers.filter(m => !isNewbieMember(m));
                 for (const nm of newMembers) {
-                    if (tables[0].length < capacities[0] && !tables[0].some(x => x.ageGroup === nm.ageGroup)) {
+                    if (tables[0].length < capacities[0]) {
                         tables[0].push(nm);
                     } else {
                         regularMembers.push(nm);
