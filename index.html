@@ -6212,17 +6212,19 @@ ${ytUrl}
             return (m.totalAttended || 0) === 0;
         }
 
-        // 동반인 / 커플 등 가급적 다른 테이블 배치가 권장되는 조합 (1부·2부 공통 분리)
+        let avoidPairsChecked = false;
+        // 같은 테이블에 앉히지 않을 조합 (1부·2부 공통).
+        // 저장소가 public 이라 실명 대신 회원 문서 id 로 지정한다.
+        // id 확인: 관리자 도구에서 대상 회원을 연 뒤 콘솔에 찍히는 문서 id,
+        // 또는 Firebase 콘솔 members 컬렉션에서 이름으로 찾는다.
         const AVOID_COUPLE_PAIRS = [
-            ["눅눅", "펠메니"]
+            ["mem-14-519f9fd3", "mem-31-bf2295df"]
         ];
 
         function isAvoidPair(m1, m2) {
             if (!m1 || !m2) return false;
-            const n1 = m1.name || "";
-            const n2 = m2.name || "";
             for (const [a, b] of AVOID_COUPLE_PAIRS) {
-                if ((n1.includes(a) && n2.includes(b)) || (n1.includes(b) && n2.includes(a))) {
+                if ((m1.id === a && m2.id === b) || (m1.id === b && m2.id === a)) {
                     return true;
                 }
             }
@@ -6561,6 +6563,13 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             if (!container) return;
 
             const todayMembers = membersData.filter(m => m.isToday && !m.leftEarly);
+
+            // 분리 대상 id 를 명단에서 못 찾으면 규칙이 조용히 죽는다 — 한 번만 알린다
+            if (!avoidPairsChecked && membersData.length) {
+                avoidPairsChecked = true;
+                const missing = AVOID_COUPLE_PAIRS.flat().filter(id => !membersData.some(m => m.id === id));
+                if (missing.length) console.warn("좌석 분리 대상 id 를 명단에서 찾지 못했습니다 (해당 규칙 미적용):", missing);
+            }
             const totalCount = todayMembers.length;
 
             // 적립 탭(오늘 참석)과 좌석 인원이 다른 이유를 화면에서 설명한다
