@@ -6315,6 +6315,10 @@ ${ytUrl}
                 unassignedPool = restMembers;
             }
 
+            // 1부에서 T1에 고정된 인원(리더+신규)만 교환에서 제외한다
+            const lockedIds = new Set(isPart2 ? [] : tables[0].map(m => m.id));
+            lockedIds.add(leader.id);
+
             let males = unassignedPool.filter(m => m.gender === "M").sort(() => Math.random() - 0.5);
             let females = unassignedPool.filter(m => m.gender !== "M").sort(() => Math.random() - 0.5);
 
@@ -6410,11 +6414,11 @@ ${ytUrl}
                     for (let t2 = t1 + 1; t2 < numTables; t2++) {
                         for (let i = 0; i < tables[t1].length; i++) {
                             const m1 = tables[t1][i];
-                            if (m1.isLeader || (m1.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m1))) continue;
+                            if (lockedIds.has(m1.id)) continue;
 
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
-                                if (m2.isLeader || (m2.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m2))) continue;
+                                if (lockedIds.has(m2.id)) continue;
 
                                 const curCost = evaluateTableMix(tables[t1]) + evaluateTableMix(tables[t2]);
 
@@ -6483,6 +6487,10 @@ ${ytUrl}
                 unassignedPool = restMembers;
             }
 
+            // 1부에서 T1에 고정된 인원(리더+신규)만 교환에서 제외한다
+            const lockedIds = new Set(isPart2 ? [] : tables[0].map(m => m.id));
+            lockedIds.add(leader.id);
+
             const sortedByAge = [...unassignedPool].sort((a, b) => {
                 const diff = getGenNum(a.ageGroup) - getGenNum(b.ageGroup);
                 return diff !== 0 ? diff : (Math.random() - 0.5);
@@ -6537,11 +6545,11 @@ ${ytUrl}
                     for (let t2 = t1 + 1; t2 < numTables; t2++) {
                         for (let i = 0; i < tables[t1].length; i++) {
                             const m1 = tables[t1][i];
-                            if (m1.isLeader || (m1.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m1))) continue;
+                            if (lockedIds.has(m1.id)) continue;
 
                             for (let j = 0; j < tables[t2].length; j++) {
                                 const m2 = tables[t2][j];
-                                if (m2.isLeader || (m2.name || "").includes("Jett") || (!isPart2 && isNewbieMember(m2))) continue;
+                                if (lockedIds.has(m2.id)) continue;
 
                                 const curScore = evaluateTablePeer(tables[t1]) + evaluateTablePeer(tables[t2]);
 
