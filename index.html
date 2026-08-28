@@ -2321,6 +2321,7 @@
 
         const membersCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
         const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'topic');
+        const seatingDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'seating');
         const sessionsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'table_sessions');
 
         const INITIAL_SEED_MEMBERS = [
@@ -3494,7 +3495,7 @@
         let isSeatMoveMode = false;
         let selectedSeatMemberId = null;
         let seatingCacheLoaded = false;
-        const SEATING_CACHE_KEY = 'seatingSnapshots_v1';
+        const SEATING_CACHE_KEY = 'seatingSnapshots_v2';
 
         // 좌석 배치는 메모리 변수라 새로고침하면 사라진다. 오늘 날짜로만 캐시해 자리 흔들림을 막는다.
         function persistSeatingSnapshots() {
@@ -3507,6 +3508,28 @@
                     p2: ids(part2SeatingSnapshot)
                 }));
             } catch (e) { /* 용량 초과 등은 무시 — 캐시는 있으면 좋은 것 */ }
+        }
+
+        let lastPublishedSeatingSig = '';
+        let seatingFromServer = false;   // 서버 배치를 한 번이라도 받았는가
+
+        function seatingTodayStr() { return new Date().toISOString().slice(0, 10); }
+        function seatingIds(snap) { return snap ? snap.map(tbl => tbl.map(m => m.id)) : null; }
+
+        // 리더 기기만 게시한다. 내용이 실제로 바뀐 경우에만 쓴다(렌더마다 쓰지 않기 위해).
+        function publishSeatingPlan() {
+            if (!isLeaderAuthenticated) return;
+            const payload = {
+                date: seatingTodayStr(),
+                isPart2Shuffle,
+                p1: seatingIds(part1SeatingSnapshot),
+                p2: seatingIds(part2SeatingSnapshot)
+            };
+            const sig = JSON.stringify(payload);
+            if (sig === lastPublishedSeatingSig) return;
+            lastPublishedSeatingSig = sig;
+            setDoc(seatingDocRef, { ...payload, updatedAt: new Date().toISOString() })
+                .catch(e => console.warn("좌석 공유 실패 (로컬 배치는 유지됨):", e));
         }
 
         function loadSeatingSnapshots() {
@@ -5291,6 +5314,25 @@ ${ytUrl}
                     }
                 }, (err) => console.warn(err));
 
+                onSnapshot(seatingDocRef, (snap) => {
+                    if (!snap.exists() || snap.metadata.hasPendingWrites) return;
+                    const d = snap.data();
+                    if (d.date !== seatingTodayStr()) return;
+                    const hydrate = s => s
+                        ? s.map(tbl => tbl.map(id => membersData.find(m => m.id === id)).filter(Boolean))
+                        : null;
+                    part1SeatingSnapshot = hydrate(d.p1);
+                    part2SeatingSnapshot = hydrate(d.p2);
+                    isPart2Shuffle = !!d.isPart2Shuffle;
+                    seatingSnapshotSig = '';
+                    seatingFromServer = true;
+                    lastPublishedSeatingSig = JSON.stringify({
+                        date: d.date, isPart2Shuffle,
+                        p1: seatingIds(part1SeatingSnapshot), p2: seatingIds(part2SeatingSnapshot)
+                    });
+                    renderSeatingPlan(isPart2Shuffle);
+                }, (err) => console.warn("좌석 구독 실패:", err));
+
                 onSnapshot(membersCollectionRef, (snapshot) => {
                     // Firestore는 서버에 못 닿으면 fromCache=true 인 빈 스냅샷을 먼저 던진다.
                     // 그걸 "서버가 비었다"로 믿으면 신규 기기에서 시드가 서버를 덮어쓴다.
@@ -6709,6 +6751,15 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
 
             if (isSnapshotValid) {
                 tables = JSON.parse(JSON.stringify(snapshot));
+            } else if (!isLeaderAuthenticated) {
+                // 회원 기기는 스스로 배치를 만들지 않는다. 기기마다 자리가 달라지기 때문이다.
+                container.innerHTML = `
+                    <div class="col-span-full p-8 text-center text-xs sm:text-sm text-zinc-500 bg-zinc-900/60 rounded-xl border border-zinc-800">
+                        리더가 자리를 배정하면 이 화면에 자동으로 표시됩니다.
+                    </div>
+                `;
+                currentSeatingTables = [];
+                return;
             } else {
                 tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
                 const saved = JSON.parse(JSON.stringify(tables));
@@ -6716,6 +6767,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             }
             currentSeatingTables = tables;
             persistSeatingSnapshots();
+            publishSeatingPlan();
 
             // Update Restore Button
             const restoreBtn = document.getElementById('btnPart1Restore');
