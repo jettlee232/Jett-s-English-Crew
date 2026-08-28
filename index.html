@@ -3515,17 +3515,21 @@
 
         function seatingTodayStr() { return new Date().toISOString().slice(0, 10); }
         function seatingIds(snap) { return snap ? snap.map(tbl => tbl.map(m => m.id)) : null; }
+        // Firestore 는 중첩 배열을 저장하지 못한다. 문자열로 직렬화해서 넣는다.
+        function seatingEncode(snap) { const ids = seatingIds(snap); return ids ? JSON.stringify(ids) : null; }
+        function seatingDecode(str) { try { return str ? JSON.parse(str) : null; } catch (e) { return null; } }
 
         // 회원 명단이 아직 없으면 반영하지 않고 보류한다.
         // 빈 껍데기로 덮어쓰면 좌석 문서가 다시 발화하지 않아 복구할 길이 없다.
         function applySeatingDoc(d) {
             if (!d || d.date !== seatingTodayStr()) return false;
+            const rawP1 = seatingDecode(d.p1), rawP2 = seatingDecode(d.p2);
             const count = s => s ? s.reduce((n, tbl) => n + tbl.length, 0) : 0;
             const hydrate = s => s
                 ? s.map(tbl => tbl.map(id => membersData.find(m => m.id === id)).filter(Boolean))
                 : null;
-            const p1 = hydrate(d.p1), p2 = hydrate(d.p2);
-            if (count(p1) !== count(d.p1) || count(p2) !== count(d.p2)) {
+            const p1 = hydrate(rawP1), p2 = hydrate(rawP2);
+            if (count(p1) !== count(rawP1) || count(p2) !== count(rawP2)) {
                 pendingSeatingDoc = d;
                 return false;
             }
@@ -3535,7 +3539,7 @@
             isPart2Shuffle = !!d.isPart2Shuffle;
             seatingSnapshotSig = '';
             lastPublishedSeatingSig = JSON.stringify({
-                date: d.date, isPart2Shuffle, p1: seatingIds(p1), p2: seatingIds(p2)
+                date: d.date, isPart2Shuffle, p1: d.p1, p2: d.p2
             });
             return true;
         }
@@ -3543,17 +3547,26 @@
         // 리더 기기만 게시한다. 내용이 실제로 바뀐 경우에만 쓴다(렌더마다 쓰지 않기 위해).
         function publishSeatingPlan() {
             if (!isLeaderAuthenticated) return;
-            const payload = {
-                date: seatingTodayStr(),
-                isPart2Shuffle,
-                p1: seatingIds(part1SeatingSnapshot),
-                p2: seatingIds(part2SeatingSnapshot)
-            };
-            const sig = JSON.stringify(payload);
-            if (sig === lastPublishedSeatingSig) return;
-            lastPublishedSeatingSig = sig;
-            setDoc(seatingDocRef, { ...payload, updatedAt: new Date().toISOString() })
-                .catch(e => console.warn("좌석 공유 실패 (로컬 배치는 유지됨):", e));
+            // 게시가 실패해도 화면 표시는 절대 막지 않는다.
+            try {
+                const payload = {
+                    date: seatingTodayStr(),
+                    isPart2Shuffle,
+                    p1: seatingEncode(part1SeatingSnapshot),
+                    p2: seatingEncode(part2SeatingSnapshot)
+                };
+                const sig = JSON.stringify(payload);
+                if (sig === lastPublishedSeatingSig) return;
+                const prevSig = lastPublishedSeatingSig;
+                lastPublishedSeatingSig = sig;
+                setDoc(seatingDocRef, { ...payload, updatedAt: new Date().toISOString() })
+                    .catch(e => {
+                        lastPublishedSeatingSig = prevSig;   // 실패했으면 다음에 다시 시도한다
+                        console.warn("좌석 공유 실패 (로컬 배치는 유지됨):", e);
+                    });
+            } catch (e) {
+                console.warn("좌석 게시 중단 (화면 표시에는 영향 없음):", e);
+            }
         }
 
         function loadSeatingSnapshots() {
@@ -5434,7 +5447,7 @@ ${ytUrl}
                         if (allowUpload) uploadMembersToServer(parsed);
                         return;
                     }
-                } catch(e) {}
+                } catch(e) { console.warn("로컬 회원 캐시 복원 실패:", e); }
             }
 
             // 로컬 캐시도 없고 서버 상태도 모른다 -> 아무것도 만들지 않는다.
