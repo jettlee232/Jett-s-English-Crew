@@ -118,34 +118,70 @@
             justify-content: flex-start;
         }
 
-        /* 심플 러닝 헤더 (소프트 에디토리얼) */
+        /* 숫자/섹션 뱃지 (흑백 인쇄 시 잉크 번짐 방지 및 선명한 가독성) */
+        .sheet-num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5px 7px;
+            border-radius: 4px;
+            background-color: #f1f5f9;
+            border: 1.2px solid #1e293b;
+            color: #0f172a;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 8pt;
+            letter-spacing: -0.01em;
+            line-height: 1.25;
+            box-sizing: border-box;
+        }
+
+        .sheet-tag-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5px 7px;
+            border-radius: 4px;
+            background-color: #f1f5f9;
+            border: 1px solid #334155;
+            color: #1e293b;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 7.5pt;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            line-height: 1.25;
+            box-sizing: border-box;
+        }
+
+        /* 심플 러닝 헤더 (흑백 인쇄 시 또렷한 그레이 라인) */
         .sheet-running-header {
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 6px;
-            margin-bottom: 14px;
+            border-bottom: 1px solid #94a3b8;
+            padding-bottom: 5px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 7.5pt;
+            font-size: 7.8pt;
             font-weight: 700;
-            color: #64748b;
+            color: #334155;
             flex-shrink: 0;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* 심플 러닝 푸터 (소프트 에디토리얼) */
+        /* 심플 러닝 푸터 (흑백 인쇄 시 날아가지 않는 경계선) */
         .sheet-running-footer {
             margin-top: auto;
-            padding-top: 6px;
-            border-top: 1px solid #f1f5f9;
+            padding-top: 5px;
+            border-top: 1px solid #cbd5e1;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 7.5pt;
-            color: #94a3b8;
-            font-weight: 600;
+            font-size: 7.8pt;
+            color: #475569;
+            font-weight: 700;
             flex-shrink: 0;
             font-family: 'JetBrains Mono', monospace;
         }
@@ -159,7 +195,7 @@
             text-wrap: balance;
         }
 
-        /* 미니멀 영작 필기 라인 (단정한 노트 스타일) */
+        /* 미니멀 영작 필기 라인 (흑백 인쇄 시 선명하게 보이는 줄노트 라인) */
         .clean-writing-card {
             padding-bottom: 2px;
         }
@@ -167,29 +203,29 @@
         .clean-ruled-lines {
             margin-top: 6px;
             height: 90px;
-            background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+            background-image: linear-gradient(#94a3b8 1px, transparent 1px);
             background-size: 100% 30px;
             background-position: 0 28px;
         }
 
-        /* 본문 낭독 전용 은은한 배경 박스 & 정돈된 여백 */
+        /* 본문 낭독 전용 은은한 배경 박스 & 선명한 경계선 */
         .reading-script-box {
             background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 18px;
+            border: 1px solid #94a3b8;
+            border-radius: 6px;
+            padding: 10px 16px;
         }
 
         /* 본문 낭독 어휘 하이라이트 (스위스 모노크롬 하이라이트) */
         .reading-keyword-highlight {
             font-weight: 800;
             color: #000000;
-            border-bottom: 1.5px solid #000000;
+            border-bottom: 1.2px solid #334155;
             padding-bottom: 1px;
             display: inline;
         }
         .reading-keyword-korean {
-            font-weight: 600;
+            font-weight: 700;
             color: #334155;
             font-size: 0.92em;
             margin-left: 2px;
@@ -214,7 +250,7 @@
 
         /* ========================================================
            🔥 인쇄 및 PDF 저장 전용 스타일 (@media print) 
-           어두운 스튜디오 테마 완전 제거 & 순백색 A4 완벽 출력
+           흑백 인쇄 최적화: 잉크 번짐 차단 & 흐린 요소 선명 보강
            ======================================================== */
         @media print {
             @page {
@@ -231,7 +267,7 @@
             html, body {
                 background: #ffffff !important;
                 background-color: #ffffff !important;
-                color: #000000 !important;
+                color: #0f172a !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
@@ -289,7 +325,7 @@
                 break-after: page !important;
                 background: #ffffff !important;
                 background-color: #ffffff !important;
-                color: #000000 !important;
+                color: #0f172a !important;
                 box-sizing: border-box !important;
                 position: relative !important;
                 display: flex !important;
@@ -304,30 +340,59 @@
                 break-after: auto !important;
             }
 
-            /* 5. 낭독 박스 & 뱃지 명도 보존 */
-            .reading-script-box {
-                background-color: #f8fafc !important;
-                border: 1px solid #e2e8f0 !important;
-                border-radius: 8px !important;
-                padding: 12px 18px !important;
+            /* 5. 흑백 인쇄 배지 & 박스 튜닝 (뒷면 잉크 번짐 원천 방지) */
+            .sheet-num-badge {
+                background-color: #f1f5f9 !important;
+                border: 1.2px solid #1e293b !important;
+                color: #0f172a !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            .bg-gray-900 {
-                background-color: #111827 !important;
-                color: #ffffff !important;
-            }
-            .bg-gray-200 {
+            .sheet-tag-badge {
                 background-color: #f1f5f9 !important;
+                border: 1px solid #334155 !important;
                 color: #0f172a !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            .bg-gray-100 {
+
+            .reading-script-box {
                 background-color: #f8fafc !important;
-                color: #0f172a !important;
+                border: 1px solid #94a3b8 !important;
+                border-radius: 6px !important;
+                padding: 10px 16px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            .bg-gray-50 {
-                background-color: #fafafa !important;
+
+            .clean-ruled-lines {
+                background-image: linear-gradient(#94a3b8 1px, transparent 1px) !important;
+                background-size: 100% 30px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* 6. 흐려서 인쇄 안 되는 보더/구분선 선명화 */
+            .border-gray-200, .border-gray-300, .border-zinc-200, .border-zinc-300 {
+                border-color: #94a3b8 !important;
+            }
+            .border-gray-100, .border-zinc-100 {
+                border-color: #cbd5e1 !important;
+            }
+
+            /* 7. 흐려서 날아가는 보조 텍스트 선명화 */
+            .text-gray-400, .text-zinc-400 {
+                color: #475569 !important;
+            }
+            .text-gray-500, .text-zinc-500 {
+                color: #334155 !important;
+            }
+            .text-gray-600, .text-gray-700 {
+                color: #1e293b !important;
+            }
+            .text-gray-950, .text-gray-900, .text-zinc-950 {
+                color: #0f172a !important;
             }
 
             .watermark-layer {
@@ -335,9 +400,9 @@
                 top: 50% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) !important;
-                width: 55% !important;
-                max-width: 360px !important;
-                opacity: var(--watermark-opacity, 0.03) !important;
+                width: 50% !important;
+                max-width: 320px !important;
+                opacity: 0.035 !important;
                 filter: grayscale(100%) !important;
                 z-index: 1 !important;
                 pointer-events: none !important;
@@ -1126,7 +1191,7 @@
 
                     <div class="sheet-running-header">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[7.5pt] tracking-wider">PREVIEW</span>
+                            <span class="sheet-tag-badge">PREVIEW</span>
                             <span>성북구 중상급 영어회화 • 이번 주 스터디 사전 예습 자료</span>
                         </div>
                         <div class="text-[8pt] text-gray-700 font-bold font-mono">
@@ -1138,15 +1203,15 @@
                         
                         <!-- Topic Title & Overview Box (Subtle Hairline Underline) -->
                         <div class="space-y-2 shrink-0 pt-1 border-b border-gray-200 pb-2.5">
-                            <div class="text-[7.5pt] font-bold text-gray-400 tracking-widest font-mono uppercase">
+                            <div class="text-[7.5pt] font-bold text-gray-600 tracking-widest font-mono uppercase">
                                 THIS WEEK'S TOPIC
                             </div>
                             <h1 class="text-xl font-black text-gray-950 tracking-tight leading-snug break-keep text-balance">
                                 ${data.title}
                             </h1>
                             ${data.overview ? `
-                            <div class="bg-gray-50/90 border border-gray-200/80 rounded-xl p-2.5 text-left">
-                                <p class="text-[8.8pt] text-gray-600 leading-relaxed font-kr font-normal break-keep">
+                            <div class="bg-gray-50/90 border border-gray-300 rounded-xl p-2.5 text-left">
+                                <p class="text-[8.8pt] text-gray-800 leading-relaxed font-kr font-normal break-keep">
                                     ${data.overview}
                                 </p>
                             </div>` : ''}
@@ -1156,10 +1221,10 @@
                         <div class="space-y-2 pt-1 flex-1 flex flex-col justify-start">
                             <div class="flex items-center justify-between border-b border-gray-200 pb-1 shrink-0 mb-0.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
-                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${teaserP1Paras.length}] 단락)</span></h2>
+                                    <span class="sheet-num-badge">01</span>
+                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-700 ml-1">(지문 낭독 1부: [1]~[${teaserP1Paras.length}] 단락)</span></h2>
                                 </div>
-                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
+                                <span class="text-[8pt] font-bold text-gray-600 font-mono tracking-wide">FULL SCRIPT</span>
                             </div>
                             <div class="reading-script-box text-gray-950 space-y-2" style="font-size: ${scriptP1FontSize}; line-height: ${scriptP1LineHeight};">
                                 ${teaserP1Paras.map(p => `
@@ -1184,7 +1249,7 @@
 
                     <div class="sheet-running-header">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[7.5pt] tracking-wider">PREVIEW</span>
+                            <span class="sheet-tag-badge">PREVIEW</span>
                             <span>성북구 중상급 영어회화 • 지문 완독 및 핵심 어휘/표현</span>
                         </div>
                         <div class="text-[8pt] text-gray-700 font-bold font-mono">
@@ -1198,10 +1263,10 @@
                         <div class="space-y-1.5 shrink-0">
                             <div class="flex items-center justify-between border-b border-gray-200 pb-1 shrink-0 mb-0.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
-                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${teaserSplit + 1}]~[${totalParas}] 완독)</span></h2>
+                                    <span class="sheet-num-badge">01</span>
+                                    <h2 class="text-[11pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[9pt] font-bold text-gray-700 ml-1">(지문 낭독 2부: [${teaserSplit + 1}]~[${totalParas}] 완독)</span></h2>
                                 </div>
-                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">FULL SCRIPT</span>
+                                <span class="text-[8pt] font-bold text-gray-600 font-mono tracking-wide">FULL SCRIPT</span>
                             </div>
                             <div class="reading-script-box text-gray-950 space-y-2" style="font-size: ${scriptP2FontSize}; line-height: ${scriptP2LineHeight};">
                                 ${teaserP2Paras.map(p => `
@@ -1217,24 +1282,24 @@
                         <div class="space-y-2.5 pt-2">
                             <div class="flex items-center justify-between border-b border-gray-200 pb-1.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
-                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[9.5pt] font-bold text-gray-500 ml-1">(핵심 6선)</span></h2>
+                                    <span class="sheet-num-badge">02</span>
+                                    <h2 class="text-[11.5pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[9.5pt] font-bold text-gray-700 ml-1">(핵심 6선)</span></h2>
                                 </div>
-                                <span class="text-[8pt] font-bold text-gray-400 font-mono tracking-wide">PRE-STUDY</span>
+                                <span class="text-[8pt] font-bold text-gray-600 font-mono tracking-wide">PRE-STUDY</span>
                             </div>
 
                             <div class="grid grid-cols-2 gap-5 pt-1">
                                 <!-- Left Col: Vocabulary -->
                                 <div class="space-y-2.5">
                                     <div class="text-[9.5pt] font-black text-gray-950 border-b border-gray-200 pb-0.5 flex items-center gap-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
                                         <span>Core Vocabulary (단어 3개)</span>
                                     </div>
                                     ${data.vocabList.map(v => `
                                         <div class="space-y-0.5 text-[9.2pt]">
                                             <div class="flex items-baseline justify-between">
                                                 <span class="font-black text-gray-950 text-[10.5pt]">${v.word}</span>
-                                                <span class="text-[8pt] font-mono text-gray-500">${v.phonetic}</span>
+                                                <span class="text-[8pt] font-mono text-gray-600 font-medium">${v.phonetic}</span>
                                             </div>
                                             <div class="text-gray-950 font-bold font-kr text-[9.5pt]">
                                                 ➔ ${v.meaning}
@@ -1250,14 +1315,14 @@
                                 <!-- Right Col: Expressions -->
                                 <div class="space-y-2.5">
                                     <div class="text-[9.5pt] font-black text-gray-950 border-b border-gray-200 pb-0.5 flex items-center gap-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
                                         <span>Core Expressions (표현 3개)</span>
                                     </div>
                                     ${data.expressionList.map(e => `
                                         <div class="space-y-0.5 text-[9.2pt]">
                                             <div class="flex items-baseline justify-between">
                                                 <span class="font-black text-gray-950 text-[10.5pt]">${e.expr}</span>
-                                                <span class="text-[7.5pt] font-mono font-bold text-gray-400 uppercase">PHRASES</span>
+                                                <span class="text-[7.5pt] font-mono font-bold text-gray-600 uppercase">PHRASES</span>
                                             </div>
                                             <div class="text-gray-950 font-bold font-kr text-[9.5pt]">
                                                 ➔ ${e.meaning}
@@ -1273,16 +1338,16 @@
                         </div>
 
                         <!-- No Spoiler Notice Box (Clean Swiss Border) -->
-                        <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 flex items-center justify-between text-gray-950 mt-auto shrink-0">
+                        <div class="border border-gray-300 rounded-lg p-3 bg-gray-50 flex items-center justify-between text-gray-950 mt-auto shrink-0">
                             <div class="space-y-0.5 text-left">
-                                <div class="font-bold text-[8pt] font-mono uppercase tracking-wider text-gray-500">
+                                <div class="font-bold text-[8pt] font-mono uppercase tracking-wider text-gray-600">
                                     ON-SITE STUDY SESSION NOTICE
                                 </div>
-                                <div class="text-[8.5pt] text-gray-700 font-medium font-kr">
+                                <div class="text-[8.5pt] text-gray-800 font-medium font-kr">
                                     웜업 질문(5문항), 내용 확인, 5문장 영작 및 8가지 심층 자유 토론은 <strong>현장 세션 교재</strong>에서 제공됩니다.
                                 </div>
                             </div>
-                            <span class="px-2.5 py-1 rounded bg-gray-900 text-white font-bold text-[7.5pt] shrink-0 font-mono tracking-wider">
+                            <span class="sheet-tag-badge">
                                 ON-SITE ONLY
                             </span>
                         </div>
@@ -1363,7 +1428,7 @@
                 <img src="logo.png" class="watermark-layer" alt="Watermark">
 
                 <!-- Cover Top Minimal Header (Clean Floating Typography) -->
-                <div class="w-full flex items-center justify-between text-[8.5pt] font-mono tracking-widest text-gray-400 uppercase">
+                <div class="w-full flex items-center justify-between text-[8.5pt] font-mono tracking-widest text-gray-600 uppercase font-semibold">
                     <span>SEONGBUK ADVANCED ENGLISH CONVERSATION</span>
                     <span class="font-bold text-gray-900">STUDY WORKBOOK</span>
                 </div>
@@ -1373,20 +1438,20 @@
                     
                     <!-- Grand Hero Logo -->
                     <div class="py-2">
-                        <img src="logo.png" alt="성북구 중상급 영어회화 로고" class="h-40 sm:h-48 w-auto object-contain mx-auto drop-shadow-sm">
+                        <img src="logo.png" alt="성북구 중상급 영어회화 로고" class="h-36 sm:h-44 w-auto object-contain mx-auto drop-shadow-sm">
                     </div>
 
                     <!-- Topic Title & Overview (Pure Typographic Art) -->
                     <div class="space-y-3 px-2 w-full">
-                        <div class="text-[8pt] font-bold text-gray-400 tracking-[0.25em] font-mono uppercase">
+                        <div class="text-[8pt] font-bold text-gray-600 tracking-[0.25em] font-mono uppercase">
                             THIS WEEK'S TOPIC
                         </div>
                         <h1 class="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-snug break-keep text-balance max-w-lg mx-auto">
                             ${data.title}
                         </h1>
                         ${data.overview ? `
-                        <div class="bg-gray-50/90 border border-gray-200/80 rounded-xl p-3.5 text-left max-w-md mx-auto shadow-sm">
-                            <p class="text-[9.2pt] text-gray-600 leading-relaxed font-kr font-normal break-keep">
+                        <div class="bg-gray-50/90 border border-gray-300 rounded-xl p-3.5 text-left max-w-md mx-auto shadow-sm">
+                            <p class="text-[9.2pt] text-gray-800 leading-relaxed font-kr font-normal break-keep">
                                 ${data.overview}
                             </p>
                         </div>` : ''}
@@ -1395,18 +1460,18 @@
                     <!-- Clean Member & Date Input -->
                     <div class="grid grid-cols-2 gap-8 text-left pt-6 max-w-md mx-auto w-full">
                         <div class="space-y-1">
-                            <span class="text-gray-400 font-mono text-[8pt] tracking-wider uppercase block font-semibold">MEMBER</span>
-                            <div class="border-b border-gray-300 h-6"></div>
+                            <span class="text-gray-600 font-mono text-[8pt] tracking-wider uppercase block font-bold">MEMBER</span>
+                            <div class="border-b border-gray-400 h-6"></div>
                         </div>
                         <div class="space-y-1">
-                            <span class="text-gray-400 font-mono text-[8pt] tracking-wider uppercase block font-semibold">TABLE / DATE</span>
-                            <div class="border-b border-gray-300 h-6"></div>
+                            <span class="text-gray-600 font-mono text-[8pt] tracking-wider uppercase block font-bold">TABLE / DATE</span>
+                            <div class="border-b border-gray-400 h-6"></div>
                         </div>
                     </div>
 
                     <!-- Clean Simple Intro Note (Kiosk Check-in Notice) -->
                     <div class="pt-2 text-center">
-                        <p class="text-[8.5pt] text-gray-500 font-medium font-kr">
+                        <p class="text-[8.5pt] text-gray-600 font-medium font-kr">
                             오전 10시 전 음료와 함께 현장 키오스크를 터치해주시면 당근 1개가 적립됩니다! 오늘도 반갑습니다😁
                         </p>
                     </div>
@@ -1414,7 +1479,7 @@
                 </div>
 
                 <!-- Cover Bottom Footer -->
-                <div class="w-full flex items-center justify-between text-[8pt] text-gray-400 font-mono">
+                <div class="w-full flex items-center justify-between text-[8pt] text-gray-600 font-mono font-medium">
                     <span>SEONGBUK STUDY CREW</span>
                     <span class="font-bold text-gray-800">01</span>
                 </div>
@@ -1428,7 +1493,7 @@
                     <div class="flex items-center gap-2">
                         <span>SESSION 1 • Warm-up & Reading (Part 1)</span>
                     </div>
-                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                    <div class="text-[7.5pt] text-gray-600 font-mono font-bold">
                         SEONGBUK ADVANCED ENGLISH
                     </div>
                 </div>
@@ -1439,10 +1504,10 @@
                     <div class="space-y-2 shrink-0">
                         <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">01</span>
-                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Warm-up <span class="text-[10pt] font-bold text-gray-500 ml-1">(입과 뇌를 푸는 질문 5개)</span></h2>
+                                <span class="sheet-num-badge">01</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Warm-up <span class="text-[10pt] font-bold text-gray-700 ml-1">(입과 뇌를 푸는 질문 5개)</span></h2>
                             </div>
-                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">15 MIN</span>
+                            <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">15 MIN</span>
                         </div>
                         <div class="space-y-2 pt-0.5 pl-1">
                             ${data.warmup.map(q => `
@@ -1455,16 +1520,16 @@
                     </div>
 
                     <!-- Divider between Warm-up and Reading with Comfortable Breathing Room -->
-                    <div class="border-t border-gray-200 my-1"></div>
+                    <div class="border-t border-gray-300 my-1"></div>
 
                     <!-- 2. INTENSIVE READING PART 1 (Subtle Hairline Underline & Box) -->
                     <div class="space-y-2 flex-1 flex flex-col justify-between">
                         <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
-                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-500 ml-1">(지문 낭독 1부: [1]~[${page2Paras.length}] 단락)</span></h2>
+                                <span class="sheet-num-badge">02</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-700 ml-1">(지문 낭독 1부: [1]~[${page2Paras.length}] 단락)</span></h2>
                             </div>
-                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">10 MIN</span>
+                            <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">10 MIN</span>
                         </div>
                         <div class="reading-script-box text-gray-950 space-y-2.5 flex-1 flex flex-col justify-between" style="font-size: ${fullP2FontSize}; line-height: ${fullP2LineHeight};">
                             ${page2Paras.map(p => `
@@ -1492,7 +1557,7 @@
                     <div class="flex items-center gap-2">
                         <span>SESSION 1 • Intensive Reading (Part 2)</span>
                     </div>
-                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                    <div class="text-[7.5pt] text-gray-600 font-mono font-bold">
                         SEONGBUK ADVANCED ENGLISH
                     </div>
                 </div>
@@ -1502,10 +1567,10 @@
                     <!-- Subtle Hairline Header Underline -->
                     <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 shrink-0 mb-1">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">02</span>
-                            <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-500 ml-1">(지문 낭독 2부: [${splitIndex + 1}]~[${totalParas}] 완독)</span></h2>
+                            <span class="sheet-num-badge">02</span>
+                            <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Intensive Reading <span class="text-[10pt] font-bold text-gray-700 ml-1">(지문 낭독 2부: [${splitIndex + 1}]~[${totalParas}] 완독)</span></h2>
                         </div>
-                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">FULL SCRIPT</span>
+                        <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">FULL SCRIPT</span>
                     </div>
 
                     <!-- Clean Script Container with Subtle Background Box & Compact Left Alignment -->
@@ -1534,7 +1599,7 @@
                     <div class="flex items-center gap-2">
                         <span>SESSION 1 • Comprehension & Vocabulary</span>
                     </div>
-                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                    <div class="text-[7.5pt] text-gray-600 font-mono font-bold">
                         SEONGBUK ADVANCED ENGLISH
                     </div>
                 </div>
@@ -1545,10 +1610,10 @@
                     <div class="space-y-2">
                         <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">03</span>
-                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Comprehension Check <span class="text-[10pt] font-bold text-gray-500 ml-1">(내용 파악 5문항)</span></h2>
+                                <span class="sheet-num-badge">03</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Comprehension Check <span class="text-[10pt] font-bold text-gray-700 ml-1">(내용 파악 5문항)</span></h2>
                             </div>
-                            <span class="text-[7.5pt] font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded border border-gray-300 tracking-wider uppercase">
+                            <span class="sheet-tag-badge">
                                 PARAPHRASE REQUIRED
                             </span>
                         </div>
@@ -1566,10 +1631,10 @@
                     <div class="space-y-2.5 pt-3">
                         <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 mb-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">04</span>
-                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[10pt] font-bold text-gray-500 ml-1">(핵심 6선)</span></h2>
+                                <span class="sheet-num-badge">04</span>
+                                <h2 class="text-[12pt] font-black text-gray-950 tracking-tight">Core Vocabulary & Expressions <span class="text-[10pt] font-bold text-gray-700 ml-1">(핵심 6선)</span></h2>
                             </div>
-                            <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">10 MIN</span>
+                            <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">10 MIN</span>
                         </div>
 
                         <!-- 2-Column Simple Accent List -->
@@ -1578,21 +1643,21 @@
                             <!-- Left Col: Vocabulary -->
                             <div class="space-y-2.5">
                                 <div class="text-[10pt] font-black text-gray-950 border-b border-gray-200 pb-1 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
                                     <span>Core Vocabulary (단어 3개)</span>
                                 </div>
                                 ${data.vocabList.map(v => `
                                     <div class="space-y-0.5 text-[9.5pt]">
                                         <div class="flex items-baseline justify-between">
                                             <span class="font-black text-gray-950 text-[11pt]">${v.word}</span>
-                                            <span class="text-[8.5pt] font-mono text-gray-500">${v.phonetic}</span>
+                                            <span class="text-[8.5pt] font-mono text-gray-600 font-medium">${v.phonetic}</span>
                                         </div>
                                         <div class="text-gray-950 font-bold font-kr text-[9.8pt]">
                                             ➔ ${v.meaning}
                                         </div>
                                         ${v.synonyms ? `
-                                        <div class="text-[8.5pt] text-gray-600">
-                                            <span class="font-bold text-gray-800">유의어:</span> ${v.synonyms}
+                                        <div class="text-[8.5pt] text-gray-700">
+                                            <span class="font-bold text-gray-900">유의어:</span> ${v.synonyms}
                                         </div>` : ''}
                                         ${v.example ? `
                                         <div class="text-[9pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
@@ -1605,21 +1670,21 @@
                             <!-- Right Col: Expressions -->
                             <div class="space-y-2.5">
                                 <div class="text-[10pt] font-black text-gray-950 border-b border-gray-200 pb-1 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-900"></span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
                                     <span>Core Expressions (표현 3개)</span>
                                 </div>
                                 ${data.expressionList.map(e => `
                                     <div class="space-y-0.5 text-[9.5pt]">
                                         <div class="flex items-baseline justify-between">
                                             <span class="font-black text-gray-950 text-[10.5pt]">${e.expr}</span>
-                                            <span class="text-[7.5pt] font-mono font-bold text-gray-400 uppercase">PHRASES</span>
+                                            <span class="text-[7.5pt] font-mono font-bold text-gray-600 uppercase">PHRASES</span>
                                         </div>
                                         <div class="text-gray-950 font-bold font-kr text-[9.8pt]">
                                             ➔ ${e.meaning}
                                         </div>
                                         ${e.synonyms ? `
-                                        <div class="text-[8.5pt] text-gray-600">
-                                            <span class="font-bold text-gray-800">유사:</span> ${e.synonyms}
+                                        <div class="text-[8.5pt] text-gray-700">
+                                            <span class="font-bold text-gray-900">유사:</span> ${e.synonyms}
                                         </div>` : ''}
                                         ${e.example ? `
                                         <div class="text-[9pt] text-gray-700 italic pt-0.5 font-normal leading-snug">
@@ -1633,11 +1698,11 @@
                     </div>
 
                     <!-- Clean Break Time Divider (Minimal Floating Pill) -->
-                    <div class="py-2 px-3 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-between text-gray-950 text-[9pt] font-bold mt-auto">
-                        <div class="flex items-center gap-2 font-mono text-[8pt] uppercase tracking-wider text-gray-600">
+                    <div class="py-2 px-3 rounded-lg bg-gray-50 border border-gray-300 flex items-center justify-between text-gray-950 text-[9pt] font-bold mt-auto">
+                        <div class="flex items-center gap-2 font-mono text-[8pt] uppercase tracking-wider text-gray-700">
                             <span>INTERMISSION & COFFEE BREAK</span>
                         </div>
-                        <span class="font-mono text-[8pt] font-bold text-gray-500">10 MIN</span>
+                        <span class="font-mono text-[8pt] font-bold text-gray-600">10 MIN</span>
                     </div>
 
                 </div>
@@ -1656,7 +1721,7 @@
                     <div class="flex items-center gap-2">
                         <span>SESSION 2 • Writing Build-up</span>
                     </div>
-                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                    <div class="text-[7.5pt] text-gray-600 font-mono font-bold">
                         SEONGBUK ADVANCED ENGLISH
                     </div>
                 </div>
@@ -1666,10 +1731,10 @@
                     <!-- Section Header with Subtle Hairline -->
                     <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-3.5 shrink-0">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">06</span>
-                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">Writing Build-up <span class="text-[10pt] font-bold text-gray-500 ml-1">(배운 표현 활용 5문장 영작)</span></h2>
+                            <span class="sheet-num-badge">06</span>
+                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">Writing Build-up <span class="text-[10pt] font-bold text-gray-700 ml-1">(배운 표현 활용 5문장 영작)</span></h2>
                         </div>
-                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">20 MIN</span>
+                        <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">20 MIN</span>
                     </div>
 
                     <!-- 5 Clean Writing Cards with Soft Typography Q-Numbers (No Heavy Black Block) -->
@@ -1677,13 +1742,13 @@
                         ${data.writingList.map(w => `
                             <div class="clean-writing-card pb-1 space-y-1">
                                 <div class="flex items-baseline gap-2">
-                                    <span class="font-mono font-black text-[10.5pt] text-gray-400 shrink-0">Q${w.num}.</span>
+                                    <span class="font-mono font-black text-[10.5pt] text-gray-700 shrink-0">Q${w.num}.</span>
                                     <span class="font-bold text-[10.5pt] text-gray-950 leading-snug break-keep flex-1">${w.korean}</span>
                                 </div>
                                 ${w.hint ? `
-                                <div class="pl-6 text-[8pt] text-gray-500 font-mono flex items-center gap-1 leading-tight">
-                                    <span class="font-bold text-gray-400">💡 Hint:</span>
-                                    <span class="text-gray-600">${w.hint}</span>
+                                <div class="pl-6 text-[8pt] text-gray-600 font-mono flex items-center gap-1 leading-tight">
+                                    <span class="font-bold text-gray-700">💡 Hint:</span>
+                                    <span class="text-gray-700">${w.hint}</span>
                                 </div>` : ''}
                                 <div class="clean-ruled-lines w-full pt-1"></div>
                             </div>
@@ -1706,7 +1771,7 @@
                     <div class="flex items-center gap-2">
                         <span>SESSION 2 • In-depth Discussion</span>
                     </div>
-                    <div class="text-[7.5pt] text-gray-400 font-mono font-bold">
+                    <div class="text-[7.5pt] text-gray-600 font-mono font-bold">
                         SEONGBUK ADVANCED ENGLISH
                     </div>
                 </div>
@@ -1716,10 +1781,10 @@
                     <!-- Section Title Header with Subtle Hairline -->
                     <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-2 shrink-0">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-gray-900 text-white font-mono font-bold text-[8pt]">07</span>
-                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">In-depth Discussion <span class="text-[10pt] font-bold text-gray-500 ml-1">(4가지 테마 심층 질문 ${totalDiscQCount}선)</span></h2>
+                            <span class="sheet-num-badge">07</span>
+                            <h2 class="text-[12.5pt] font-black text-gray-950 tracking-tight">In-depth Discussion <span class="text-[10pt] font-bold text-gray-700 ml-1">(4가지 테마 심층 질문 ${totalDiscQCount}선)</span></h2>
                         </div>
-                        <span class="text-[8pt] font-mono font-bold text-gray-400 tracking-wider uppercase">30 MIN</span>
+                        <span class="text-[8pt] font-mono font-bold text-gray-600 tracking-wider uppercase">30 MIN</span>
                     </div>
 
                     <!-- 4 Clean Editorial Thematic Sections with Soft Minimalist PART Labels -->
@@ -1729,8 +1794,8 @@
                         ${partA_Questions.length > 0 ? `
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
-                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART A</span>
-                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-mono font-bold text-gray-700 text-[8.5pt] tracking-wider uppercase">PART A</span>
+                                <span class="text-gray-400 text-[8pt]">•</span>
                                 <span class="font-bold text-[10.5pt] text-gray-900">Personal Perspectives & Lifestyle</span>
                             </div>
                             <div class="space-y-1.5 pt-0.5 pl-1">
@@ -1747,8 +1812,8 @@
                         ${partB_Questions.length > 0 ? `
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
-                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART B</span>
-                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-mono font-bold text-gray-700 text-[8.5pt] tracking-wider uppercase">PART B</span>
+                                <span class="text-gray-400 text-[8pt]">•</span>
                                 <span class="font-bold text-[10.5pt] text-gray-900">Social Trends & Cultural Dynamics</span>
                             </div>
                             <div class="space-y-1.5 pt-0.5 pl-1">
@@ -1765,8 +1830,8 @@
                         ${partC_Questions.length > 0 ? `
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
-                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART C</span>
-                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-mono font-bold text-gray-700 text-[8.5pt] tracking-wider uppercase">PART C</span>
+                                <span class="text-gray-400 text-[8pt]">•</span>
                                 <span class="font-bold text-[10.5pt] text-gray-900">Thought Experiments & Hypothetical Scenarios</span>
                             </div>
                             <div class="space-y-1.5 pt-0.5 pl-1">
@@ -1783,8 +1848,8 @@
                         ${partD_Questions.length > 0 ? `
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2 border-b border-gray-200 pb-1 mb-1.5">
-                                <span class="font-mono font-bold text-gray-400 text-[8.5pt] tracking-wider uppercase">PART D</span>
-                                <span class="text-gray-300 text-[8pt]">•</span>
+                                <span class="font-mono font-bold text-gray-700 text-[8.5pt] tracking-wider uppercase">PART D</span>
+                                <span class="text-gray-400 text-[8pt]">•</span>
                                 <span class="font-bold text-[10.5pt] text-gray-900">Hard Debates & Ethical Dilemmas</span>
                             </div>
                             <div class="space-y-1.5 pt-0.5 pl-1">
@@ -1800,11 +1865,11 @@
                     </div>
 
                     <!-- Clean Simple Outro (Floating Footer Note) -->
-                    <div class="pt-3 mt-auto shrink-0 flex items-center justify-between text-[8.2pt] text-gray-500 font-medium border-t border-gray-100">
+                    <div class="pt-3 mt-auto shrink-0 flex items-center justify-between text-[8.2pt] text-gray-600 font-medium border-t border-gray-300">
                         <div class="flex items-center gap-1.5">
                             <span>스터디 후기를 남겨주신 후, 현장 키오스크를 터치해주시면 당근 1개가 적립됩니다! 오늘도 반가웠습니다 😁</span>
                         </div>
-                        <span class="font-mono text-[7.5pt] text-gray-400 font-semibold tracking-wider uppercase shrink-0">SEONGBUK CREW</span>
+                        <span class="font-mono text-[7.5pt] text-gray-600 font-semibold tracking-wider uppercase shrink-0">SEONGBUK CREW</span>
                     </div>
 
                 </div>
