@@ -6331,11 +6331,11 @@ ${ytUrl}
                 const nextCount = tbl.length + 1;
                 const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
                 const nextAvgAge = nextAgeSum / nextCount;
-                cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
+                cost += Math.abs(nextAvgAge - overallAvgAge) * 1500;
 
                 for (const existing of tbl) {
                     if (isAvoidPair(existing, member)) cost += 9000;
-                    cost += getPairMeetingCount(existing, member) * 800;
+                    cost += getPairMeetingCount(existing, member) * 600;
                     if (isPart2 && part1SeatingSnapshot) {
                         for (const p1T of part1SeatingSnapshot) {
                             if (p1T.some(x => x.id === existing.id) && p1T.some(x => x.id === member.id)) {
@@ -6387,12 +6387,12 @@ ${ytUrl}
                 let p = 0;
                 const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
                 const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
-                p += Math.abs(tblAvgAge - overallAvgAge) * 200;
+                p += Math.abs(tblAvgAge - overallAvgAge) * 2500;
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
                         if (isAvoidPair(tbl[i], tbl[j])) p += 9000;
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
+                        p += getPairMeetingCount(tbl[i], tbl[j]) * 600;
                         if (isPart2 && part1SeatingSnapshot) {
                             for (const p1T of part1SeatingSnapshot) {
                                 if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
