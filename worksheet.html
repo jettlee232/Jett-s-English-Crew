@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 이 페이지는 자체 다크 테마를 갖는다. 선언하지 않으면 크롬 안드로이드의
-         '자동 다크 테마'가 흰 A4 용지까지 반전시켜 PDF가 검게 나온다. -->
-    <meta name="color-scheme" content="dark">
+    <!-- 라이트/다크를 브라우저에 명시하여 모바일 강제 반전 및 PDF 인쇄 시 검은 화면 방지 -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>성북구 중상급 영어회화 - 워크시트 스튜디오 Pro</title>
     
     <!-- Favicon -->
@@ -48,9 +48,8 @@
     </script>
 
     <style>
-        /* 이 페이지는 자체 다크 테마다(meta color-scheme 와 짝). 선언해두지 않으면
-           크롬 안드로이드 자동 다크 테마가 흰 A4 를 반전시켜 PDF 가 검게 나온다. */
-        :root { color-scheme: dark; }
+        /* 라이트/다크를 명시하여 모바일 자동 다크 인버전(Force Dark) 방지 */
+        :root { color-scheme: light dark; }
 
         /* 헤더가 모바일에서 가로로 넘쳐 PDF 버튼을 가리는 문제.
            뱃지는 JS가 className을 통째로 덮어쓰므로 클래스가 아닌 CSS로 잡는다.
@@ -80,7 +79,12 @@
             padding: 13mm 16mm 12mm 16mm;
             margin: 0 auto 30px auto;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             color: #0f172a !important;
+            color-scheme: light !important;
+            forced-color-adjust: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
             box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12);
             position: relative;
             box-sizing: border-box;
@@ -91,6 +95,12 @@
             font-size: calc(10pt * var(--sheet-font-scale, 1.12));
             line-height: var(--print-line-height, 1.72);
             letter-spacing: -0.015em;
+        }
+
+        .a4-page-sheet,
+        .a4-page-sheet * {
+            color-scheme: light !important;
+            forced-color-adjust: none !important;
         }
 
         /* 워터마크 레이어 */
@@ -240,6 +250,11 @@
                 max-height: none !important;
                 padding: 20px 16px 24px 16px !important;
                 margin-bottom: 20px !important;
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+                color-scheme: light !important;
+                forced-color-adjust: none !important;
                 border-radius: 16px !important;
                 font-size: calc(9.5pt * var(--sheet-font-scale, 1.12));
             }
@@ -258,13 +273,16 @@
                 margin: 0;
             }
 
-            /* 화면이 다크든 아니든 인쇄 경로는 라이트로 고정 */
+            /* 화면이 다크든 아니든 인쇄 경로는 라이트로 고정 및 강제 색상 조정 차단 */
             :root {
                 color-scheme: light !important;
+                forced-color-adjust: none !important;
             }
 
             /* 1. 최상위 html, body 순백색 강제 */
             html, body {
+                color-scheme: light !important;
+                forced-color-adjust: none !important;
                 background: #ffffff !important;
                 background-color: #ffffff !important;
                 color: #0f172a !important;
