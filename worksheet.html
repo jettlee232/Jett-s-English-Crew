@@ -1158,15 +1158,15 @@
                 let totalChars = 0;
                 data.readingParagraphs.forEach(p => totalChars += p.content.length);
 
-                // Maximize Page 1 fill generously: Page 1 holds ~75% of paragraphs (e.g. 9 out of 12) to fill right down to the footer
-                let teaserSplit = 9;
-                if (totalParas <= 6) teaserSplit = 4;
-                else if (totalParas <= 8) teaserSplit = 6;
-                else if (totalParas <= 10) teaserSplit = 8;
-                else if (totalParas <= 12) teaserSplit = 9;
-                else if (totalParas <= 14) teaserSplit = 10;
-                else if (totalParas <= 16) teaserSplit = 12;
-                else teaserSplit = Math.ceil(totalParas * 0.75);
+                // Balanced Page 1 & Page 2 split for larger, comfortable font readability
+                let teaserSplit = 7;
+                if (totalParas <= 6) teaserSplit = 3;
+                else if (totalParas <= 8) teaserSplit = 5;
+                else if (totalParas <= 10) teaserSplit = 6;
+                else if (totalParas <= 12) teaserSplit = 7;
+                else if (totalParas <= 14) teaserSplit = 8;
+                else if (totalParas <= 16) teaserSplit = 10;
+                else teaserSplit = Math.ceil(totalParas * 0.65);
 
                 const teaserP1Paras = data.readingParagraphs.slice(0, teaserSplit);
                 const teaserP2Paras = data.readingParagraphs.slice(teaserSplit);
@@ -1177,29 +1177,29 @@
                 let p2Chars = 0;
                 teaserP2Paras.forEach(p => p2Chars += p.content.length);
 
-                // Adaptive typography to fill Page 1 gracefully right before the footer
-                let scriptP1FontSize = "9.7pt";
-                let scriptP1LineHeight = "1.58";
-                if (p1Chars > 2500) {
-                    scriptP1FontSize = "8.8pt";
-                    scriptP1LineHeight = "1.44";
-                } else if (p1Chars > 1900) {
-                    scriptP1FontSize = "9.2pt";
-                    scriptP1LineHeight = "1.48";
-                } else if (p1Chars > 1300) {
+                // Adaptive typography to fill Page 1 gracefully with large, comfortable font
+                let scriptP1FontSize = "10.8pt";
+                let scriptP1LineHeight = "1.65";
+                if (p1Chars > 2600) {
                     scriptP1FontSize = "9.5pt";
-                    scriptP1LineHeight = "1.54";
+                    scriptP1LineHeight = "1.50";
+                } else if (p1Chars > 2000) {
+                    scriptP1FontSize = "10.0pt";
+                    scriptP1LineHeight = "1.56";
+                } else if (p1Chars > 1400) {
+                    scriptP1FontSize = "10.5pt";
+                    scriptP1LineHeight = "1.62";
                 }
 
                 // Adaptive typography for Page 2
-                let scriptP2FontSize = "9.8pt";
-                let scriptP2LineHeight = "1.60";
-                if (p2Chars > 1600) {
-                    scriptP2FontSize = "8.8pt";
-                    scriptP2LineHeight = "1.46";
-                } else if (p2Chars > 1100) {
-                    scriptP2FontSize = "9.3pt";
-                    scriptP2LineHeight = "1.54";
+                let scriptP2FontSize = "10.8pt";
+                let scriptP2LineHeight = "1.65";
+                if (p2Chars > 2000) {
+                    scriptP2FontSize = "9.6pt";
+                    scriptP2LineHeight = "1.52";
+                } else if (p2Chars > 1400) {
+                    scriptP2FontSize = "10.3pt";
+                    scriptP2LineHeight = "1.60";
                 }
 
                 let teaserHtml = `
@@ -1406,16 +1406,18 @@
             let p3Chars = 0;
             page3Paras.forEach(p => p3Chars += p.content.length);
 
-            let fullP2FontSize = "10.6pt";
-            let fullP2LineHeight = "1.80";
-            let fullP3FontSize = "10.6pt";
-            let fullP3LineHeight = "1.82";
+            let fullP2FontSize = "11.2pt";
+            let fullP2LineHeight = "1.74";
+            let fullP3FontSize = "11.6pt";
+            let fullP3LineHeight = "1.78";
 
-            if (p2Chars > 1600) { fullP2FontSize = "9.5pt"; fullP2LineHeight = "1.58"; }
-            else if (p2Chars > 1200) { fullP2FontSize = "10.0pt"; fullP2LineHeight = "1.68"; }
+            if (p2Chars > 2200) { fullP2FontSize = "9.8pt"; fullP2LineHeight = "1.56"; }
+            else if (p2Chars > 1600) { fullP2FontSize = "10.4pt"; fullP2LineHeight = "1.65"; }
+            else if (p2Chars > 1100) { fullP2FontSize = "10.8pt"; fullP2LineHeight = "1.70"; }
 
-            if (p3Chars > 2400) { fullP3FontSize = "9.2pt"; fullP3LineHeight = "1.52"; }
-            else if (p3Chars > 1800) { fullP3FontSize = "9.8pt"; fullP3LineHeight = "1.65"; }
+            if (p3Chars > 2600) { fullP3FontSize = "10.0pt"; fullP3LineHeight = "1.56"; }
+            else if (p3Chars > 1800) { fullP3FontSize = "10.8pt"; fullP3LineHeight = "1.68"; }
+            else if (p3Chars > 1200) { fullP3FontSize = "11.4pt"; fullP3LineHeight = "1.75"; }
 
             // Dynamic continuous numbering for Discussion Questions (1 to N)
             let runningDiscNum = 1;
