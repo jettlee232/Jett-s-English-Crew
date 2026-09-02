@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 라이트/다크를 브라우저에 명시하여 모바일 강제 반전 및 PDF 인쇄 시 검은 화면 방지 -->
-    <meta name="color-scheme" content="light dark">
-    <meta name="supported-color-schemes" content="light dark">
+    <!-- 브라우저에 라이트 테마를 명시하여 모바일 다크 모드/인쇄 시 검은 화면 원천 차단 -->
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
     <title>성북구 중상급 영어회화 - 워크시트 스튜디오 Pro</title>
     
     <!-- Favicon -->
@@ -48,8 +48,8 @@
     </script>
 
     <style>
-        /* 라이트/다크를 명시하여 모바일 자동 다크 인버전(Force Dark) 방지 */
-        :root { color-scheme: light dark; }
+        /* 라이트 테마를 강제 고정하여 모바일 자동 다크 인버전(Force Dark) 방지 */
+        :root { color-scheme: light !important; }
 
         /* 헤더가 모바일에서 가로로 넘쳐 PDF 버튼을 가리는 문제.
            뱃지는 JS가 className을 통째로 덮어쓰므로 클래스가 아닌 CSS로 잡는다.
@@ -241,6 +241,50 @@
             margin-left: 2px;
         }
 
+        /* ========================================================
+           📖 리더 모드 전용 (회원/사용자가 PDF/학습자료를 볼 때 깔끔한 라이트 페이퍼 뷰)
+           ======================================================== */
+        .reader-mode-active,
+        .reader-mode-active body {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            color-scheme: light !important;
+        }
+        .reader-mode-active header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .reader-mode-active #headerBrandTitle {
+            color: #0f172a !important;
+        }
+        .reader-mode-active #previewContainerWrapper {
+            background-color: #f1f5f9 !important;
+        }
+        .reader-mode-active .sticky {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-color: #cbd5e1 !important;
+            color: #1e293b !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08) !important;
+        }
+        .reader-mode-active #zoomDisplay {
+            color: #334155 !important;
+        }
+        .reader-mode-active .sticky button.bg-studio-border\/70 {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        .reader-mode-active .sticky button.bg-studio-border\/70:hover {
+            background-color: #cbd5e1 !important;
+        }
+        .reader-mode-active .a4-page-sheet {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            color-scheme: light !important;
+            forced-color-adjust: none !important;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        }
+
         /* 모바일 화면 뷰 최적화 (읽기 편한 카드형 뷰) */
         @media screen and (max-width: 768px) {
             .a4-page-sheet {
@@ -260,6 +304,7 @@
             }
             .reader-mode-active #previewContainerWrapper {
                 padding: 12px 8px !important;
+                background-color: #f1f5f9 !important;
             }
         }
 
