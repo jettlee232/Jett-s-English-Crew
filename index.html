@@ -932,7 +932,7 @@
                         </div>
                         <span id="topicRoundDisplay" class="bg-blue-600 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg shadow-sm shrink-0 whitespace-nowrap flex items-center justify-center gap-1 min-w-[62px]">
                             <i class="fa-solid fa-flag text-[9px]"></i>
-                            <span>19회차</span>
+                            <span>20회차</span>
                         </span>
                     </div>
 
@@ -1707,7 +1707,7 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <input id="inputTopicSchedule" type="text" placeholder="예: 9월 5일 (토) 10:00 - 11:50" class="col-span-2 bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <input id="inputTopicRound" type="text" placeholder="예: 19회차" class="bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <input id="inputTopicRound" type="text" placeholder="예: 20회차" class="bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
                     </div>
 
@@ -2485,7 +2485,7 @@
         let customConfirmCallback = null;
 
         let topicData = {
-            round: "19회차",
+            round: "20회차",
             schedule: "9월 5일 (토) 10:00 - 11:50",
             location: "투썸 아리랑힐 호텔점 2층",
             locationUrl: "https://kko.to/eZx7E9kExG",
@@ -2858,7 +2858,7 @@
             const docsEl = document.getElementById('topicDocsLink');
 
             if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${esc(topicData.schedule || '')}</span>`;
-            if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '19회차')}</span>`;
+            if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '20회차')}</span>`;
             if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
@@ -2997,8 +2997,8 @@
             const schedule = (topicData && topicData.schedule) ? topicData.schedule : "9월 5일 (토) 10:00 - 11:50";
             const title = (topicData && topicData.title) ? topicData.title.replace(/^["']|["']$/g, '') : "청중을 사로잡는 4가지 스토리텔링 비법 📖✨";
             const ytUrl = (topicData && topicData.youtubeUrl) ? topicData.youtubeUrl : "https://youtu.be/JOs-q7rXqdk?si=5W-i8DqKjc80r8Yw";
-            const roundText = (topicData && topicData.round) ? topicData.round.trim() : "19회차";
-            const roundTag = roundText ? (roundText.startsWith('[') ? roundText : `[${roundText}]`) : "[19회차]";
+            const roundText = (topicData && topicData.round) ? topicData.round.trim() : "20회차";
+            const roundTag = roundText ? (roundText.startsWith('[') ? roundText : `[${roundText}]`) : "[20회차]";
 
             const text = `안녕하세요! 😁
 성북구 중상급 영어회화
