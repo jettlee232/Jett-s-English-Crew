@@ -3803,7 +3803,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             }
             let csvContent = "\uFEFF이름,성별,연령대,당근수,총참석회차,신규여부\n";
             membersData.forEach(m => {
-                const isNewStr = (m.isNew || m.totalAttended === 1) ? 'Y' : 'N';
+                const isNewStr = isNewbieMember(m) ? 'Y' : 'N';
                 csvContent += `"${m.name || ''}","${m.gender || 'F'}","${m.ageGroup || '30대'}",${m.coins || 0},${m.totalAttended ?? 0},"${isNewStr}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -3876,7 +3876,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         const ageGroup = cols[2] || '30대';
                         const coins = parseInt(cols[3]) || 0;
                         const totalAttended = Number.isFinite(parseInt(cols[4])) ? parseInt(cols[4]) : 0;
-                        const isNew = (cols[5] === 'Y' || cols[5] === 'y') && totalAttended === 1;
+                        const isNew = (cols[5] === 'Y' || cols[5] === 'y') && totalAttended === 0;
 
                         if (!name) continue;
 
@@ -3948,7 +3948,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             m.checkedInReview = false;
                             m.leftEarly = false;
                             m.totalAttended = newTotal;
-                            m.isNew = newTotal <= 1;
+                            m.isNew = newTotal === 0;
                             if (shouldIncrementAttended && wasToday) {
                                 m.lastAttendedAt = now;
                             }
@@ -4812,7 +4812,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             const idx = membersData.findIndex(m => m.id === selectedAdminMemberId);
             if (idx !== -1) {
                 const now = new Date().toISOString();
-                const isNew = totalAttended <= 1;
+                const isNew = totalAttended === 0;
                 const isLeader = name.includes('Jett');
                 membersData[idx] = {
                     ...membersData[idx],
@@ -5728,7 +5728,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                                 `}
                             ` : members.map(m => {
                                 const isLeader = m.isLeader || (m.name || '').includes('Jett');
-                                const isNew = m.isNew || m.totalAttended === 1 || m.lastAction === '신규 참석';
+                                const isNew = isNewbieMember(m);
                                 const isMale = m.gender === 'M';
 
                                 let tagHtml = '';
