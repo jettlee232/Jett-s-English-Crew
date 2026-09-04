@@ -1890,22 +1890,31 @@
                         </div>
 
                         <div id="adminActionPanelBody" class="space-y-3 opacity-40 pointer-events-none transition-all">
-                            <div class="space-y-1">
-                                <label class="text-xs font-bold text-blue-400 block whitespace-nowrap">오늘 스터디 참석 상태 전환</label>
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-blue-400 block whitespace-nowrap">오늘 스터디 참석 상태 전환</label>
+                                    <span class="text-[10px] text-zinc-500 font-normal">*목요일 이전 취소는 일반 미참</span>
+                                </div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <button id="btnPanelToday" onclick="panelSetToday(true)" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                    <button id="btnPanelToday" onclick="panelSetToday(true)" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95" title="오늘 스터디 참석 등록">
                                         <i class="fa-solid fa-circle-check text-xs"></i>
                                         <span>오늘 참석</span>
                                     </button>
-                                    <button id="btnPanelCancel" onclick="panelHandleNoShow('cancel')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                    <button id="btnPanelAbsent" onclick="panelSetToday(false)" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95" title="목요일 이전 자유 취소 또는 단순 불참 (당근 변동 없음)">
+                                        <i class="fa-solid fa-circle-xmark text-xs"></i>
+                                        <span>일반 미참 (취소)</span>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button id="btnPanelCancel" onclick="panelHandleNoShow('cancel')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95" title="목요일 자정 마감 후 입금 상태에서 사전 연락 취소 (+2당근 페이백)">
                                         <i class="fa-solid fa-clock-rotate-left text-xs"></i>
                                         <span>사전취소(+2)</span>
                                     </button>
-                                    <button id="btnPanelNoshow" onclick="panelHandleNoShow('noshow')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                    <button id="btnPanelNoshow" onclick="panelHandleNoShow('noshow')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95" title="마감 후 사전 연락 없는 무단 불참 (0당근)">
                                         <i class="fa-solid fa-ban text-xs"></i>
                                         <span>무단 노쇼</span>
                                     </button>
-                                    <button id="btnPanelLeftEarly" onclick="panelHandleNoShow('leftearly')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95">
+                                    <button id="btnPanelLeftEarly" onclick="panelHandleNoShow('leftearly')" class="py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95" title="1부 참석 후 귀가 (출석 인정, 2부 자리 제외)">
                                         <i class="fa-solid fa-person-walking-arrow-right text-xs"></i>
                                         <span>조기 퇴장</span>
                                     </button>
@@ -2260,6 +2269,58 @@
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button onclick="closeConfirmModal(false)" class="w-full bg-zinc-900 text-zinc-400 hover:text-white text-xs sm:text-sm font-medium py-2.5 rounded-xl border border-zinc-800 whitespace-nowrap">취소</button>
                 <button onclick="closeConfirmModal(true)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold py-2.5 rounded-xl shadow-sm whitespace-nowrap">확인 실행</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seat Member Remove/Action Modal (일반 미참석 vs 조기 퇴장 선택) -->
+    <div id="seatMemberActionModal" onclick="if(event.target === this) closeSeatMemberActionModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#121216] border border-[#23232b] w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div class="w-11 h-11 rounded-xl bg-zinc-800 text-rose-400 border border-zinc-700 flex items-center justify-center text-lg mx-auto mb-2 shadow-sm">
+                    <i class="fa-solid fa-user-xmark"></i>
+                </div>
+                <h3 class="font-bold text-base text-white whitespace-nowrap">좌석 제외 및 참석 상태 선택</h3>
+                <p class="text-xs sm:text-sm text-zinc-300 mt-1 font-semibold">
+                    <span id="seatActionMemberName" class="text-blue-400 font-bold underline"></span> 님의 처리 방식을 선택하세요
+                </p>
+            </div>
+
+            <div class="space-y-2.5">
+                <!-- Option 1: 일반 미참석 -->
+                <button type="button" onclick="executeSeatMemberAction('absent')" class="w-full text-left p-3 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition active:scale-98 group cursor-pointer shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-zinc-400"></span>
+                            <span>⚪ 일반 미참석 (취소 / 불참)</span>
+                        </span>
+                        <span class="text-[10px] font-semibold bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700">추천</span>
+                    </div>
+                    <p class="text-[11px] text-zinc-400 mt-1 pl-3.5 leading-normal">
+                        목요일 이전 취소 등 오늘 스터디에 오지 않은 회원입니다.<br>
+                        <span class="text-zinc-500">• 출석 및 좌석 완전 제외 (당근 변동 없음)</span>
+                    </p>
+                </button>
+
+                <!-- Option 2: 조기 퇴장 -->
+                <button type="button" onclick="executeSeatMemberAction('leftearly')" class="w-full text-left p-3 rounded-xl border border-violet-800/60 bg-violet-950/30 hover:bg-violet-950/60 hover:border-violet-600 transition active:scale-98 group cursor-pointer shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs sm:text-sm font-bold text-violet-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-walking-arrow-right text-xs text-violet-400"></i>
+                            <span>🚶 조기 퇴장 (1부 참여 후 귀가)</span>
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-zinc-400 mt-1 pl-4 leading-normal">
+                        오늘 스터디에 왔으나 중간에 먼저 퇴장하는 회원입니다.<br>
+                        <span class="text-violet-400/80">• 오늘 출석 인정(유효기간 갱신), 2부 좌석에서만 제외</span>
+                    </p>
+                </button>
+            </div>
+
+            <div class="pt-1">
+                <button type="button" onclick="closeSeatMemberActionModal()" class="w-full bg-zinc-900 text-zinc-400 hover:text-white text-xs sm:text-sm font-medium py-2.5 rounded-xl border border-zinc-800 whitespace-nowrap cursor-pointer">
+                    취소 (닫기)
+                </button>
             </div>
         </div>
     </div>
@@ -4581,6 +4642,8 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 statusBadgeHtml = '<span class="bg-amber-600 text-white border border-amber-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">📢 사전 취소됨</span>';
             } else if (member.lastAction && member.lastAction.includes('무단 노쇼')) {
                 statusBadgeHtml = '<span class="bg-rose-600 text-white border border-rose-400 font-bold px-2.5 py-0.5 rounded-full shadow-sm">🚫 무단 노쇼</span>';
+            } else if (member.lastAction && (member.lastAction.includes('취소') || member.lastAction.includes('제외') || member.lastAction.includes('불참'))) {
+                statusBadgeHtml = '<span class="bg-zinc-800 text-zinc-300 border border-zinc-600 font-bold px-2.5 py-0.5 rounded-full">⚪ 취소 / 미참</span>';
             } else {
                 statusBadgeHtml = '<span class="bg-zinc-800 text-zinc-400 border border-zinc-700 font-bold px-2.5 py-0.5 rounded-full">⚪ 미참석</span>';
             }
@@ -4602,6 +4665,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
             // Active button state styling
             const btnToday = document.getElementById('btnPanelToday');
+            const btnAbsent = document.getElementById('btnPanelAbsent');
             const btnCancel = document.getElementById('btnPanelCancel');
             const btnNoshow = document.getElementById('btnPanelNoshow');
             const btnLeftEarly = document.getElementById('btnPanelLeftEarly');
@@ -4610,32 +4674,38 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 // Reset classes
                 const baseClass = "py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap active:scale-95 ";
                 btnToday.className = baseClass;
+                if (btnAbsent) btnAbsent.className = baseClass;
                 btnCancel.className = baseClass;
                 btnNoshow.className = baseClass;
                 if (btnLeftEarly) btnLeftEarly.className = baseClass;
 
                 if (member.leftEarly) {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    if (btnAbsent) btnAbsent.className += "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
                     if (btnLeftEarly) btnLeftEarly.className += "bg-violet-600 text-white font-bold shadow-lg ring-2 ring-violet-400 border-violet-500";
                 } else if (member.isToday) {
                     btnToday.className += "bg-blue-600 text-white font-bold shadow-lg ring-2 ring-blue-400 border-blue-500";
+                    if (btnAbsent) btnAbsent.className += "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
                     if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else if (member.lastAction && member.lastAction.includes('사전 취소')) {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    if (btnAbsent) btnAbsent.className += "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-amber-600 text-white font-bold shadow-lg ring-2 ring-amber-400 border-amber-500";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-300 border border-zinc-700";
                     if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else if (member.lastAction && member.lastAction.includes('무단 노쇼')) {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-950 hover:text-blue-300 text-zinc-300 border border-zinc-700";
+                    if (btnAbsent) btnAbsent.className += "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-950 hover:text-amber-300 text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-rose-600 text-white font-bold shadow-lg ring-2 ring-rose-400 border-rose-500";
                     if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-950 hover:text-violet-300 text-zinc-300 border border-zinc-700";
                 } else {
                     btnToday.className += "bg-zinc-800 hover:bg-blue-600 hover:text-white text-zinc-300 border border-zinc-700";
+                    if (btnAbsent) btnAbsent.className += "bg-zinc-700 text-white font-bold shadow ring-1 ring-zinc-400 border-zinc-500";
                     btnCancel.className += "bg-zinc-800 hover:bg-amber-600 hover:text-white text-zinc-300 border border-zinc-700";
                     btnNoshow.className += "bg-zinc-800 hover:bg-rose-600 hover:text-white text-zinc-300 border border-zinc-700";
                     if (btnLeftEarly) btnLeftEarly.className += "bg-zinc-800 hover:bg-violet-600 hover:text-white text-zinc-300 border border-zinc-700";
@@ -4656,11 +4726,11 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
             const now = new Date().toISOString();
             membersData[idx].isToday = isToday;
+            membersData[idx].leftEarly = false;
             if (isToday) {
-                membersData[idx].leftEarly = false;
                 membersData[idx].lastAttendedAt = now;
             }
-            membersData[idx].lastAction = isToday ? '오늘 참석 등록' : '참석 제외';
+            membersData[idx].lastAction = isToday ? '오늘 참석 등록' : '일반 취소 (미참석)';
             membersData[idx].updatedAt = now;
 
             persistMembers([...membersData]);
@@ -4668,13 +4738,13 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             renderAdminMemberList();
             renderUI();
 
-            showToast(isToday ? `📌 ${membersData[idx].name}님 오늘 참석으로 등록되었습니다.` : `⚪ ${membersData[idx].name}님 참석 제외되었습니다.`, "success");
+            showToast(isToday ? `📌 ${membersData[idx].name}님 오늘 참석으로 등록되었습니다.` : `⚪ ${membersData[idx].name}님 미참석(취소) 처리되었습니다. (당근 변동 없음)`, "success");
 
             try {
                 const docRef = doc(membersCollectionRef, selectedAdminMemberId);
                 const updatePayload = {
                     isToday,
-                    leftEarly: membersData[idx].leftEarly || false,
+                    leftEarly: false,
                     lastAction: membersData[idx].lastAction,
                     updatedAt: now
                 };
@@ -4683,7 +4753,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 }
                 await updateDoc(docRef, updatePayload);
             } catch (e) {
-                console.warn(e);
+                console.warn("회원 참석 상태 동기화 실패 (로컬은 저장됨):", e);
             }
         };
 
@@ -5761,7 +5831,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                                 return `
                                     <div ${memberClickHandler} class="aspect-[4/3] rounded-xl ${cardTheme} ${memberVisualClass} border p-2 sm:p-3 flex flex-col items-center justify-center text-center shadow-sm transition-all duration-200 relative select-none group">
                                         ${(isLeaderAuthenticated && !isLeader && !isSeatMoveMode) ? `
-                                            <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 조기 퇴장 처리">
+                                            <button type="button" onclick="event.stopPropagation(); quickRemoveSeatedMember('${m.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/70 hover:bg-rose-600 text-zinc-400 hover:text-white border border-zinc-700/60 hover:border-rose-400 flex items-center justify-center text-[9px] transition active:scale-90 shadow-sm cursor-pointer" title="${esc(m.name)}님 상태 변경 (미참석 취소 / 조기 퇴장)">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         ` : ''}
@@ -5793,6 +5863,8 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             });
         };
 
+        let activeSeatActionMemberId = null;
+
         window.quickRemoveSeatedMember = function(memberId) {
             if (!isLeaderAuthenticated) {
                 showToast("🔒 리더 전용 기능입니다 (🔑 상단 인증 필요)", "warning");
@@ -5801,30 +5873,72 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             const member = membersData.find(m => m.id === memberId);
             if (!member) return;
 
-            openConfirmModal({
-                title: "👋 조기 퇴장 처리",
-                msg: `<strong>${esc(member.name)}</strong>님을 오늘 스터디에서 조기 퇴장(좌석 제외) 처리하시겠습니까?<br><span class='text-xs text-zinc-500'>* 출석 및 적립 이력은 보존되며 좌석 배치에서만 제외됩니다.</span>`,
-                showOption: false,
-                onConfirm: async () => {
-                    const now = new Date().toISOString();
-                    member.leftEarly = true;
-                    member.lastAction = '조기 퇴장';
-                    member.updatedAt = now;
-                    persistMembers([...membersData]);
-                    renderUI();
-                    showToast(`👋 ${member.name}님이 조기 퇴장 처리되었습니다.`, "info");
+            activeSeatActionMemberId = memberId;
+            const modal = document.getElementById('seatMemberActionModal');
+            const nameEl = document.getElementById('seatActionMemberName');
+            if (nameEl) nameEl.innerText = member.name || '회원';
+            if (modal) modal.classList.remove('hidden');
+        };
 
-                    try {
-                        await updateDoc(doc(membersCollectionRef, member.id), {
-                            leftEarly: true,
-                            lastAction: '조기 퇴장',
-                            updatedAt: now
-                        });
-                    } catch (e) {
-                        console.warn("조기 퇴장 Firestore 동기화 실패 (로컬은 저장됨):", e);
-                    }
+        window.closeSeatMemberActionModal = function() {
+            const modal = document.getElementById('seatMemberActionModal');
+            if (modal) modal.classList.add('hidden');
+            activeSeatActionMemberId = null;
+        };
+
+        window.executeSeatMemberAction = async function(actionType) {
+            if (!activeSeatActionMemberId) return;
+            const member = membersData.find(m => m.id === activeSeatActionMemberId);
+            if (!member) {
+                closeSeatMemberActionModal();
+                return;
+            }
+
+            const now = new Date().toISOString();
+            const memberId = member.id;
+            closeSeatMemberActionModal();
+
+            if (actionType === 'absent') {
+                // 일반 미참석 (목요일 이전 자유 취소 / 단순 불참)
+                member.isToday = false;
+                member.leftEarly = false;
+                member.lastAction = '일반 취소 (미참석)';
+                member.updatedAt = now;
+                persistMembers([...membersData]);
+                renderUI();
+                showToast(`⚪ ${member.name}님이 오늘 미참석(취소) 처리되었습니다. (당근 변동 없음)`, "info");
+
+                try {
+                    await updateDoc(doc(membersCollectionRef, memberId), {
+                        isToday: false,
+                        leftEarly: false,
+                        lastAction: '일반 취소 (미참석)',
+                        updatedAt: now
+                    });
+                } catch (e) {
+                    console.warn("미참석 Firestore 동기화 실패 (로컬은 저장됨):", e);
                 }
-            });
+            } else if (actionType === 'leftearly') {
+                // 조기 퇴장 (1부 참여 후 귀가)
+                member.leftEarly = true;
+                member.lastAction = '조기 퇴장';
+                member.lastAttendedAt = now;
+                member.updatedAt = now;
+                persistMembers([...membersData]);
+                renderUI();
+                showToast(`🚶 ${member.name}님이 조기 퇴장 처리되었습니다. (출석 인정, 2부 좌석 제외)`, "info");
+
+                try {
+                    await updateDoc(doc(membersCollectionRef, memberId), {
+                        leftEarly: true,
+                        lastAction: '조기 퇴장',
+                        lastAttendedAt: now,
+                        updatedAt: now
+                    });
+                } catch (e) {
+                    console.warn("조기 퇴장 Firestore 동기화 실패 (로컬은 저장됨):", e);
+                }
+            }
         };
 
         window.openSeatingAddMemberModal = function() {
