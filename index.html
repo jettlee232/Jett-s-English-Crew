@@ -5183,23 +5183,46 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
         // 🌟 SMART SEATING & MEETING HISTORY ENGINE
         // ==========================================
 
-        function getPairMeetingCount(m1, m2) {
-            if (!m1 || !m2 || m1.id === m2.id) return 0;
-            let count = 0;
-            const id1 = m1.id, id2 = m2.id;
-            const name1 = m1.name || '', name2 = m2.name || '';
+        // 만남 횟수는 배치 1회당 수천 번 조회된다. 이력 전체를 매번 훑지 않도록
+        // tableSessionsData 가 통째로 재할당될 때만(=유일한 갱신 경로) 맵을 다시 만든다.
+        let pairMeetingCache = null;
+
+        function pairKey(a, b) { return a < b ? a + '\u0000' + b : b + '\u0000' + a; }
+
+        function buildPairMeetingMap() {
             const todayStr = new Date().toISOString().slice(0, 10);
-            
+            const map = new Map();
             for (const session of tableSessionsData) {
                 if (session.date === todayStr) continue;
                 if (!session.tables || !Array.isArray(session.tables)) continue;
                 for (const tbl of session.tables) {
                     if (!Array.isArray(tbl)) continue;
-                    const has1 = tbl.includes(id1) || tbl.includes(name1);
-                    const has2 = tbl.includes(id2) || tbl.includes(name2);
-                    if (has1 && has2) {
-                        count++;
+                    for (let i = 0; i < tbl.length; i++) {
+                        for (let j = i + 1; j < tbl.length; j++) {
+                            const k = pairKey(tbl[i], tbl[j]);
+                            map.set(k, (map.get(k) || 0) + 1);
+                        }
                     }
+                }
+            }
+            return { src: tableSessionsData, today: todayStr, map };
+        }
+
+        function getPairMeetingCount(m1, m2) {
+            if (!m1 || !m2 || m1.id === m2.id) return 0;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            if (!pairMeetingCache || pairMeetingCache.src !== tableSessionsData || pairMeetingCache.today !== todayStr) {
+                pairMeetingCache = buildPairMeetingMap();
+            }
+            const map = pairMeetingCache.map;
+            // 구 데이터 호환: 이력에 id 로 저장된 회차와 이름으로 저장된 회차가 섞여 있다
+            const keysA = [m1.id, m1.name].filter(Boolean);
+            const keysB = [m2.id, m2.name].filter(Boolean);
+            let count = 0;
+            for (const a of keysA) {
+                for (const b of keysB) {
+                    if (a === b) continue;
+                    count += map.get(pairKey(a, b)) || 0;
                 }
             }
             return count;
@@ -5248,7 +5271,19 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
         // =========================================================================
         // 🎯 스마트 테이블 배치 마스터 알고리즘 (3단계 우선순위 체계)
+        //
+        // 페널티 사다리 — 위가 셀수록 강한 제약이다.
+        //   회피쌍 동석            : 사실상 금지 (다른 모든 항의 합보다 크게)
+        //   재회(만난 횟수)         : 제곱으로 증가 — 첫 재회는 참을 만하고, 두 번째부터 급증
+        //   같은 연령대 / 1부 중복  : 재회 1회보다 무겁고 2회보다 가볍다
+        //   평균나이·성비 균형      : 미세 조정용
         // =========================================================================
+        const W_AVOID = 1000000;        // 회피쌍 (하드 제약)
+        const W_MET = 1200;             // 믹스: 만난 횟수² 계수 (1회 1200 / 2회 4800 / 3회 10800)
+        const W_SAME_AGE = 3000;        // 믹스: 같은 연령대 동석
+        const W_PART1_DUP = 3000;       // 믹스 2부: 1부에 같은 테이블이었음
+        const W_MET_PEER = 400;         // 또래: 만난 횟수² 계수 (세대차 최대치 2100과 3회에서 역전)
+        const W_PART1_DUP_PEER = 1500;  // 또래 2부: 1부에 같은 테이블이었음
         function generateMixSeatingPlan(todayMembers, isPart2 = false) {
             const totalCount = todayMembers.length;
             if (totalCount === 0) return [];
@@ -5307,16 +5342,18 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
                 const nextAvgAge = nextAgeSum / nextCount;
                 cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
-                // 같은 연령대끼리 앉으면 2부 또래 배치에서 또 만난다 — 최우선 회피
-                cost += tbl.filter(x => (x.ageGroup || '') === (member.ageGroup || '')).length * 50000;
+                // 같은 연령대끼리 앉으면 2부 또래 배치에서 또 만난다 — 피하되,
+                // "덜 만난 사람 우선"이 위다 (재회 2번이면 연령대 중복보다 비싸진다)
+                cost += tbl.filter(x => (x.ageGroup || '') === (member.ageGroup || '')).length * W_SAME_AGE;
 
                 for (const existing of tbl) {
-                    if (isAvoidPair(existing, member)) cost += 9000;
-                    cost += getPairMeetingCount(existing, member) * 800;
+                    if (isAvoidPair(existing, member)) cost += W_AVOID;
+                    const met = getPairMeetingCount(existing, member);
+                    cost += met * met * W_MET;
                     if (isPart2 && part1SeatingSnapshot) {
                         for (const p1T of part1SeatingSnapshot) {
                             if (p1T.some(x => x.id === existing.id) && p1T.some(x => x.id === member.id)) {
-                                cost += 1000;
+                                cost += W_PART1_DUP;
                             }
                         }
                     }
@@ -5375,13 +5412,14 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        if ((tbl[i].ageGroup || '') === (tbl[j].ageGroup || '')) p += 50000;
-                        if (isAvoidPair(tbl[i], tbl[j])) p += 9000;
-                        p += getPairMeetingCount(tbl[i], tbl[j]) * 800;
+                        if ((tbl[i].ageGroup || '') === (tbl[j].ageGroup || '')) p += W_SAME_AGE;
+                        if (isAvoidPair(tbl[i], tbl[j])) p += W_AVOID;
+                        const met = getPairMeetingCount(tbl[i], tbl[j]);
+                        p += met * met * W_MET;
                         if (isPart2 && part1SeatingSnapshot) {
                             for (const p1T of part1SeatingSnapshot) {
                                 if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
-                                    p += 1000;
+                                    p += W_PART1_DUP;
                                 }
                             }
                         }
@@ -5500,15 +5538,16 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
                 for (let i = 0; i < tbl.length; i++) {
                     for (let j = i + 1; j < tbl.length; j++) {
-                        if (isAvoidPair(tbl[i], tbl[j])) score += 9000;
+                        if (isAvoidPair(tbl[i], tbl[j])) score += W_AVOID;
                         const genDiff = Math.abs(getGenNum(tbl[i].ageGroup) - getGenNum(tbl[j].ageGroup));
                         score += genDiff * 70;
-                        score += getPairMeetingCount(tbl[i], tbl[j]) * 300;
+                        const met = getPairMeetingCount(tbl[i], tbl[j]);
+                        score += met * met * W_MET_PEER;
 
                         if (isPart2 && part1SeatingSnapshot) {
                             for (const p1T of part1SeatingSnapshot) {
                                 if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
-                                    score += 700;
+                                    score += W_PART1_DUP_PEER;
                                 }
                             }
                         }
