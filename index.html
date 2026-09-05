@@ -4460,17 +4460,16 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         renderUI();
                         showToast("🧹 금주 출석 및 적립 상태가 초기화되었습니다. 다음 주 준비 완료!", "success");
 
-                        try {
-                            if (updates.length > 0) {
-                                await commitBatchUpdates(updates);
-                                localStorage.removeItem('pendingWeeklyReset');
-                            }
-                        } catch (e) {
-                            console.warn("금주 적립 초기화 서버 동기화 지연 (로컬은 안전하게 보존되며 자동 재시도됩니다):", e);
-                            showToast("서버 동기화 지연 — 기기 로컬에 출석 초기화가 보존되었습니다.", "warning");
-                        } finally {
-                            isBulkOperationPending = false;
+                        if (updates.length > 0) {
+                            await commitBatchUpdates(updates);
+                            localStorage.removeItem('pendingWeeklyReset');
                         }
+                    } catch (e) {
+                        console.warn("금주 적립 초기화 서버 동기화 지연 (로컬은 안전하게 보존되며 자동 재시도됩니다):", e);
+                        showToast("서버 동기화 지연 — 기기 로컬에 출석 초기화가 보존되었습니다.", "warning");
+                    } finally {
+                        isBulkOperationPending = false;
+                    }
                 }
             });
         };
