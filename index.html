@@ -3937,6 +3937,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             if (typeof renderSeatingPlan === 'function' && typeof isPart2Shuffle !== 'undefined') {
                 renderSeatingPlan(isPart2Shuffle);
             }
+            maybeRunDailyMaintenance();   // 리더 인증 직후에도 한 번 시도 (내부에서 중복 실행 방지)
         }
 
         function openCustomPinModal(title, callback) {
@@ -4804,20 +4805,14 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             });
                         }
 
-                        if (!coinExpiryChecked && membersData.length > 0) {
-                            coinExpiryChecked = true;
-                            backfillLastAttended().then(() => expireStaleCoins());
-                        }
+                        maybeRunDailyMaintenance();
                     }
                 }, (error) => {
                     console.error("Firestore error:", error);
                     if (!membersSnapshotArrived && membersData.length === 0) {
                         seedInitialMembers();
                     } else {
-                        if (!coinExpiryChecked && membersData.length > 0) {
-                            coinExpiryChecked = true;
-                            backfillLastAttended().then(() => expireStaleCoins());
-                        }
+                        maybeRunDailyMaintenance();
                     }
                 });
 
@@ -4948,6 +4943,17 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             } catch (e) {
                 console.warn("만료 동기화 실패 (로컬은 반영됨):", e);
             }
+        }
+
+        // 회원 데이터를 서버에 쓰는 자동 정리 작업. 리더 기기에서만 돈다.
+        // 리더 검사 없이 두면 접속한 모든 회원 폰에서 실행되어 Firestore 쓰기 쿼터를 태운다.
+        // (HANDOFF.md "리더 검사 없이 모든 기기에서 Firestore 에 쓰는 코드를 만들지 말 것")
+        function maybeRunDailyMaintenance() {
+            if (coinExpiryChecked) return;
+            if (!isLeaderAuthenticated) return;      // 리더 기기가 아니면 아무것도 하지 않는다
+            if (membersData.length === 0) return;
+            coinExpiryChecked = true;
+            backfillLastAttended().then(() => expireStaleCoins());
         }
 
         async function backfillLastAttended() {
