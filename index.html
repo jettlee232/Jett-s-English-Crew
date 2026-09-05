@@ -4756,6 +4756,48 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         }
                     }
 
+                    // 09/05 토요 스터디 참석자 12명 출석 회차 동기화 보정 (+1 반영)
+                    const TODAY_0905_ATTENDEES = {
+                        'Jett': 20,
+                        'Jackie': 11,
+                        '대니얼': 11,
+                        'Cindy': 8,
+                        'Jun': 7,
+                        '표토르': 5,
+                        'Hanul': 5,
+                        '군밤': 5,
+                        'Jade': 4,
+                        'Richard': 3,
+                        'Bonny': 1,
+                        '천연암반수': 1
+                    };
+                    const needSync0905 = [];
+                    list.forEach(m => {
+                        if (TODAY_0905_ATTENDEES[m.name] !== undefined) {
+                            const targetAtt = TODAY_0905_ATTENDEES[m.name];
+                            if ((m.totalAttended || 0) < targetAtt) {
+                                m.totalAttended = targetAtt;
+                                if (m.totalAttended > 0) m.isNew = false;
+                                m.lastAttendedAt = new Date('2026-09-05T19:00:00Z').toISOString();
+                                m.isToday = false;
+                                m.checkedInOnTime = false;
+                                m.checkedInReview = false;
+                                needSync0905.push({
+                                    id: m.id,
+                                    data: {
+                                        totalAttended: targetAtt,
+                                        isNew: m.isNew,
+                                        lastAttendedAt: m.lastAttendedAt,
+                                        isToday: false,
+                                        checkedInOnTime: false,
+                                        checkedInReview: false,
+                                        updatedAt: new Date().toISOString()
+                                    }
+                                });
+                            }
+                        }
+                    });
+
                     membersData = list;
                     
                     if (membersData.length === 0) {
@@ -4782,19 +4824,23 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
                         renderUI();
 
-                        // 보류 중인 금주 초기화가 남아있다면 백그라운드에서 조용히 서버 반영 재시도
-                        if (pendingRaw && !isBulkOperationPending) {
+                        // 보류 중인 금주 초기화나 09/05 출석 동기화가 남아있다면 백그라운드에서 조용히 서버 반영 재시도
+                        const totalSyncItems = [...needSync0905];
+                        if (pendingRaw) {
                             try {
                                 const pending = JSON.parse(pendingRaw);
-                                if (pending && Array.isArray(pending.updates) && pending.updates.length > 0) {
-                                    commitBatchUpdates(pending.updates).then(() => {
-                                        localStorage.removeItem('pendingWeeklyReset');
-                                        console.log("보류 중이던 금주 초기화 서버 동기화 성공");
-                                    }).catch(() => {
-                                        // 쿼터 복구 시까지 로컬 우선 유지
-                                    });
+                                if (pending && Array.isArray(pending.updates)) {
+                                    totalSyncItems.push(...pending.updates);
                                 }
                             } catch (e) {}
+                        }
+                        if (totalSyncItems.length > 0 && !isBulkOperationPending) {
+                            commitBatchUpdates(totalSyncItems).then(() => {
+                                localStorage.removeItem('pendingWeeklyReset');
+                                console.log("09/05 출석 회차 및 금주 초기화 서버 동기화 성공");
+                            }).catch(() => {
+                                // 쿼터 복구 시까지 로컬 우선 유지
+                            });
                         }
 
                         if (!coinExpiryChecked && membersData.length > 0) {
