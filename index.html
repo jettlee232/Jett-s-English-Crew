@@ -4419,6 +4419,8 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             const wasToday = !!m.isToday;
                             const curTotal = (m.totalAttended !== undefined && m.totalAttended !== null && !isNaN(m.totalAttended)) ? parseInt(m.totalAttended, 10) : 0;
                             const newTotal = (shouldIncrementAttended && wasToday) ? curTotal + 1 : curTotal;
+                            const needsUpdate = wasToday || m.checkedInOnTime || m.checkedInReview || m.leftEarly;
+
                             m.checkedInOnTime = false;
                             m.checkedInReview = false;
                             m.leftEarly = false;
@@ -4429,22 +4431,25 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             }
                             m.isToday = false; // 오늘 참석자 상태 모두 비우기
                             m.updatedAt = now;
-                            const updateObj = {
-                                isToday: false,
-                                checkedInOnTime: false,
-                                checkedInReview: false,
-                                leftEarly: false,
-                                totalAttended: newTotal,
-                                isNew: m.isNew,
-                                updatedAt: now
-                            };
-                            if (shouldIncrementAttended && wasToday) {
-                                updateObj.lastAttendedAt = now;
+
+                            if (needsUpdate) {
+                                const updateObj = {
+                                    isToday: false,
+                                    checkedInOnTime: false,
+                                    checkedInReview: false,
+                                    leftEarly: false,
+                                    totalAttended: newTotal,
+                                    isNew: m.isNew,
+                                    updatedAt: now
+                                };
+                                if (shouldIncrementAttended && wasToday) {
+                                    updateObj.lastAttendedAt = now;
+                                }
+                                updates.push({
+                                    id: m.id,
+                                    data: updateObj
+                                });
                             }
-                            updates.push({
-                                id: m.id,
-                                data: updateObj
-                            });
                         });
                         selectedMemberId = null;
                         part1SeatingSnapshot = null;
