@@ -400,15 +400,39 @@
         html.light-theme .bg-zinc-900,
         html.light-theme .bg-zinc-900\/90,
         html.light-theme .bg-zinc-900\/80,
+        html.light-theme .bg-zinc-900\/70,
         html.light-theme .bg-zinc-900\/60,
         html.light-theme .bg-zinc-800,
         html.light-theme .bg-zinc-800\/80,
         html.light-theme .bg-zinc-800\/60,
         html.light-theme .bg-zinc-800\/90,
         html.light-theme .bg-zinc-800\/70,
-        html.light-theme .bg-zinc-800\/50 {
+        html.light-theme .bg-zinc-800\/50,
+        html.light-theme .bg-\[\#18181D\],
+        html.light-theme .bg-\[\#18181d\],
+        html.light-theme [class*="bg-[#18181D]"],
+        html.light-theme [class*="bg-[#18181d]"],
+        html.light-theme #coinHistoryList > div {
             background-color: #f8fafc !important;
             border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        html.light-theme #coinHistoryModal .bg-zinc-900\/70,
+        html.light-theme #coinHistoryModal .bg-zinc-900\/90 {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-theme #coinHistoryModal button.bg-zinc-800 {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+        }
+        html.light-theme #coinHistoryModal .text-zinc-400,
+        html.light-theme #coinHistoryModal .text-zinc-500 {
+            color: #64748b !important;
+        }
+        html.light-theme #coinHistoryModal .text-zinc-200,
+        html.light-theme #coinHistoryModal .text-zinc-100 {
             color: #0f172a !important;
         }
 
@@ -822,6 +846,20 @@
         html.light-theme select:focus {
             border-color: #3b82f6 !important;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        }
+        html.light-theme #memberSearchInput {
+            background-color: #ffffff !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+        }
+        html.light-theme #memberSearchInput::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+        html.light-theme #memberSearchInput:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
         }
 
         /* Light Action Buttons */
@@ -1280,13 +1318,23 @@
             <!-- 2. 멤버별 당근 현황 리스트 -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between gap-2 pb-1">
-                    <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-users text-blue-400"></i>
-                        <span>출석 & 당근 현황판</span>
-                    </h2>
-                    <div class="relative w-36 sm:w-48">
-                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs"></i>
-                        <input id="memberSearchInput" type="text" oninput="renderMemberList()" placeholder="이름/초성 검색..." class="w-full bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg pl-7 pr-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <div>
+                        <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-users text-blue-400"></i>
+                            <span>출석 & 당근 현황판</span>
+                        </h2>
+                        <p class="text-[10px] sm:text-[11.5px] text-zinc-400 mt-0.5 flex items-center gap-1 select-none whitespace-nowrap">
+                            <i class="fa-solid fa-circle-info text-[9px] text-amber-400 shrink-0"></i>
+                            <span>이름 클릭 시 상세 내역 확인</span>
+                        </p>
+                    </div>
+                    <div class="relative w-32 sm:w-48 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none"></i>
+                        <input id="memberSearchInput"
+                               type="text"
+                               oninput="renderMemberList()"
+                               placeholder="이름/초성 검색..."
+                               class="w-full bg-zinc-950/90 border border-zinc-500/80 focus:border-blue-400 text-zinc-100 placeholder:text-zinc-400 text-xs rounded-lg pl-7 pr-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 shadow-sm transition">
                     </div>
                 </div>
 
@@ -2367,6 +2415,61 @@
         </div>
     </div>
 
+    <!-- Member Coin History Modal (Tab 3 당근 상세 내역 모달) -->
+    <div id="coinHistoryModal" onclick="if(event.target === this) closeCoinHistoryModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-[#121216] border border-[#23232b] w-full max-w-sm sm:max-w-md rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[88vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex items-start justify-between border-b border-zinc-800 pb-3 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-orange-950/80 text-orange-400 border border-orange-600/50 flex items-center justify-center text-base shrink-0 shadow-sm">
+                        <i class="fa-solid fa-carrot"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <h3 id="coinHistoryMemberName" class="font-bold text-base text-white">회원 이름</h3>
+                            <span id="coinHistoryFreeBadge" class="hidden text-[9px] font-black tracking-tight text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 px-1.5 py-0.5 rounded shadow-sm ring-1 ring-yellow-200/90">
+                                <i class="fa-solid fa-gift text-[8px] mr-0.5"></i>FREE PASS
+                            </span>
+                        </div>
+                        <p id="coinHistorySubtitle" class="text-xs text-zinc-400 mt-0.5">현재 보유: <span id="coinHistoryCurrentCount" class="font-bold text-orange-400">0</span>개</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCoinHistoryModal()" class="text-zinc-500 hover:text-white p-1 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Expiry Warning Banner (당근 초기화/소멸 경고 배너) -->
+            <div id="coinHistoryExpiryBanner" class="hidden rounded-xl p-2.5 border text-xs flex items-center justify-between gap-2 shrink-0 transition-all"></div>
+
+            <!-- Filter Tabs -->
+            <div class="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 shrink-0 gap-1">
+                <button type="button" onclick="filterCoinHistory('all')" id="coinFilterAll" class="flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-white bg-zinc-800 shadow-sm cursor-pointer">전체</button>
+                <button type="button" onclick="filterCoinHistory('earn')" id="coinFilterEarn" class="flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-zinc-400 hover:text-zinc-200 cursor-pointer">적립 (+)</button>
+                <button type="button" onclick="filterCoinHistory('spend')" id="coinFilterSpend" class="flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-zinc-400 hover:text-zinc-200 cursor-pointer">사용/차감 (-)</button>
+            </div>
+
+            <!-- Table Header: 날짜 | 적립/차감 | 이유 -->
+            <div class="flex items-center px-3 py-1.5 bg-zinc-900/70 rounded-lg text-[11px] font-bold text-zinc-400 border border-zinc-800/80 shrink-0">
+                <div class="w-[76px] sm:w-[86px] shrink-0 text-left">날짜</div>
+                <div class="w-[86px] sm:w-[96px] shrink-0 text-center">적립/차감</div>
+                <div class="flex-1 text-right truncate pl-2">이유</div>
+            </div>
+
+            <!-- History List (Scrollable) -->
+            <div id="coinHistoryList" class="flex-1 overflow-y-auto space-y-1.5 pr-0.5 min-h-[160px] max-h-[360px]">
+                <!-- Dynamic Content Rendered via renderCoinHistoryList -->
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-2 border-t border-zinc-800/80 shrink-0">
+                <button type="button" onclick="closeCoinHistoryModal()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs sm:text-sm py-2.5 rounded-xl border border-zinc-700 active:scale-95 transition cursor-pointer">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification (Top Center Semi-Transparent Slim Capsule) -->
     <div id="toast" class="fixed top-3.5 sm:top-4 left-1/2 -translate-x-1/2 bg-zinc-900/60 backdrop-blur-md text-white/95 border border-white/10 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg opacity-0 -translate-y-2 pointer-events-none z-50 flex items-center gap-2 max-w-[90vw] transition-all duration-200 ease-out">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xs sm:text-sm shrink-0"></i>
@@ -2376,7 +2479,7 @@
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase 웹 설정값은 공개되어도 되는 정보다. 실제 접근 제어는 Firestore 규칙이 담당한다.
         const firebaseConfig = {
@@ -2403,6 +2506,49 @@
             membersData = newList;
             localStorage.setItem('localMembersData', JSON.stringify(membersData));
             renderUI();
+        }
+
+        // 로컬 배열에 즉시 반영하고, Firestore 페이로드에 넣을 tx 객체를 돌려준다.
+        // 반환값이 null 이면 기록할 변동이 없다는 뜻이므로 페이로드에 coinHistory 를 넣지 않는다.
+        function appendCoinHistory(member, prevCoins, newCoins, reason, type = 'earn') {
+            if (!member) return null;
+
+            const before = parseInt(prevCoins, 10) || 0;
+            const after  = parseInt(newCoins, 10) || 0;
+            const delta  = after - before;
+            if (delta === 0) return null;   // 실제 변동이 없으면 기록하지 않는다
+
+            // 방어 코드: 기존 회원 문서에 coinHistory 필드가 없어도 죽지 않는다
+            if (!Array.isArray(member.coinHistory)) {
+                member.coinHistory = [];
+            }
+
+            const tx = {
+                id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                date: new Date().toISOString(),
+                delta: delta,
+                reason: reason || '당근 변동',
+                balance: after,
+                type: type
+            };
+
+            member.coinHistory.push(tx);   // 화면 즉시 반영용 (Firestore 쓰기는 호출부에서 arrayUnion)
+            return tx;
+        }
+
+        function formatCoinDate(isoStr) {
+            if (!isoStr) return '';
+            try {
+                const d = new Date(isoStr);
+                if (isNaN(d.getTime())) return isoStr;
+                const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                const day = d.getDate().toString().padStart(2, '0');
+                const h = d.getHours().toString().padStart(2, '0');
+                const min = d.getMinutes().toString().padStart(2, '0');
+                return `${m}.${day} ${h}:${min}`;
+            } catch (e) {
+                return '';
+            }
         }
 
         function persistTableSessions(newList) {
@@ -3590,11 +3736,13 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 playCoinSound();
                 if (e) triggerCoinBurst(e);
 
-                const newCoins = (member.coins || 0) + 1;
+                const prevCoins = member.coins || 0;
+                const newCoins = prevCoins + 1;
                 const now = new Date().toISOString();
 
                 // 로컬 먼저 반영한다 (다른 관리자 함수들과 동일한 패턴)
                 member.coins = newCoins;
+                const tx = appendCoinHistory(member, prevCoins, newCoins, '제시간 도착 적립', 'earn');
                 member.checkedInOnTime = true;
                 member.lastAttendedAt = now;
                 member.lastAction = '제시간 (+1당근)';
@@ -3607,13 +3755,15 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 renderUI();
 
                 try {
-                    await updateDoc(doc(membersCollectionRef, member.id), {
+                    const updatePayload = {
                         coins: newCoins,
                         checkedInOnTime: true,
                         lastAttendedAt: now,
                         lastAction: '제시간 (+1당근)',
                         updatedAt: now
-                    });
+                    };
+                    if (tx) updatePayload.coinHistory = arrayUnion(tx);
+                    await updateDoc(doc(membersCollectionRef, member.id), updatePayload);
                 } catch (e) {
                     console.warn("적립 동기화 실패 (로컬은 저장됨):", e);
                 }
@@ -3646,11 +3796,13 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 playCoinSound();
                 if (e) triggerCoinBurst(e);
 
-                const newCoins = (member.coins || 0) + 1;
+                const prevCoins = member.coins || 0;
+                const newCoins = prevCoins + 1;
                 const now = new Date().toISOString();
 
                 // 로컬 먼저 반영한다
                 member.coins = newCoins;
+                const tx = appendCoinHistory(member, prevCoins, newCoins, '후기 작성 적립', 'earn');
                 member.checkedInReview = true;
                 member.lastAttendedAt = now;
                 member.lastAction = '후기 작성 (+1당근)';
@@ -3663,13 +3815,15 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 renderUI();
 
                 try {
-                    await updateDoc(doc(membersCollectionRef, member.id), {
+                    const updatePayload = {
                         coins: newCoins,
                         checkedInReview: true,
                         lastAttendedAt: now,
                         lastAction: '후기 작성 (+1당근)',
                         updatedAt: now
-                    });
+                    };
+                    if (tx) updatePayload.coinHistory = arrayUnion(tx);
+                    await updateDoc(doc(membersCollectionRef, member.id), updatePayload);
                 } catch (e) {
                     console.warn("적립 동기화 실패 (로컬은 저장됨):", e);
                 }
@@ -3925,6 +4079,200 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             if (cb) cb(val);
         };
 
+        // =========================================================================
+        // 🥕 당근 적립/소모 상세 내역 모달 (Tab 3)
+        // =========================================================================
+        let currentCoinHistoryMemberId = null;
+        let activeCoinHistoryFilter = 'all'; // 'all' | 'earn' | 'spend'
+
+        window.openCoinHistoryModal = function(memberId) {
+            const member = membersData.find(m => m.id === memberId);
+            if (!member) return;
+
+            currentCoinHistoryMemberId = memberId;
+            activeCoinHistoryFilter = 'all';
+
+            const modal = document.getElementById('coinHistoryModal');
+            const nameEl = document.getElementById('coinHistoryMemberName');
+            const subEl = document.getElementById('coinHistorySubtitle');
+            const freeBadge = document.getElementById('coinHistoryFreeBadge');
+            const expiryBanner = document.getElementById('coinHistoryExpiryBanner');
+
+            if (nameEl) nameEl.textContent = `${member.name || '회원'}님의 당근 기록`;
+            if (subEl) {
+                subEl.innerHTML = `현재 보유: <span class="font-bold text-orange-400">${member.coins || 0}</span>개`;
+            }
+            if (freeBadge) {
+                if ((member.coins || 0) >= 6) {
+                    freeBadge.classList.remove('hidden');
+                } else {
+                    freeBadge.classList.add('hidden');
+                }
+            }
+
+            // 상단 초기화(만료)까지 남은 기간 경고 배너
+            if (expiryBanner) {
+                const coins = member.coins || 0;
+                if (coins > 0) {
+                    const daysLeft = member.lastAttendedAt
+                        ? COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(member.lastAttendedAt).getTime()) / 86400000)
+                        : null;
+
+                    if (daysLeft !== null) {
+                        expiryBanner.classList.remove('hidden');
+                        if (daysLeft <= 0) {
+                            expiryBanner.className = "rounded-xl p-2.5 bg-rose-950/90 border border-rose-500 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0 animate-pulse";
+                            expiryBanner.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base shrink-0"></i>
+                                    <div>
+                                        <p class="font-bold text-rose-200">🚨 당근 소멸 만료일입니다 (오늘 소멸 예정)</p>
+                                        <p class="text-[10.5px] text-rose-300/80">오늘 출석 또는 적립이 없으면 0개로 소멸됩니다.</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded bg-rose-900 text-rose-100 font-mono font-black text-xs shrink-0">D-Day</span>
+                            `;
+                        } else if (daysLeft <= COIN_WARN_DAYS) {
+                            expiryBanner.className = "rounded-xl p-2.5 bg-rose-950/70 border border-rose-500/60 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0";
+                            expiryBanner.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-hourglass-half text-rose-400 text-base shrink-0"></i>
+                                    <div>
+                                        <p class="font-bold text-rose-200">⚠️ 당근 소멸까지 <span class="text-rose-300 font-extrabold">${daysLeft}일</span> 남았습니다!</p>
+                                        <p class="text-[10.5px] text-rose-300/80">스터디 출석 또는 당근 적립 시 30일로 자동 연장됩니다.</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded bg-rose-900/80 text-rose-200 border border-rose-600/50 font-mono font-black text-xs shrink-0">D-${daysLeft}</span>
+                            `;
+                        } else {
+                            expiryBanner.className = "rounded-xl p-2.5 bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs flex items-center justify-between gap-2 shrink-0";
+                            expiryBanner.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-clock text-amber-400 text-base shrink-0"></i>
+                                    <div>
+                                        <p class="font-medium text-zinc-200">당근 유효기간: <strong class="text-white">${daysLeft}일</strong> 남음</p>
+                                        <p class="text-[10.5px] text-zinc-400">출석 또는 적립 시 30일로 자동 갱신됩니다.</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-bold text-xs shrink-0">D-${daysLeft}</span>
+                            `;
+                        }
+                    } else {
+                        expiryBanner.classList.add('hidden');
+                    }
+                } else {
+                    expiryBanner.classList.add('hidden');
+                }
+            }
+
+            updateCoinFilterButtons();
+            renderCoinHistoryList();
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeCoinHistoryModal = function() {
+            const modal = document.getElementById('coinHistoryModal');
+            if (modal) modal.classList.add('hidden');
+            currentCoinHistoryMemberId = null;
+        };
+
+        window.filterCoinHistory = function(mode) {
+            activeCoinHistoryFilter = mode;
+            updateCoinFilterButtons();
+            renderCoinHistoryList();
+        };
+
+        function updateCoinFilterButtons() {
+            const btns = {
+                all: document.getElementById('coinFilterAll'),
+                earn: document.getElementById('coinFilterEarn'),
+                spend: document.getElementById('coinFilterSpend')
+            };
+            Object.keys(btns).forEach(k => {
+                const btn = btns[k];
+                if (!btn) return;
+                if (k === activeCoinHistoryFilter) {
+                    btn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-white bg-zinc-800 shadow-sm cursor-pointer";
+                } else {
+                    btn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-zinc-400 hover:text-zinc-200 cursor-pointer";
+                }
+            });
+        }
+
+        function renderCoinHistoryList() {
+            const container = document.getElementById('coinHistoryList');
+            if (!container) return;
+
+            const member = membersData.find(m => m.id === currentCoinHistoryMemberId);
+            if (!member) {
+                container.innerHTML = `<div class="p-6 text-center text-zinc-500 text-xs">회원 정보를 찾을 수 없습니다.</div>`;
+                return;
+            }
+
+            // 진입부 방어: 배열이 아니면 빈 배열 (Rev.2 §7)
+            const rawList = Array.isArray(member.coinHistory) ? member.coinHistory : [];
+
+            // 필터링: delta 의 부호로 거른다 (Rev.2 §6.2)
+            let filtered = rawList;
+            if (activeCoinHistoryFilter === 'earn') {
+                filtered = filtered.filter(tx => (tx.delta || 0) > 0);
+            } else if (activeCoinHistoryFilter === 'spend') {
+                filtered = filtered.filter(tx => (tx.delta || 0) < 0);
+            }
+
+            if (filtered.length === 0) {
+                const emptyMsg = activeCoinHistoryFilter === 'all'
+                    ? `기록된 당근 적립/소모 내역이 없습니다.<br><span class="text-[11px] text-zinc-500 mt-1 block leading-relaxed">* 2026년 9월 이전 내역은 상세 일시가 기록되지 않으며, 앞으로 활동 시 실시간 기록됩니다.</span>`
+                    : (activeCoinHistoryFilter === 'earn' ? '적립 내역이 없습니다.' : '사용/차감 내역이 없습니다.');
+                container.innerHTML = `
+                    <div class="p-6 text-center text-zinc-500 bg-[#18181D] rounded-xl border border-zinc-800/60 text-xs">
+                        <i class="fa-regular fa-clock text-lg mb-1.5 text-zinc-600 block"></i>
+                        ${emptyMsg}
+                    </div>
+                `;
+                return;
+            }
+
+            // 최신순 정렬 후 상위 25건만 렌더한다 (Rev.2 §6.2)
+            const displayList = [...filtered]
+                .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+                .slice(0, 25);
+
+            container.innerHTML = displayList.map(tx => {
+                const delta = tx.delta || 0;
+                const isPlus = delta > 0;
+                const deltaStr = isPlus ? `+${delta}` : `${delta}`;
+                const badgeStyle = isPlus
+                    ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-600/40'
+                    : 'bg-rose-950/80 text-rose-400 border border-rose-600/40';
+                const dateStr = formatCoinDate(tx.date);
+
+                return `
+                    <div class="bg-[#18181D] border border-zinc-800/80 hover:border-zinc-700 rounded-xl px-3 py-2 flex items-center gap-1.5 transition-colors">
+                        <!-- Col 1: 날짜 -->
+                        <div class="w-[76px] sm:w-[86px] shrink-0 text-left">
+                            <span class="text-[11px] font-mono text-zinc-400 block">${dateStr}</span>
+                        </div>
+
+                        <!-- Col 2: 적립/차감 -->
+                        <div class="w-[86px] sm:w-[96px] shrink-0 flex flex-col items-center justify-center">
+                            <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11.5px] font-black ${badgeStyle} shadow-sm">
+                                ${deltaStr} 당근
+                            </span>
+                            <span class="text-[9.5px] font-mono text-zinc-500 mt-0.5">잔여 ${tx.balance !== undefined ? tx.balance : '-'}개</span>
+                        </div>
+
+                        <!-- Col 3: 이유 -->
+                        <div class="flex-1 text-right min-w-0 pl-2">
+                            <span class="text-xs font-semibold text-zinc-200 block truncate" title="${esc(tx.reason || '당근 변동')}">
+                                ${esc(tx.reason || '당근 변동')}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         window.exportMembersCSV = function() {
             if (!membersData || membersData.length === 0) {
                 showToast("내보낼 멤버 데이터가 없습니다.", "warning");
@@ -4136,9 +4484,13 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             const now = new Date().toISOString();
                             const updates = [];
                             membersData.forEach(m => {
+                                const prev = m.coins || 0;
                                 m.coins = 0;
                                 m.updatedAt = now;
-                                updates.push({ id: m.id, data: { coins: 0, updatedAt: now } });
+                                const payload = { coins: 0, updatedAt: now };
+                                const tx = appendCoinHistory(m, prev, 0, '전체 시즌 당근 초기화', 'admin');
+                                if (tx) payload.coinHistory = arrayUnion(tx);
+                                updates.push({ id: m.id, data: payload });
                             });
                             persistMembers([...membersData]);
                             renderUI();
@@ -4213,6 +4565,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         const now = new Date().toISOString();
                         const updates = [];
                         membersData.forEach(m => {
+                            const prev = m.coins || 0;
                             m.coins = targetCoins;
                             m.updatedAt = now;
                             const payload = { coins: targetCoins, updatedAt: now };
@@ -4220,6 +4573,8 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                                 m.lastAttendedAt = now;
                                 payload.lastAttendedAt = now;
                             }
+                            const tx = appendCoinHistory(m, prev, targetCoins, '전체 당근 수 통일 설정', 'admin');
+                            if (tx) payload.coinHistory = arrayUnion(tx);
                             updates.push({ id: m.id, data: payload });
                         });
                         persistMembers([...membersData]);
@@ -4273,6 +4628,8 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                                 m.lastAttendedAt = now;
                                 payload.lastAttendedAt = now;
                             }
+                            const tx = appendCoinHistory(m, cur, updatedCoins, '전체 일괄 지급/차감', 'admin');
+                            if (tx) payload.coinHistory = arrayUnion(tx);
                             updates.push({ id: m.id, data: payload });
                         });
                         persistMembers([...membersData]);
@@ -4831,10 +5188,13 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             if (idx === -1) return;
 
             const member = membersData[idx];
+            let tx = null;
 
             if (type === 'cancel') {
-                const newCoins = (member.coins || 0) + 2;
+                const prevCoins = member.coins || 0;
+                const newCoins = prevCoins + 2;
                 member.coins = newCoins;
+                tx = appendCoinHistory(member, prevCoins, newCoins, '사전 취소 환급', 'earn');
                 member.isToday = false;
                 member.leftEarly = false;
                 member.lastAction = '사전 취소 (+2당근)';
@@ -4884,6 +5244,9 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 if (member.lastAttendedAt) {
                     updatePayload.lastAttendedAt = member.lastAttendedAt;
                 }
+                if (type === 'cancel' && tx) {
+                    updatePayload.coinHistory = arrayUnion(tx);
+                }
                 await updateDoc(docRef, updatePayload);
             } catch (e) {
                 console.warn(e);
@@ -4903,11 +5266,27 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             }
 
             const now = new Date().toISOString();
-            const currentCoins = member.coins || 0;
-            const newCoins = Math.max(0, currentCoins + amount);
+            const prevCoins = member.coins || 0;
+            const newCoins = Math.max(0, prevCoins + amount);
             member.coins = newCoins;
             member.lastAction = actionLabel;
             member.updatedAt = now;
+
+            let reason = '관리자 당근 지급';
+            let txType = 'earn';
+            if (amount === -6) {
+                reason = '1회 무료 스터디 사용';
+                txType = 'use';
+            } else if (newCoins < prevCoins) {
+                reason = '관리자 당근 차감';
+                txType = 'admin';
+            } else {
+                reason = '관리자 당근 지급';
+                txType = 'earn';
+            }
+
+            const tx = appendCoinHistory(member, prevCoins, newCoins, reason, txType);
+
             const updatePayload = {
                 coins: newCoins,
                 lastAction: actionLabel,
@@ -4917,6 +5296,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 member.lastAttendedAt = now;
                 updatePayload.lastAttendedAt = now;
             }
+            if (tx) updatePayload.coinHistory = arrayUnion(tx);
 
             persistMembers([...membersData]);
             loadAdminActionPanel();
@@ -4952,6 +5332,10 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 const now = new Date().toISOString();
                 const isNew = totalAttended === 0;
                 const isLeader = name.includes('Jett');
+                const prevCoins = membersData[idx].coins || 0;
+
+                const tx = appendCoinHistory(membersData[idx], prevCoins, coins, '관리자 직접 수정', 'admin');
+
                 membersData[idx] = {
                     ...membersData[idx],
                     name, gender, ageGroup, totalAttended, coins,
@@ -4967,7 +5351,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
                 try {
                     const docRef = doc(membersCollectionRef, selectedAdminMemberId);
-                    await updateDoc(docRef, {
+                    const updatePayload = {
                         name,
                         gender,
                         ageGroup,
@@ -4976,7 +5360,9 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         isNew,
                         isLeader,
                         updatedAt: now
-                    });
+                    };
+                    if (tx) updatePayload.coinHistory = arrayUnion(tx);
+                    await updateDoc(docRef, updatePayload);
                 } catch (e) {
                     console.warn(e);
                 }
@@ -5066,6 +5452,9 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             if (!document.getElementById('adminModal').classList.contains('hidden')) {
                 renderAdminMemberList();
                 if (selectedAdminMemberId) loadAdminActionPanel();
+            }
+            if (currentCoinHistoryMemberId && document.getElementById('coinHistoryModal')?.classList.contains('hidden') === false) {
+                renderCoinHistoryList();
             }
         }
 
@@ -6506,17 +6895,19 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 const daysLeft = m.lastAttendedAt
                     ? COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(m.lastAttendedAt).getTime()) / 86400000)
                     : null;
-                const expiryBadge = ((m.coins || 0) > 0 && daysLeft !== null && daysLeft <= COIN_WARN_DAYS)
-                    ? `<span class="badge-expiry text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/40 whitespace-nowrap mr-1 shrink-0" title="출석하거나 당근을 지급받으면 갱신됩니다">⏳ ${daysLeft <= 0 ? '소멸 임박' : `D-${daysLeft}`}</span>`
-                    : '';
+                const hasExpiryWarning = (m.coins || 0) > 0 && daysLeft !== null && daysLeft <= COIN_WARN_DAYS;
+                const isDDay = hasExpiryWarning && daysLeft <= 0;
 
                 return `
                     <div class="${isKing ? 'rainbow-super-card px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-md' : 'bg-[#121216] border border-[#23232b] rounded-xl px-2.5 sm:px-4 py-2 sm:py-2.5 shadow-sm'} transition-all duration-200 flex items-center gap-1.5 sm:gap-2.5 w-full hover:border-zinc-700 overflow-hidden">
                         <!-- Col 1: Member Name (Strict Column) -->
                         <div class="w-[58px] sm:w-[84px] shrink-0 truncate flex items-center">
-                            <span class="member-name-text font-bold text-xs sm:text-sm text-zinc-100 truncate" title="${esc(m.name || '미지정')}">
+                            <button type="button"
+                                    onclick="openCoinHistoryModal('${m.id}')"
+                                    class="member-name-text text-left font-bold text-xs sm:text-sm text-zinc-100 hover:text-amber-300 transition truncate cursor-pointer underline decoration-dotted decoration-zinc-600 underline-offset-2 hover:decoration-amber-300"
+                                    title="${esc(m.name || '미지정')} (클릭 시 당근 내역 확인)">
                                 ${esc(m.name || '미지정')}
-                            </span>
+                            </button>
                         </div>
 
                         <!-- Col 2: Attendance Badge (Strict Column) -->
@@ -6524,18 +6915,21 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                             ${getAttendanceBadge(m.totalAttended)}
                         </div>
 
-                        <!-- Col 3: Free Ticket Badge (Strict Column - 🎁 FREE) -->
-                        <div class="w-[40px] sm:w-[46px] shrink-0 flex items-center justify-center">
-                            ${isKing ? `
+                        <!-- Col 3: Free Ticket Badge or D-Day Expiry Badge (Strict Column - 🎁 FREE 자리) -->
+                        <div class="w-[42px] sm:w-[48px] shrink-0 flex items-center justify-center">
+                            ${hasExpiryWarning ? `
+                                <span class="badge-expiry w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight text-rose-200 bg-rose-950/90 border border-rose-500/60 py-0.5 rounded shadow-sm whitespace-nowrap inline-flex items-center justify-center gap-0.5 ${isDDay ? 'animate-pulse' : ''}" title="당근 만료 임박! 스터디 출석 또는 당근 적립 시 30일 연장">
+                                    <i class="fa-solid ${isDDay ? 'fa-triangle-exclamation' : 'fa-hourglass-half'} text-[7px] sm:text-[8px] text-rose-400"></i><span>${isDDay ? 'D-Day' : `D-${daysLeft}`}</span>
+                                </span>
+                            ` : (isKing ? `
                                 <span class="w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 py-0.5 rounded shadow-sm ring-1 ring-yellow-200/90 whitespace-nowrap inline-flex items-center justify-center gap-0.5" title="당근 6개 완성! 이번 스터디 무료 참가 대상 (FREE PASS)">
                                     <i class="fa-solid fa-gift text-[7.5px] sm:text-[8.5px] text-zinc-900"></i><span>FREE</span>
                                 </span>
-                            ` : ''}
+                            ` : '')}
                         </div>
 
                         <!-- Col 4: Carrot Coin Slots & Score (Strict Right-Aligned Column) -->
                         <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
-                            ${expiryBadge}
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
