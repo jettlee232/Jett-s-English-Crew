@@ -410,8 +410,6 @@
         html.light-theme .bg-zinc-800\/50,
         html.light-theme .bg-\[\#18181D\],
         html.light-theme .bg-\[\#18181d\],
-        html.light-theme [class*="bg-[#18181D]"],
-        html.light-theme [class*="bg-[#18181d]"],
         html.light-theme #coinHistoryList > div {
             background-color: #f8fafc !important;
             border-color: #e2e8f0 !important;
@@ -1307,10 +1305,10 @@
                 <div class="bg-zinc-900/90 p-3 sm:p-3.5 rounded-xl border border-zinc-800/80 space-y-1 text-xs sm:text-sm">
                     <div class="flex items-center gap-1.5 font-bold text-zinc-100 text-xs sm:text-sm">
                         <span class="text-sm">⏳</span>
-                        <span>당근 유효기간 (30일) 및 모래시계 알림</span>
+                        <span>당근 유효기간 (<span class="coin-expiry-days-val">30</span>일) 및 모래시계 알림</span>
                     </div>
                     <p class="text-[11px] sm:text-xs text-zinc-400 font-normal leading-relaxed">
-                        마지막 출석일로부터 <strong>30일간 미출석 시 보유 당근이 자동 소멸</strong>됩니다. 만료 7일 전부터 이름 옆에 <span class="text-rose-300 font-semibold">⏳ 모래시계</span>가 표시되며, 스터디에 출석하면 유효기간이 <strong>다시 30일로 갱신</strong>됩니다.
+                        마지막 출석일로부터 <strong><span class="coin-expiry-days-val">30</span>일간 미출석 시 보유 당근이 자동 소멸</strong>됩니다. 만료 7일 전부터 이름 옆에 <span class="text-rose-300 font-semibold">⏳ 모래시계</span>가 표시되며, 스터디에 출석하면 유효기간이 <strong>다시 <span class="coin-expiry-days-val">30</span>일로 갱신</strong>됩니다.
                     </p>
                 </div>
             </div>
@@ -3272,7 +3270,7 @@ ${ytUrl}
 • 입금 후 불참 사전 연락
   (+2 당근 페이백)
 👉 당근 6개 = 1회 무료참가! 🏆
-※ 30일간 미출석 시 소멸됩니다
+※ ${COIN_EXPIRY_DAYS}일간 미출석 시 소멸됩니다
 
 ━━━━━━━━━━━━━━
 
@@ -4139,7 +4137,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                                     <i class="fa-solid fa-hourglass-half text-rose-400 text-base shrink-0"></i>
                                     <div>
                                         <p class="font-bold text-rose-200">⚠️ 당근 소멸까지 <span class="text-rose-300 font-extrabold">${daysLeft}일</span> 남았습니다!</p>
-                                        <p class="text-[10.5px] text-rose-300/80">스터디 출석 또는 당근 적립 시 30일로 자동 연장됩니다.</p>
+                                        <p class="text-[10.5px] text-rose-300/80">스터디 출석 또는 당근 적립 시 ${COIN_EXPIRY_DAYS}일로 자동 연장됩니다.</p>
                                     </div>
                                 </div>
                                 <span class="px-2 py-1 rounded bg-rose-900/80 text-rose-200 border border-rose-600/50 font-mono font-black text-xs shrink-0">D-${daysLeft}</span>
@@ -4151,7 +4149,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                                     <i class="fa-solid fa-clock text-amber-400 text-base shrink-0"></i>
                                     <div>
                                         <p class="font-medium text-zinc-200">당근 유효기간: <strong class="text-white">${daysLeft}일</strong> 남음</p>
-                                        <p class="text-[10.5px] text-zinc-400">출석 또는 적립 시 30일로 자동 갱신됩니다.</p>
+                                        <p class="text-[10.5px] text-zinc-400">출석 또는 적립 시 ${COIN_EXPIRY_DAYS}일로 자동 갱신됩니다.</p>
                                     </div>
                                 </div>
                                 <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-bold text-xs shrink-0">D-${daysLeft}</span>
@@ -4661,6 +4659,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 }
 
                 initTheme();
+                document.querySelectorAll('.coin-expiry-days-val').forEach(el => el.textContent = COIN_EXPIRY_DAYS);
                 switchTab(getTabFromUrl(), false);
                 updateLockUIState();
                 if (isTrustedLeaderDevice) {
@@ -6915,21 +6914,22 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                             ${getAttendanceBadge(m.totalAttended)}
                         </div>
 
-                        <!-- Col 3: Free Ticket Badge or D-Day Expiry Badge (Strict Column - 🎁 FREE 자리) -->
+                        <!-- Col 3: Free Ticket Badge (Strict Column - 🎁 FREE) -->
                         <div class="w-[42px] sm:w-[48px] shrink-0 flex items-center justify-center">
-                            ${hasExpiryWarning ? `
-                                <span class="badge-expiry w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight text-rose-200 bg-rose-950/90 border border-rose-500/60 py-0.5 rounded shadow-sm whitespace-nowrap inline-flex items-center justify-center gap-0.5 ${isDDay ? 'animate-pulse' : ''}" title="당근 만료 임박! 스터디 출석 또는 당근 적립 시 30일 연장">
-                                    <i class="fa-solid ${isDDay ? 'fa-triangle-exclamation' : 'fa-hourglass-half'} text-[7px] sm:text-[8px] text-rose-400"></i><span>${isDDay ? 'D-Day' : `D-${daysLeft}`}</span>
-                                </span>
-                            ` : (isKing ? `
+                            ${isKing ? `
                                 <span class="w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 py-0.5 rounded shadow-sm ring-1 ring-yellow-200/90 whitespace-nowrap inline-flex items-center justify-center gap-0.5" title="당근 6개 완성! 이번 스터디 무료 참가 대상 (FREE PASS)">
                                     <i class="fa-solid fa-gift text-[7.5px] sm:text-[8.5px] text-zinc-900"></i><span>FREE</span>
                                 </span>
-                            ` : '')}
+                            ` : ''}
                         </div>
 
                         <!-- Col 4: Carrot Coin Slots & Score (Strict Right-Aligned Column) -->
                         <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
+                            ${hasExpiryWarning ? `
+                                <span class="badge-expiry text-[8px] sm:text-[9.5px] font-black tracking-tight text-rose-200 bg-rose-950/90 border border-rose-500/60 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap inline-flex items-center justify-center gap-0.5 shrink-0 ${isDDay ? 'animate-pulse' : ''}" title="당근 만료 임박! 스터디 출석 또는 당근 적립 시 ${COIN_EXPIRY_DAYS}일 연장">
+                                    <i class="fa-solid ${isDDay ? 'fa-triangle-exclamation' : 'fa-hourglass-half'} text-[7px] sm:text-[8px] text-rose-400"></i><span>${isDDay ? 'D-Day' : `D-${daysLeft}`}</span>
+                                </span>
+                            ` : ''}
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
