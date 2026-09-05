@@ -6914,22 +6914,21 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                             ${getAttendanceBadge(m.totalAttended)}
                         </div>
 
-                        <!-- Col 3: Free Ticket Badge (Strict Column - 🎁 FREE) -->
+                        <!-- Col 3: Free Ticket Badge or D-Day Expiry Badge (Strict Column - 🎁 FREE 자리) -->
                         <div class="w-[42px] sm:w-[48px] shrink-0 flex items-center justify-center">
-                            ${isKing ? `
+                            ${hasExpiryWarning ? `
+                                <span class="badge-expiry w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight ${isKing ? 'text-amber-200 bg-rose-950/90 border border-amber-400/80 ring-1 ring-amber-300/40' : 'text-rose-200 bg-rose-950/90 border border-rose-500/60'} py-0.5 rounded shadow-sm whitespace-nowrap inline-flex items-center justify-center gap-0.5 ${isDDay ? 'animate-pulse' : ''}" title="${isKing ? '당근 6개 완성(FREE) & 만료 임박!' : '당근 만료 임박!'} 스터디 출석 또는 당근 적립 시 ${COIN_EXPIRY_DAYS}일 연장">
+                                    <i class="fa-solid ${isKing ? 'fa-gift text-amber-300' : (isDDay ? 'fa-triangle-exclamation text-rose-400' : 'fa-hourglass-half text-rose-400')} text-[7px] sm:text-[8px]"></i><span>${isDDay ? 'D-Day' : `D-${daysLeft}`}</span>
+                                </span>
+                            ` : (isKing ? `
                                 <span class="w-full text-center text-[8px] sm:text-[9.5px] font-black tracking-tight text-zinc-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 py-0.5 rounded shadow-sm ring-1 ring-yellow-200/90 whitespace-nowrap inline-flex items-center justify-center gap-0.5" title="당근 6개 완성! 이번 스터디 무료 참가 대상 (FREE PASS)">
                                     <i class="fa-solid fa-gift text-[7.5px] sm:text-[8.5px] text-zinc-900"></i><span>FREE</span>
                                 </span>
-                            ` : ''}
+                            ` : '')}
                         </div>
 
                         <!-- Col 4: Carrot Coin Slots & Score (Strict Right-Aligned Column) -->
                         <div class="flex items-center justify-end gap-1 sm:gap-2 shrink-0 ml-auto">
-                            ${hasExpiryWarning ? `
-                                <span class="badge-expiry text-[8px] sm:text-[9.5px] font-black tracking-tight text-rose-200 bg-rose-950/90 border border-rose-500/60 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap inline-flex items-center justify-center gap-0.5 shrink-0 ${isDDay ? 'animate-pulse' : ''}" title="당근 만료 임박! 스터디 출석 또는 당근 적립 시 ${COIN_EXPIRY_DAYS}일 연장">
-                                    <i class="fa-solid ${isDDay ? 'fa-triangle-exclamation' : 'fa-hourglass-half'} text-[7px] sm:text-[8px] text-rose-400"></i><span>${isDDay ? 'D-Day' : `D-${daysLeft}`}</span>
-                                </span>
-                            ` : ''}
                             <div class="flex items-center gap-0.5 sm:gap-1">
                                 ${slotsHtml}
                             </div>
