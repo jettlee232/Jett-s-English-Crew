@@ -4743,6 +4743,31 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         }
                         renderUI();
 
+                        const charles = membersData.find(m => m.name === '찰스');
+                        if (charles) {
+                            const cDays = charles.lastAttendedAt 
+                                ? (COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(charles.lastAttendedAt).getTime()) / 86400000))
+                                : null;
+                            if (cDays !== null && cDays <= 7) {
+                                const realDate = new Date(Date.now() - 10 * 86400000).toISOString();
+                                charles.lastAttendedAt = realDate;
+                                charles.coins = 6;
+                                charles.coinHistory = [];
+                                persistMembers([...membersData]);
+                                renderUI();
+                                updateDoc(doc(membersCollectionRef, charles.id), {
+                                    lastAttendedAt: realDate,
+                                    coins: 6,
+                                    coinHistory: []
+                                }).then(() => {
+                                    console.log("찰스 원본 데이터(20일 남음, 6코인) Firestore 복구 완료");
+                                    renderUI();
+                                }).catch((err) => {
+                                    console.error("찰스 복구 실패:", err);
+                                });
+                            }
+                        }
+
                         if (!coinExpiryChecked && membersData.length > 0) {
                             coinExpiryChecked = true;
                             backfillLastAttended().then(() => expireStaleCoins());
