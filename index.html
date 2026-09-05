@@ -1692,13 +1692,21 @@
                         <span>이번 주 스터디 주제 & 미디어/장소 설정</span>
                     </label>
                     <div class="flex items-center gap-1.5 flex-wrap">
-                        <button onclick="copyDaangnPostToClipboard()" class="flex items-center gap-1.5 bg-orange-950/80 hover:bg-orange-900 active:scale-95 text-orange-300 border border-orange-600/50 px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="당근 모임에 올릴 공지 글 전체를 클립보드에 복사">
+                        <button onclick="copyDaangnPostToClipboard()" class="flex items-center gap-1 bg-orange-950/80 hover:bg-orange-900 active:scale-95 text-orange-300 border border-orange-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="당근 모임에 올릴 공지 글 전체를 클립보드에 복사">
                             <i class="fa-solid fa-carrot text-orange-400 text-xs"></i>
-                            <span>당근 공지글 복사</span>
+                            <span>공지글</span>
                         </button>
-                        <button onclick="copyFeeRequestToClipboard()" class="flex items-center gap-1.5 bg-emerald-950/80 hover:bg-emerald-900 active:scale-95 text-emerald-300 border border-emerald-600/50 px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="당근 모임톡에 올릴 참가비 더치페이 요청 문구를 클립보드에 복사">
+                        <button onclick="copyFeeRequestToClipboard()" class="flex items-center gap-1 bg-emerald-950/80 hover:bg-emerald-900 active:scale-95 text-emerald-300 border border-emerald-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="당근 모임톡에 올릴 참가비 더치페이 요청 문구를 클립보드에 복사">
                             <i class="fa-solid fa-won-sign text-emerald-400 text-xs"></i>
-                            <span>더치페이 요청 복사</span>
+                            <span>더치페이</span>
+                        </button>
+                        <button onclick="copyMorningNoticeToClipboard()" class="flex items-center gap-1 bg-blue-950/80 hover:bg-blue-900 active:scale-95 text-blue-300 border border-blue-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="스터디 당일 아침 정시 참가 독려 문구를 클립보드에 복사">
+                            <i class="fa-solid fa-bell text-blue-400 text-xs"></i>
+                            <span>당일독려</span>
+                        </button>
+                        <button onclick="copyClosingNoticeToClipboard()" class="flex items-center gap-1 bg-pink-950/80 hover:bg-pink-900 active:scale-95 text-pink-300 border border-pink-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="스터디 종료 후 감사 인사 및 후기 당근 안내 문구를 클립보드에 복사">
+                            <i class="fa-solid fa-pen-nib text-pink-400 text-xs"></i>
+                            <span>마감후기</span>
                         </button>
                     </div>
                 </div>
@@ -3190,6 +3198,66 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 이번 주도 즐거운 스터디로 봬요! 😊`;
 
             const successMsg = "💬 참가비 더치페이 요청 문구가 복사되었습니다!";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMsg, "success");
+                }).catch(() => {
+                    fallbackCopyText(text, successMsg);
+                });
+            } else {
+                fallbackCopyText(text, successMsg);
+            }
+        };
+
+        window.copyMorningNoticeToClipboard = function() {
+            const text = `좋은 아침입니다!
+잠시 후 10시에 뵙겠습니다!
+
+🥕 [정시 도착 이벤트]
+• 10시 전 도착 (음료와 함께)
+  리더석 키오스크 터치 시
+  +1 당근 즉시 적립!
+👉 당근 6개 모으시면
+  1회 무료 참가 가능!
+
+• 내 자리 확인하기:
+https://jettlee232.github.io/Jett-s-English-Crew/#tab2
+
+조심히 오시고
+곧 뵙겠습니다! 😊`;
+
+            const successMsg = "⏰ 당일 정시참가 독려 문구가 복사되었습니다!";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMsg, "success");
+                }).catch(() => {
+                    fallbackCopyText(text, successMsg);
+                });
+            } else {
+                fallbackCopyText(text, successMsg);
+            }
+        };
+
+        window.copyClosingNoticeToClipboard = function() {
+            const text = `오늘 스터디에
+참여해 주셔서 감사합니다!
+
+열정적인 대화 덕분에
+즐겁고 알찬 시간이었습니다.
+
+🥕 [후기 작성 이벤트]
+• 당근 모임에 후기를 남기시면
+  +1 당근을 적립해 드립니다.
+👉 당근 6개 모으면
+  다음 1회 무료 참가 가능!
+
+• 내 당근 현황 확인하기:
+https://jettlee232.github.io/Jett-s-English-Crew/#tab3
+
+남은 주말 편안히 보내시고,
+다음 주에 또 뵙겠습니다! 😊`;
+
+            const successMsg = "💌 스터디 마감 인사 및 후기 독려 문구가 복사되었습니다!";
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     showToast(successMsg, "success");
