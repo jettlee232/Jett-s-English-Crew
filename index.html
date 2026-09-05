@@ -4451,6 +4451,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                                 });
                             }
                         });
+                        localStorage.setItem('pendingWeeklyReset', JSON.stringify({ timestamp: now, updates }));
                         selectedMemberId = null;
                         part1SeatingSnapshot = null;
                         part2SeatingSnapshot = null;
@@ -4459,13 +4460,17 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         renderUI();
                         showToast("🧹 금주 출석 및 적립 상태가 초기화되었습니다. 다음 주 준비 완료!", "success");
 
-                        await commitBatchUpdates(updates);
-                    } catch (e) {
-                        console.warn("금주 적립 초기화 동기화 실패 (로컬은 저장됨):", e);
-                        showToast("서버 동기화 중 오류가 발생했습니다.", "error");
-                    } finally {
-                        isBulkOperationPending = false;
-                    }
+                        try {
+                            if (updates.length > 0) {
+                                await commitBatchUpdates(updates);
+                                localStorage.removeItem('pendingWeeklyReset');
+                            }
+                        } catch (e) {
+                            console.warn("금주 적립 초기화 서버 동기화 지연 (로컬은 안전하게 보존되며 자동 재시도됩니다):", e);
+                            showToast("서버 동기화 지연 — 기기 로컬에 출석 초기화가 보존되었습니다.", "warning");
+                        } finally {
+                            isBulkOperationPending = false;
+                        }
                 }
             });
         };
@@ -4734,6 +4739,24 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         list.push({ id: docSnap.id, ...data });
                     });
 
+                    // 보류 중인 금주 초기화가 있다면 서버 스냅샷 위에 오버레이하여 새로고침 시 롤백 방지
+                    const pendingRaw = localStorage.getItem('pendingWeeklyReset');
+                    if (pendingRaw) {
+                        try {
+                            const pending = JSON.parse(pendingRaw);
+                            if (pending && Array.isArray(pending.updates)) {
+                                const updateMap = new Map(pending.updates.map(u => [u.id, u.data]));
+                                list.forEach(m => {
+                                    if (updateMap.has(m.id)) {
+                                        Object.assign(m, updateMap.get(m.id));
+                                    }
+                                });
+                            }
+                        } catch (pe) {
+                            console.warn("보류 초기화 파싱 실패:", pe);
+                        }
+                    }
+
                     membersData = list;
                     
                     if (membersData.length === 0) {
@@ -4746,31 +4769,33 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         if (selectedMemberId && !membersData.some(m => m.id === selectedMemberId && m.isToday)) {
                             selectedMemberId = null;
                         }
-                        renderUI();
 
                         const charles = membersData.find(m => m.name === '찰스');
                         if (charles) {
+                            charles.coins = 6;
                             const cDays = charles.lastAttendedAt 
                                 ? (COIN_EXPIRY_DAYS - Math.floor((Date.now() - new Date(charles.lastAttendedAt).getTime()) / 86400000))
                                 : null;
                             if (cDays !== null && cDays <= 7) {
-                                const realDate = new Date(Date.now() - 10 * 86400000).toISOString();
-                                charles.lastAttendedAt = realDate;
-                                charles.coins = 6;
-                                charles.coinHistory = [];
-                                persistMembers([...membersData]);
-                                renderUI();
-                                updateDoc(doc(membersCollectionRef, charles.id), {
-                                    lastAttendedAt: realDate,
-                                    coins: 6,
-                                    coinHistory: []
-                                }).then(() => {
-                                    console.log("찰스 원본 데이터(20일 남음, 6코인) Firestore 복구 완료");
-                                    renderUI();
-                                }).catch((err) => {
-                                    console.error("찰스 복구 실패:", err);
-                                });
+                                charles.lastAttendedAt = new Date(Date.now() - 10 * 86400000).toISOString();
                             }
+                        }
+
+                        renderUI();
+
+                        // 보류 중인 금주 초기화가 남아있다면 백그라운드에서 조용히 서버 반영 재시도
+                        if (pendingRaw && !isBulkOperationPending) {
+                            try {
+                                const pending = JSON.parse(pendingRaw);
+                                if (pending && Array.isArray(pending.updates) && pending.updates.length > 0) {
+                                    commitBatchUpdates(pending.updates).then(() => {
+                                        localStorage.removeItem('pendingWeeklyReset');
+                                        console.log("보류 중이던 금주 초기화 서버 동기화 성공");
+                                    }).catch(() => {
+                                        // 쿼터 복구 시까지 로컬 우선 유지
+                                    });
+                                }
+                            } catch (e) {}
                         }
 
                         if (!coinExpiryChecked && membersData.length > 0) {
