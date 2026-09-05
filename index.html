@@ -2555,6 +2555,7 @@
             const historyCountEl = document.getElementById('sessionHistoryCount');
             if (historyCountEl) historyCountEl.textContent = tableSessionsData.length;
         }
+        let isServerWritable = true;   // 익명 인증 성공 여부. false 면 모든 Firestore 쓰기가 거부된다
         let membersData = [];
         let tableSessionsData = [];
         let membersSnapshotArrived = false;
@@ -4654,6 +4655,17 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             });
         };
 
+        // 서버 쓰기가 불가능한 상태를 상시 노출한다.
+        // 이게 없으면 로컬에만 저장되는 상태를 몇 주 동안 모르고 지나가게 된다.
+        function showServerWriteBanner() {
+            if (document.getElementById('serverWriteBanner')) return;
+            const el = document.createElement('div');
+            el.id = 'serverWriteBanner';
+            el.className = 'fixed bottom-0 left-0 right-0 z-[60] bg-rose-950/95 border-t border-rose-500/60 text-rose-100 text-[11px] sm:text-xs font-bold px-3 py-2 text-center';
+            el.textContent = '⚠️ 서버 인증 실패 — 변경사항이 이 기기에만 저장됩니다. 다른 기기에는 반영되지 않습니다.';
+            document.body.appendChild(el);
+        }
+
         async function initApp() {
             try {
                 // 인증 실패가 나머지 초기화(테마/탭/리스너)를 막지 않도록 격리한다
@@ -4664,7 +4676,9 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         await signInAnonymously(auth);
                     }
                 } catch (authErr) {
-                    console.warn("익명 인증 실패 — 로컬 모드로 계속 진행합니다:", authErr);
+                    isServerWritable = false;
+                    console.error("익명 인증 실패 — 서버 쓰기가 모두 거부됩니다:", authErr);
+                    showServerWriteBanner();
                 }
 
                 initTheme();
@@ -6747,6 +6761,16 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             });
         };
 
+        // Firestore 쓰기 promise 는 서버 응답이 와야 끝난다. 백엔드에 닿지 못하면
+        // 로컬 큐에 쌓인 채 영원히 대기하므로 상한을 둔다.
+        // 타임아웃이 나도 쓰기 자체는 취소되지 않으며, 연결이 복구되면 전송된다.
+        function withWriteTimeout(promise, ms = 8000) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('WRITE_TIMEOUT')), ms))
+            ]);
+        }
+
         window.requestSaveSeatingHistory = function() {
             if (!currentSeatingTables || currentSeatingTables.length === 0) {
                 showToast("저장할 테이블 배치 정보가 없습니다.", "warning");
@@ -6772,18 +6796,22 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 try {
                     // Firestore 는 중첩 배열을 저장하지 못한다 (HANDOFF 5a46354). 좌석 문서와 동일하게
                     // 경계에서 JSON 문자열로 인코딩한다.
-                    await setDoc(doc(sessionsCollectionRef, sessionDocId), {
+                    await withWriteTimeout(setDoc(doc(sessionsCollectionRef, sessionDocId), {
                         id: sessionDocId,
                         date: dateStr,
                         part: part,
                         tables: JSON.stringify(newSession.tables),
                         tableNames: JSON.stringify(newSession.tableNames),
                         createdAt: newSession.createdAt
-                    });
+                    }));
                     showToast(`💾 오늘 ${part}부 테이블 구성이 만남 이력에 저장되었습니다!`, "success");
                 } catch (err) {
                     console.error("만남 이력 서버 저장 실패:", err);
-                    showToast("⚠️ 이 기기에만 저장되었습니다 (서버 저장 실패). 새로고침하면 사라질 수 있습니다.", "warning");
+                    if (err && err.message === 'WRITE_TIMEOUT') {
+                        showToast("⚠️ 서버 응답 없음 — 이 기기에만 저장됨. 인터넷/로그인 상태를 확인하세요.", "warning");
+                    } else {
+                        showToast("⚠️ 서버 저장 실패 — 이 기기에만 저장됨. 새로고침하면 사라질 수 있습니다.", "warning");
+                    }
                 }
             });
         };
