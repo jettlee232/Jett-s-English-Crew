@@ -4756,26 +4756,32 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                         }
                     }
 
-                    // 09/05 토요 스터디 참석자 12명 출석 회차 동기화 보정 (+1 반영)
-                    const TODAY_0905_ATTENDEES = {
-                        'Jett': 20,
+                    // 공식 모임 앱 09/05 최종 출석(일정 참여) 실측 동기화
+                    const OFFICIAL_APP_ATTENDANCE = {
+                        'Jett': 21,
+                        '대니얼': 12,
                         'Jackie': 11,
-                        '대니얼': 11,
-                        'Cindy': 8,
-                        'Jun': 7,
-                        '표토르': 5,
+                        '찰스': 11,
+                        '대니': 10,
+                        'DY': 9,
+                        'Sunny': 9,
+                        'Jun': 8,
+                        'Emilia': 8,
+                        'Baylin': 8,
+                        '표토르': 7,
                         'Hanul': 5,
-                        '군밤': 5,
                         '눅눅': 5,
-                        'Jade': 4,
                         'Richard': 4,
+                        'Cindy': 8,
+                        '군밤': 5,
+                        'Jade': 4,
                         'Bonny': 1,
                         '천연암반수': 1
                     };
                     const needSync0905 = [];
                     list.forEach(m => {
-                        if (TODAY_0905_ATTENDEES[m.name] !== undefined) {
-                            const targetAtt = TODAY_0905_ATTENDEES[m.name];
+                        if (OFFICIAL_APP_ATTENDANCE[m.name] !== undefined) {
+                            const targetAtt = OFFICIAL_APP_ATTENDANCE[m.name];
                             if ((m.totalAttended || 0) < targetAtt) {
                                 m.totalAttended = targetAtt;
                                 if (m.totalAttended > 0) m.isNew = false;
