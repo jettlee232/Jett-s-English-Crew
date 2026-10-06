@@ -5840,367 +5840,113 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             return (m.totalAttended || 0) === 0;
         }
 
-        let avoidPairsChecked = false;
-        // 같은 테이블에 앉히지 않을 조합 (1부·2부 공통).
-        // 저장소가 public 이라 실명 대신 회원 문서 id 로 지정한다.
-        // id 확인: 관리자 도구에서 대상 회원을 연 뒤 콘솔에 찍히는 문서 id,
-        // 또는 Firebase 콘솔 members 컬렉션에서 이름으로 찾는다.
-        const AVOID_COUPLE_PAIRS = [
-            ["mem-14-519f9fd3", "mem-31-bf2295df"]
-        ];
-
-        function isAvoidPair(m1, m2) {
-            if (!m1 || !m2) return false;
-            for (const [a, b] of AVOID_COUPLE_PAIRS) {
-                if ((m1.id === a && m2.id === b) || (m1.id === b && m2.id === a)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         // =========================================================================
-        // 🎯 스마트 테이블 배치 마스터 알고리즘 (3단계 우선순위 체계)
+        // 🎯 스마트 테이블 배치 (2026-10-06 리더 확정)
         //
-        // 페널티 사다리 — 위가 셀수록 강한 제약이다.
-        //   회피쌍 동석            : 사실상 금지 (다른 모든 항의 합보다 크게)
-        //   재회(만난 횟수)         : 제곱으로 증가 — 첫 재회는 참을 만하고, 두 번째부터 급증
-        //   같은 연령대 / 1부 중복  : 재회 1회보다 무겁고 2회보다 가볍다
-        //   평균나이·성비 균형      : 미세 조정용
+        // 테이블은 3명 기준(floor(n/3)개). T1 = 리더 고정, 1부는 첫 참석자도 T1.
+        // 우선순위 — 위가 셀수록 강하다. 숫자는 이 상수들에만 둔다.
+        //   1부 믹스: 시니어(40대+) 테이블당 1명 > 남녀 최소 1명씩 > 재회 회피 > 같은 연령대 회피
+        //   2부 또래: 테이블 연령폭 인접 세대(20~30, 30~40 …) 이내 > 남녀 최소 1명씩 > 1부 동석·재회 회피
+        // 시니어끼리 2부에서 모이는 걸 꺼려 해서 1부에서라도 젊은 세대와 섞는 게 최우선이다.
         // =========================================================================
-        const W_AVOID = 1000000;        // 회피쌍 (하드 제약)
-        const W_MET = 1200;             // 믹스: 만난 횟수² 계수 (1회 1200 / 2회 4800 / 3회 10800)
-        const W_SAME_AGE = 3000;        // 믹스: 같은 연령대 동석
-        const W_PART1_DUP = 3000;       // 믹스 2부: 1부에 같은 테이블이었음
-        const W_MET_PEER = 400;         // 또래: 만난 횟수² 계수 (세대차 최대치 2100과 3회에서 역전)
-        const W_PART1_DUP_PEER = 1500;  // 또래 2부: 1부에 같은 테이블이었음
-        function generateMixSeatingPlan(todayMembers, isPart2 = false) {
-            const totalCount = todayMembers.length;
-            if (totalCount === 0) return [];
-            const numTables = Math.max(1, Math.floor(totalCount / 3));
-            const tables = Array.from({ length: numTables }, () => []);
+        const SENIOR_AGE = 40;          // 이 연령대 이상을 1부에서 흩는다
+        const W_SENIOR = 100000;        // 1부: 한 테이블 시니어 2명째부터 1명당
+        const W_SPAN = 100000;          // 2부: 테이블 연령폭이 10년을 넘을 때 10년당
+        const W_GENDER = 20000;         // 공통: 한 성별만 있는 테이블
+        const W_PART1_DUP = 3000;       // 2부: 1부에 같은 테이블이었던 쌍
+        const W_SAME_AGE = 3000;        // 1부: 같은 연령대 쌍
+        const W_MET = 1200;             // 공통: 만난 횟수² 계수 (1회 1200 / 2회 4800 / 3회 10800)
+        const W_SPAN_ADJ = 300;         // 2부: 인접 세대 섞임 (같은 세대면 더 좋다)
 
-            function getAgeNum(ageStr) {
-                if (!ageStr) return 35;
-                if (ageStr.includes("10")) return 18;
-                if (ageStr.includes("20")) return 25;
-                if (ageStr.includes("30")) return 35;
-                if (ageStr.includes("40")) return 45;
-                if (ageStr.includes("50")) return 55;
-                if (ageStr.includes("60")) return 65;
-                return 35;
-            }
+        function seatAge(m) { return parseInt(m.ageGroup, 10) || 30; }   // "20대" → 20
+        function isLeaderMember(m) { return !!(m.isLeader || (m.name || '').includes('Jett')); }
 
-            const totalAgeSum = todayMembers.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
-            const overallAvgAge = totalCount > 0 ? (totalAgeSum / totalCount) : 40;
-
-            const baseCapacity = Math.floor(totalCount / numTables);
-            const remainder = totalCount % numTables;
-            const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
-
-            let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
-            if (!leader) leader = todayMembers[0];
-
-            const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
-            tables[0].push(leader);
-
-            let unassignedPool = [];
-            if (!isPart2) {
-                const newMembers = restMembers.filter(m => isNewbieMember(m));
-                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
-                for (const nm of newMembers) {
-                    if (tables[0].length < capacities[0]) {
-                        tables[0].push(nm);
-                    } else {
-                        regularMembers.push(nm);
-                    }
-                }
-                unassignedPool = regularMembers;
+        function seatingTableCost(tbl, peer, p1TableOf) {
+            if (tbl.length === 0) return 0;
+            let c = 0;
+            const ages = tbl.map(seatAge);
+            const males = tbl.filter(m => m.gender === 'M').length;
+            if (tbl.length >= 2 && (males === 0 || males === tbl.length)) c += W_GENDER;
+            c += Math.abs(2 * males - tbl.length) * 50;
+            if (peer) {
+                const span = Math.max(...ages) - Math.min(...ages);
+                if (span > 10) c += (span - 10) / 10 * W_SPAN;
+                else if (span === 10) c += W_SPAN_ADJ;
             } else {
-                unassignedPool = restMembers;
+                const seniors = ages.filter(a => a >= SENIOR_AGE).length;
+                if (seniors > 1) c += (seniors - 1) * W_SENIOR;
             }
-
-            // 1부에서 T1에 고정된 인원(리더+신규)만 교환에서 제외한다
-            const lockedIds = new Set(isPart2 ? [] : tables[0].map(m => m.id));
-            lockedIds.add(leader.id);
-
-            function getMixCost(tbl, member) {
-                let cost = 0;
-                cost += tbl.length * 70;
-
-                const nextCount = tbl.length + 1;
-                const nextAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0) + getAgeNum(member.ageGroup);
-                const nextAvgAge = nextAgeSum / nextCount;
-                cost += Math.abs(nextAvgAge - overallAvgAge) * 120;
-                // 같은 연령대끼리 앉으면 2부 또래 배치에서 또 만난다 — 피하되,
-                // "덜 만난 사람 우선"이 위다 (재회 2번이면 연령대 중복보다 비싸진다)
-                cost += tbl.filter(x => (x.ageGroup || '') === (member.ageGroup || '')).length * W_SAME_AGE;
-
-                for (const existing of tbl) {
-                    if (isAvoidPair(existing, member)) cost += W_AVOID;
-                    const met = getPairMeetingCount(existing, member);
-                    cost += met * met * W_MET;
-                    if (isPart2 && part1SeatingSnapshot) {
-                        for (const p1T of part1SeatingSnapshot) {
-                            if (p1T.some(x => x.id === existing.id) && p1T.some(x => x.id === member.id)) {
-                                cost += W_PART1_DUP;
-                            }
-                        }
-                    }
-                }
-
-                const mCount = tbl.filter(m => m.gender === "M").length;
-                const fCount = tbl.filter(m => m.gender !== "M").length;
-                if (member.gender === "M" && mCount > fCount) cost += 45;
-                if (member.gender !== "M" && fCount > mCount) cost += 45;
-
-                return cost;
-            }
-
-            // 같은 연령대가 연달아 배치되지 않도록 연령대별 라운드로빈으로 투입 순서를 만든다
-            const byGen = {};
-            for (const m of unassignedPool) {
-                const g = m.ageGroup || '기타';
-                (byGen[g] = byGen[g] || []).push(m);
-            }
-            const genGroups = Object.values(byGen)
-                .sort((a, b) => b.length - a.length)
-                .map(g => g.sort(() => Math.random() - 0.5));
-            const unassigned = [];
-            for (let k = 0; unassigned.length < unassignedPool.length; k++) {
-                for (const g of genGroups) if (g[k]) unassigned.push(g[k]);
-            }
-
-            for (const member of unassigned) {
-                let bestTableIdx = -1;
-                let minCost = Infinity;
-
-                for (let t = 0; t < numTables; t++) {
-                    if (tables[t].length >= capacities[t]) continue;
-                    const cost = getMixCost(tables[t], member);
-                    if (cost < minCost) {
-                        minCost = cost;
-                        bestTableIdx = t;
-                    }
-                }
-                if (bestTableIdx !== -1) {
-                    tables[bestTableIdx].push(member);
-                } else {
-                    let minT = 0;
-                    for (let t = 1; t < numTables; t++) {
-                        if (tables[t].length < tables[minT].length) minT = t;
-                    }
-                    tables[minT].push(member);
+            for (let i = 0; i < tbl.length; i++) {
+                for (let j = i + 1; j < tbl.length; j++) {
+                    if (!peer && ages[i] === ages[j]) c += W_SAME_AGE;
+                    const met = getPairMeetingCount(tbl[i], tbl[j]);
+                    c += met * met * W_MET;
+                    const t = p1TableOf.get(tbl[i].id);
+                    if (t !== undefined && t === p1TableOf.get(tbl[j].id)) c += W_PART1_DUP;
                 }
             }
-
-            function evaluateTableMix(tbl) {
-                let p = 0;
-                const tblAgeSum = tbl.reduce((sum, m) => sum + getAgeNum(m.ageGroup), 0);
-                const tblAvgAge = tbl.length > 0 ? (tblAgeSum / tbl.length) : overallAvgAge;
-                p += Math.abs(tblAvgAge - overallAvgAge) * 200;
-
-                for (let i = 0; i < tbl.length; i++) {
-                    for (let j = i + 1; j < tbl.length; j++) {
-                        if ((tbl[i].ageGroup || '') === (tbl[j].ageGroup || '')) p += W_SAME_AGE;
-                        if (isAvoidPair(tbl[i], tbl[j])) p += W_AVOID;
-                        const met = getPairMeetingCount(tbl[i], tbl[j]);
-                        p += met * met * W_MET;
-                        if (isPart2 && part1SeatingSnapshot) {
-                            for (const p1T of part1SeatingSnapshot) {
-                                if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
-                                    p += W_PART1_DUP;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                const mCount = tbl.filter(m => m.gender === "M").length;
-                const fCount = tbl.filter(m => m.gender !== "M").length;
-                p += Math.abs(mCount - fCount) * 50;
-
-                return p;
-            }
-
-            for (let iter = 0; iter < 50; iter++) {
-                let improved = false;
-                for (let t1 = 0; t1 < numTables; t1++) {
-                    for (let t2 = t1 + 1; t2 < numTables; t2++) {
-                        for (let i = 0; i < tables[t1].length; i++) {
-                            const m1 = tables[t1][i];
-                            if (lockedIds.has(m1.id)) continue;
-
-                            for (let j = 0; j < tables[t2].length; j++) {
-                                const m2 = tables[t2][j];
-                                if (lockedIds.has(m2.id)) continue;
-
-                                const curCost = evaluateTableMix(tables[t1]) + evaluateTableMix(tables[t2]);
-
-                                tables[t1][i] = m2;
-                                tables[t2][j] = m1;
-
-                                const newCost = evaluateTableMix(tables[t1]) + evaluateTableMix(tables[t2]);
-                                if (newCost < curCost) {
-                                    improved = true;
-                                    break;
-                                } else {
-                                    tables[t1][i] = m1;
-                                    tables[t2][j] = m2;
-                                }
-                            }
-                            if (improved) break;
-                        }
-                        if (improved) break;
-                    }
-                    if (improved) break;
-                }
-                if (!improved) break;
-            }
-
-            return tables;
+            return c;
         }
 
-        function generatePeerSeatingPlan(todayMembers, isPart2 = false) {
-            const totalCount = todayMembers.length;
-            if (totalCount === 0) return [];
-            const numTables = Math.max(1, Math.floor(totalCount / 3));
-            const tables = Array.from({ length: numTables }, () => []);
+        function generateSeatingPlan(todayMembers, peer, isPart2) {
+            const n = todayMembers.length;
+            if (n === 0) return [];
+            const numTables = Math.max(1, Math.floor(n / 3));
+            const caps = Array.from({ length: numTables }, (_, i) => Math.floor(n / numTables) + (i < n % numTables ? 1 : 0));
 
-            function getGenNum(ageStr) {
-                if (!ageStr) return 30;
-                if (ageStr.includes("10") || ageStr.includes("20") || ageStr.includes("30")) return 30;
-                if (ageStr.includes("40")) return 45;
-                if (ageStr.includes("50")) return 55;
-                if (ageStr.includes("60")) return 60;
-                return 30;
-            }
-
-            const baseCapacity = Math.floor(totalCount / numTables);
-            const remainder = totalCount % numTables;
-            const capacities = Array.from({ length: numTables }, (_, i) => baseCapacity + (i < remainder ? 1 : 0));
-
-            let leader = todayMembers.find(m => m.isLeader || (m.name || "").includes("Jett"));
-            if (!leader) leader = todayMembers[0];
-
-            const restMembers = todayMembers.filter(m => !leader || m.id !== leader.id);
-            tables[0].push(leader);
-
-            let unassignedPool = [];
+            const leader = todayMembers.find(isLeaderMember) || todayMembers[0];
+            const t1 = [leader];
             if (!isPart2) {
-                const newMembers = restMembers.filter(m => isNewbieMember(m));
-                const regularMembers = restMembers.filter(m => !isNewbieMember(m));
-                for (const nm of newMembers) {
-                    if (tables[0].length < capacities[0]) {
-                        tables[0].push(nm);
-                    } else {
-                        regularMembers.push(nm);
-                    }
-                }
-                unassignedPool = regularMembers;
-            } else {
-                unassignedPool = restMembers;
-            }
-
-            // 1부에서 T1에 고정된 인원(리더+신규)만 교환에서 제외한다
-            const lockedIds = new Set(isPart2 ? [] : tables[0].map(m => m.id));
-            lockedIds.add(leader.id);
-
-            const sortedByAge = [...unassignedPool].sort((a, b) => {
-                const diff = getGenNum(a.ageGroup) - getGenNum(b.ageGroup);
-                return diff !== 0 ? diff : (Math.random() - 0.5);
-            });
-
-            let ageIdx = 0;
-            for (let t = 0; t < numTables; t++) {
-                while (tables[t].length < capacities[t] && ageIdx < sortedByAge.length) {
-                    tables[t].push(sortedByAge[ageIdx++]);
+                for (const m of todayMembers) {
+                    if (m !== leader && isNewbieMember(m) && t1.length < caps[0]) t1.push(m);
                 }
             }
-            while (ageIdx < sortedByAge.length) {
-                const minT = tables.reduce((minI, t, i, arr) => t.length < arr[minI].length ? i : minI, 0);
-                tables[minT].push(sortedByAge[ageIdx++]);
-            }
+            const locked = new Set(t1.map(m => m.id));
+            const rest = todayMembers.filter(m => !locked.has(m.id));
 
-            function evaluateTablePeer(tbl) {
-                let score = 0;
-                if (tbl.length === 0) return 0;
+            const p1TableOf = new Map();
+            if (isPart2 && part1SeatingSnapshot) part1SeatingSnapshot.forEach((tbl, i) => tbl.forEach(m => p1TableOf.set(m.id, i)));
+            const cost = tbl => seatingTableCost(tbl, peer, p1TableOf);
 
-                for (let i = 0; i < tbl.length; i++) {
-                    for (let j = i + 1; j < tbl.length; j++) {
-                        if (isAvoidPair(tbl[i], tbl[j])) score += W_AVOID;
-                        const genDiff = Math.abs(getGenNum(tbl[i].ageGroup) - getGenNum(tbl[j].ageGroup));
-                        score += genDiff * 70;
-                        const met = getPairMeetingCount(tbl[i], tbl[j]);
-                        score += met * met * W_MET_PEER;
+            // 무작위 시작 → 두 사람 맞바꾸기로 더 나빠지지 않을 때까지 개선. 시작점을 바꿔 여러 번 돌려 최선을 고른다.
+            let best = null, bestCost = Infinity;
+            for (let run = 0; run < 20; run++) {
+                const pool = [...rest].sort(() => Math.random() - 0.5);
+                const tables = caps.map((cap, i) => i === 0 ? [...t1] : []);
+                tables.forEach((tbl, i) => { while (tbl.length < caps[i]) tbl.push(pool.pop()); });
+                const costs = tables.map(cost);
 
-                        if (isPart2 && part1SeatingSnapshot) {
-                            for (const p1T of part1SeatingSnapshot) {
-                                if (p1T.some(x => x.id === tbl[i].id) && p1T.some(x => x.id === tbl[j].id)) {
-                                    score += W_PART1_DUP_PEER;
+                let improved = true;
+                while (improved) {
+                    improved = false;
+                    for (let a = 0; a < numTables; a++) {
+                        for (let b = a + 1; b < numTables; b++) {
+                            for (let i = 0; i < tables[a].length; i++) {
+                                if (locked.has(tables[a][i].id)) continue;
+                                for (let j = 0; j < tables[b].length; j++) {
+                                    if (locked.has(tables[b][j].id)) continue;
+                                    [tables[a][i], tables[b][j]] = [tables[b][j], tables[a][i]];
+                                    const ca = cost(tables[a]), cb = cost(tables[b]);
+                                    if (ca + cb < costs[a] + costs[b]) {
+                                        costs[a] = ca; costs[b] = cb; improved = true;
+                                    } else {
+                                        [tables[a][i], tables[b][j]] = [tables[b][j], tables[a][i]];
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
-                const mCount = tbl.filter(m => m.gender === "M").length;
-                const fCount = tbl.filter(m => m.gender !== "M").length;
-                score += Math.abs(mCount - fCount) * 80;
-
-                return score;
+                const total = costs.reduce((x, y) => x + y, 0);
+                if (total < bestCost) { bestCost = total; best = tables; }
             }
-
-            for (let iter = 0; iter < 80; iter++) {
-                let improved = false;
-                for (let t1 = 0; t1 < numTables; t1++) {
-                    for (let t2 = t1 + 1; t2 < numTables; t2++) {
-                        for (let i = 0; i < tables[t1].length; i++) {
-                            const m1 = tables[t1][i];
-                            if (lockedIds.has(m1.id)) continue;
-
-                            for (let j = 0; j < tables[t2].length; j++) {
-                                const m2 = tables[t2][j];
-                                if (lockedIds.has(m2.id)) continue;
-
-                                const curScore = evaluateTablePeer(tables[t1]) + evaluateTablePeer(tables[t2]);
-
-                                tables[t1][i] = m2;
-                                tables[t2][j] = m1;
-
-                                const newScore = evaluateTablePeer(tables[t1]) + evaluateTablePeer(tables[t2]);
-                                if (newScore < curScore) {
-                                    improved = true;
-                                    break;
-                                } else {
-                                    tables[t1][i] = m1;
-                                    tables[t2][j] = m2;
-                                }
-                            }
-                            if (improved) break;
-                        }
-                        if (improved) break;
-                    }
-                    if (improved) break;
-                }
-                if (!improved) break;
-            }
-
-            return tables;
+            return best;
         }
 
-        // =========================================================================
-        // 🎯 스마트 테이블 배치 마스터 디스패처 (믹스 ⇄ 또래 모드 스위치 지원)
-        // =========================================================================
+        // 순서 모드: mix_first(기본) = 1부 믹스 → 2부 또래, peer_first = 반대
         function calculateSmartSeatingPlan(todayMembers, isShuffle = false) {
             const isPeerFirst = (topicData && topicData.seatingOrderMode === "peer_first");
-            if (!isShuffle) {
-                // 1부
-                return isPeerFirst ? generatePeerSeatingPlan(todayMembers, false) : generateMixSeatingPlan(todayMembers, false);
-            } else {
-                // 2부 (셔플)
-                return isPeerFirst ? generateMixSeatingPlan(todayMembers, true) : generatePeerSeatingPlan(todayMembers, true);
-            }
+            return generateSeatingPlan(todayMembers, isShuffle !== isPeerFirst, isShuffle);
         }
 function renderSeatingPlan(isShuffle = false, forceNew = false) {
             const container = document.getElementById('seatingGrid');
@@ -6208,12 +5954,6 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
 
             const todayMembers = membersData.filter(m => m.isToday && !m.leftEarly);
 
-            // 분리 대상 id 를 명단에서 못 찾으면 규칙이 조용히 죽는다 — 한 번만 알린다
-            if (!avoidPairsChecked && membersData.length) {
-                avoidPairsChecked = true;
-                const missing = AVOID_COUPLE_PAIRS.flat().filter(id => !membersData.some(m => m.id === id));
-                if (missing.length) console.warn("좌석 분리 대상 id 를 명단에서 찾지 못했습니다 (해당 규칙 미적용):", missing);
-            }
             const totalCount = todayMembers.length;
 
             // 적립 탭(오늘 참석)과 좌석 인원이 다른 이유를 화면에서 설명한다
