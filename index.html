@@ -473,6 +473,10 @@
         html.light-theme .bg-orange-600 *,
         html.light-theme .bg-orange-500,
         html.light-theme .bg-orange-500 *,
+        html.light-theme .my-seat-bar { background: #ecfdf5; border-color: #6ee7b7; }
+        html.light-theme .my-seat-bar,
+        html.light-theme .my-seat-bar * { color: #065f46; }
+        html.light-theme .my-seat-select { background: #ffffff; color: #27272a; border-color: #d4d4d8; }
         html.light-theme .bg-emerald-600,
         html.light-theme .bg-emerald-600 *,
         html.light-theme .bg-rose-600,
@@ -1198,6 +1202,9 @@
                 <!-- Schedule Notice centered below horizontal line -->
                 <p class="text-center text-[11px] sm:text-xs text-zinc-400 font-normal tracking-tight">* 인원 변동에 따라 시작 전 배치가 조정될 수 있습니다.</p>
 
+                <!-- 내 자리 찾기 (이 기기에만 기억) -->
+                <div id="mySeatBar" class="hidden"></div>
+
                 <!-- Seat Move Mode Active Helper Bar -->
                 <div id="seatMoveGuideBar" class="hidden"></div>
 
@@ -1239,14 +1246,14 @@
                                 <span class="text-amber-400 font-bold mt-0.5"><i class="fa-solid fa-scale-balanced"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">세대 간 균형 및 공감대 페어링</strong>
-                                    1부에는 특정 세대가 한 테이블로 치우치지 않도록 고르게 섞고, 2부에는 반대로 비슷한 세대끼리 모아 깊은 공감대를 형성하며 대화하실 수 있게 합니다.
+                                    1부에는 50대 이상 멤버가 테이블마다 한 분씩 젊은 세대와 함께 앉도록 고르게 섞고, 2부에는 20~30대·30~40대처럼 가까운 세대끼리 모아 깊은 공감대를 형성하며 대화하실 수 있게 합니다.
                                 </div>
                             </div>
                             <div class="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg">
                                 <span class="text-purple-400 font-bold mt-0.5"><i class="fa-solid fa-venus-mars"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">남녀 성비 균형 배분</strong>
-                                    남성과 여성 멤버의 비율이 특정 테이블로 쏠리지 않고 자연스럽게 섞이도록 테이블마다 성비를 균등하게 조율합니다.
+                                    모든 테이블에 남성과 여성 멤버가 최소 한 분씩 앉도록 배정해, 한 성별로만 이루어진 테이블이 생기지 않게 조율합니다.
                                 </div>
                             </div>
                             <div class="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg">
@@ -1768,6 +1775,7 @@
                                 <i class="fa-regular fa-calendar-check text-blue-400"></i>
                                 <span>스터디 일정 & 회차</span>
                             </label>
+                            <button type="button" onclick="advanceScheduleOneWeek()" class="text-[11px] sm:text-xs font-semibold text-blue-300 bg-blue-950/60 hover:bg-blue-900/70 border border-blue-700/50 px-2 py-0.5 rounded-lg transition active:scale-95 whitespace-nowrap cursor-pointer">다음 주로 (+7일, +1회차)</button>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <input id="inputTopicSchedule" type="text" placeholder="예: 9월 5일 (토) 10:00 - 11:50" class="col-span-2 bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
@@ -3196,6 +3204,24 @@
                     console.warn("Firestore sync error:", e);
                 }
             });
+        };
+
+        // 일정 입력칸의 "M월 D일 (요일)"을 7일 뒤로, 회차 숫자를 +1 한다. 저장은 리더가 확인 후 누른다.
+        window.advanceScheduleOneWeek = function() {
+            const inSch = document.getElementById('inputTopicSchedule');
+            const inRound = document.getElementById('inputTopicRound');
+            const m = inSch && inSch.value.match(/(\d{1,2})월\s*(\d{1,2})일(\s*\([^)]*\))?/);
+            if (!m) {
+                showToast("일정에서 'M월 D일' 형식을 찾지 못했습니다. 직접 수정해주세요.", "warning");
+                return;
+            }
+            const now = new Date();
+            let d = new Date(now.getFullYear(), +m[1] - 1, +m[2] + 7);
+            if (+m[1] === 12 && now.getMonth() === 0) d = new Date(now.getFullYear() - 1, 11, +m[2] + 7);   // 1월에 작년 12월 일정을 넘기는 경우
+            const day = '일월화수목금토'[d.getDay()];
+            inSch.value = inSch.value.replace(m[0], `${d.getMonth() + 1}월 ${d.getDate()}일 (${day})`);
+            if (inRound) inRound.value = inRound.value.replace(/\d+/, n => +n + 1);
+            showToast("📅 다음 주 일정으로 바꿨습니다. 확인 후 저장해주세요.", "info");
         };
 
         window.saveTopicSettings = async function() {
@@ -5973,6 +5999,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                         오늘 지정된 스터디 참석자가 없어 테이블 배치가 필요하지 않습니다.
                     </div>
                 `;
+                renderMySeatBar([]);
                 return;
             }
 
@@ -6039,6 +6066,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                     </div>
                 `;
                 currentSeatingTables = [];
+                renderMySeatBar([]);
                 return;
             } else {
                 tables = calculateSmartSeatingPlan(todayMembers, isShuffle);
@@ -6153,6 +6181,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 }
             }
 
+            const mySeatId = getMySeatId();
             container.innerHTML = tables.map((members, idx) => {
                 const tableNo = idx + 1;
                 const capacity = members.length;
@@ -6207,7 +6236,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 }
 
                 return `
-                    <div ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
+                    <div id="seat-table-${idx}" ${tableClickHandler} class="table-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 relative overflow-hidden transition-all duration-200 ${tableHighlightClass}">
                         <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 gap-2 flex-wrap">
                             <div class="flex items-center gap-2.5">
                                 ${tBadgeHtml}
@@ -6255,7 +6284,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                                 const isSelected = isSeatMoveMode && selectedSeatMemberId === m.id;
                                 const isDimmed = isSeatMoveMode && selectedSeatMemberId && selectedSeatMemberId !== m.id;
 
-                                let memberVisualClass = '';
+                                let memberVisualClass = (m.id === mySeatId && !isSeatMoveMode) ? 'ring-2 ring-emerald-400' : '';
                                 let memberClickHandler = '';
                                 if (isSelected) {
                                     memberVisualClass = 'seat-move-selected cursor-pointer';
@@ -6280,6 +6309,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                                                 ${esc(m.name || '미지정')}
                                             </span>
                                             ${tagHtml}
+                                            ${(m.id === mySeatId && !isSeatMoveMode) ? '<span class="inline-flex items-center px-1 h-4 rounded bg-emerald-500 text-zinc-950 font-black text-[10px] leading-none shrink-0">나</span>' : ''}
                                         </div>
                                         ${isSelected ? `
                                             <span class="mt-1 inline-flex items-center gap-0.5 bg-black/50 text-amber-200 border border-amber-300/60 font-bold text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded shadow-sm">
@@ -6293,6 +6323,55 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                     </div>
                 `;
             }).join('');
+            renderMySeatBar(tables);
+        }
+
+        // 내 자리 찾기: 고른 이름은 이 기기 localStorage 에만 둔다 (서버 쓰기 없음)
+        function getMySeatId() {
+            try { return localStorage.getItem('mySeatMemberId') || ''; } catch (e) { return ''; }
+        }
+
+        window.setMySeat = function(id) {
+            try {
+                if (id) localStorage.setItem('mySeatMemberId', id); else localStorage.removeItem('mySeatMemberId');
+            } catch (e) { console.warn("내 자리 기억 실패 (이번 화면에만 적용):", e); }
+            renderSeatingPlan(isPart2Shuffle);
+            if (id) scrollToMySeatTable();
+        };
+
+        window.scrollToMySeatTable = function() {
+            const id = getMySeatId();
+            const idx = currentSeatingTables.findIndex(t => t.some(m => m.id === id));
+            const el = idx !== -1 && document.getElementById('seat-table-' + idx);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        function renderMySeatBar(tables) {
+            const bar = document.getElementById('mySeatBar');
+            if (!bar) return;
+            if (!tables.length || isSeatMoveMode) { bar.className = 'hidden'; bar.innerHTML = ''; return; }
+            const myId = getMySeatId();
+            const idx = tables.findIndex(t => t.some(m => m.id === myId));
+            bar.className = 'block';
+            if (idx !== -1) {
+                const me = tables[idx].find(m => m.id === myId);
+                bar.innerHTML = `
+                    <div class="my-seat-bar flex items-center justify-between gap-2 bg-emerald-950/40 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs sm:text-sm">
+                        <button type="button" onclick="scrollToMySeatTable()" class="flex items-center gap-1.5 min-w-0 text-emerald-200 font-medium truncate cursor-pointer">
+                            📍 <strong class="truncate">${esc(me.name)}</strong>님 자리는 <strong class="text-emerald-300 whitespace-nowrap">T${idx + 1} 테이블</strong>
+                        </button>
+                        <button type="button" onclick="setMySeat('')" class="shrink-0 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-200 underline cursor-pointer">이름 변경</button>
+                    </div>`;
+            } else {
+                const opts = tables.flat().slice()
+                    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'))
+                    .map(m => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+                bar.innerHTML = `
+                    <select onchange="setMySeat(this.value)" aria-label="내 이름 선택" class="my-seat-select w-full bg-zinc-900 border border-zinc-700 text-zinc-200 rounded-xl px-3 py-2 text-xs sm:text-sm cursor-pointer">
+                        <option value="">${myId ? '오늘 배치에 이름이 없어요 — 다시 선택' : '🔎 내 이름을 고르면 내 자리를 찾아드려요'}</option>
+                        ${opts}
+                    </select>`;
+            }
         }
 
         window.toggleLeaderFreshnessWithPin = function() {
