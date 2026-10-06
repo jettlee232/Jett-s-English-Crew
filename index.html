@@ -5966,7 +5966,8 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                     : `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span><span class="text-zinc-400 font-medium">착석</span><strong class="text-zinc-100 font-semibold">${totalCount}명</strong>`;
             }
 
-            if (totalCount === 0) {
+            // 리더는 주간 초기화 후에도 참석 상태로 남는다 — 리더 혼자면 아직 모임 전이다
+            if (totalCount === 0 || (totalCount === 1 && isLeaderMember(todayMembers[0]))) {
                 container.innerHTML = `
                     <div class="col-span-full p-8 text-center text-xs sm:text-sm text-zinc-500 bg-zinc-900/60 rounded-xl border border-zinc-800">
                         오늘 지정된 스터디 참석자가 없어 테이블 배치가 필요하지 않습니다.
@@ -5993,7 +5994,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             const todaySig = todayMembers.map(m => m.id).sort().join(',');
             if (seatingSnapshotSig !== todaySig) {
                 const todayIds = new Set(todayMembers.map(m => m.id));
-                const patchSnapshot = (snap) => {
+                const patchSnapshot = (snap, isP1) => {
                     if (!snap || snap.length === 0) return null;
 
                     // 1) 빠진 사람 제거 + 남은 사람은 최신 회원 정보로 갱신
@@ -6001,10 +6002,12 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                         tbl.filter(m => todayIds.has(m.id))
                            .map(m => membersData.find(x => x.id === m.id) || m)
                     );
-                    // 2) 새로 합류한 사람은 가장 적은 테이블에 붙인다
+                    // 2) 새로 합류한 사람은 가장 적은 테이블에 붙인다 (1부 첫 참석자는 리더 테이블)
                     const seated = new Set(patched.flat().map(m => m.id));
+                    const leaderT = Math.max(0, patched.findIndex(tbl => tbl.some(isLeaderMember)));
                     for (const m of todayMembers) {
                         if (seated.has(m.id)) continue;
+                        if (isP1 && isNewbieMember(m)) { patched[leaderT].push(m); continue; }
                         let minT = 0;
                         for (let t = 1; t < patched.length; t++) {
                             if (patched[t].length < patched[minT].length) minT = t;
@@ -6013,7 +6016,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                     }
                     return patched;
                 };
-                part1SeatingSnapshot = patchSnapshot(part1SeatingSnapshot);
+                part1SeatingSnapshot = patchSnapshot(part1SeatingSnapshot, true);
                 part2SeatingSnapshot = patchSnapshot(part2SeatingSnapshot);
                 seatingSnapshotSig = todaySig;
             }
