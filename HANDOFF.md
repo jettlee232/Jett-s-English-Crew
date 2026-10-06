@@ -1,4 +1,4 @@
-# 작업 지시 (갱신 2026-09-06) — 성북구 중상급 영어회화 사이트
+# 작업 지시 (갱신 2026-10-06) — 성북구 중상급 영어회화 사이트
 
 ## 전제
 정적 사이트 2파일(`index.html`, `worksheet.html`) + Firebase(Firestore/익명auth).
@@ -6,7 +6,7 @@
 저장소 public, GitHub Pages 배포. 프로덕션 실데이터(회원 103명).
 백업: `firestore-backup-2026-08-25.json` (gitignore됨).
 
-**라이브 = `cf9f85c` (푸시·배포 반영 완료). 로컬과 원격 동일.**
+**라이브 = `19b7827` (푸시·배포 반영 완료). 로컬과 원격 동일.**
 
 > ⚠️ **회원들이 각자 폰으로 사이트에 접속한다.** 어떤 코드든
 > "처음 접속하는 기기에서 자동으로 Firestore 에 쓰는" 형태로 만들지 말 것.
@@ -29,12 +29,12 @@
      └─ localStorage 캐시 ──────┘  (오프라인/새로고침 폴백)  ──┘
 ```
 
-- **좌석 문서**: `artifacts/{appId}/public/data/settings/seating` (`index.html:2324`)
+- **좌석 문서**: `artifacts/{appId}/public/data/settings/seating` (`index.html:2522`)
   `{ date, isPart2Shuffle, p1:[[id...]...], p2:[...], updatedAt }` — 회원 **id 배열만** 저장한다.
-- **게시**: `publishSeatingPlan()` (`index.html:3544`). **리더 기기만**(`isLeaderAuthenticated`)
+- **게시**: `publishSeatingPlan()` (`index.html:2643`). **리더 기기만**(`isLeaderAuthenticated`)
   쓰고, 직전 게시 내용과 서명이 같으면 쓰지 않는다(렌더마다 쓰지 않기 위함).
-- **구독**: `onSnapshot(seatingDocRef, ...)` (`index.html:5322`) → `applySeatingDoc()` (`index.html:3521`)
-- **로컬 캐시**: `SEATING_CACHE_KEY = 'seatingSnapshots_v2'` (`index.html:3498`),
+- **구독**: `onSnapshot(seatingDocRef, ...)` (`index.html:4849`) → `applySeatingDoc()` (`index.html:2619`)
+- **로컬 캐시**: `SEATING_CACHE_KEY = 'seatingSnapshots_v2'` (`index.html:2593`),
   `persistSeatingSnapshots()` / `loadSeatingSnapshots()`. 날짜가 바뀌면 자동 폐기.
 - **호출 지점은 한 곳**: `renderSeatingPlan()` 안의
   `currentSeatingTables = tables;` 직후에 `persistSeatingSnapshots(); publishSeatingPlan();`
@@ -175,6 +175,17 @@
 
 ## ✅ 완료 — 다시 손대지 말 것
 
+**`19b7827` 휴회 공지 복사 + 휴회 주간 당근 유효기간 +7일 연장 (2026-09-08)**
+- 공지 탭 `휴회공지` 버튼 → `copySkipWeekNoticeToClipboard()`. 문구 복사만 하고 쓰기는 없다.
+- 관리자 도구 "한 주 쉬어가기" → `openSkipWeekExtendCoinsModal()`.
+  `requireLeaderAuth` 뒤에서 **리더가 버튼을 눌렀을 때만** 돈다(자동 실행 아님 — 위 금지 규칙과 무관).
+  당근 보유자(`coins > 0`)의 `lastAttendedAt` 을 +7일 밀어 `commitBatchUpdates` 로 일괄 저장한다.
+- **`lastAttendedAt` 은 사실상 "당근 만료 기준일"이다.** 쓰는 곳은 `expireStaleCoins()` 와
+  남은 일수 표시(`COIN_EXPIRY_DAYS - 경과일`) 뿐이라, 미래 날짜로 밀어도 부작용이 없다.
+  이 필드를 "실제 마지막 출석일"로 쓰는 기능을 새로 만들면 휴회 연장분만큼 틀린다 — 그땐 필드를 분리할 것.
+- **멱등이 아니다.** 두 번 누르면 +14일. 휴회 1주에 정확히 1회만 누를 것(버튼 라벨에 명시됨).
+- 연장은 `coinHistory` 에 남지 않는다(당근 수량 변동이 아니므로 의도된 동작).
+
 **`6ce5dc5` 하드코딩 데이터 패치 2건 제거 + 만남 이력 중첩 배열 수정
 (2026-09-05 — 앱 전체가 하루 멈춘 사고. 여기부터 읽을 것)**
 
@@ -246,7 +257,7 @@
 - 교환 제외 대상을 "신규 전원" → `lockedIds`(실제로 T1 에 앉힌 사람)로 축소
 - 조기 퇴장 1명에 배치가 통째로 날아가던 문제 → 세션 중 테이블 개수 고정, 스냅샷 무결성 검사로 전환
 - 만남 이력 멱등 저장(`${date}-p${part}`), `getPairMeetingCount` 에서 오늘 세션 제외
-- 1부 재배치 🎲 버튼(`requestRerollPart1WithPin`, `index.html:7172`)
+- 1부 재배치 🎲 버튼(`requestRerollPart1WithPin`, `index.html:6872`)
 
 **더 이전**
 - `worksheet.html` / `index.html` `color-scheme` 선언 (모바일 다크테마 PDF 검은 화면)
