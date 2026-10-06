@@ -2597,7 +2597,7 @@
             try {
                 const ids = snap => snap ? snap.map(tbl => tbl.map(m => m.id)) : null;
                 localStorage.setItem(SEATING_CACHE_KEY, JSON.stringify({
-                    date: new Date().toISOString().slice(0, 10),
+                    date: seatingTodayStr(),
                     isPart2Shuffle,
                     p1: ids(part1SeatingSnapshot),
                     p2: ids(part2SeatingSnapshot)
@@ -2608,7 +2608,8 @@
         let lastPublishedSeatingSig = '';
         let pendingSeatingDoc = null;   // 회원 명단보다 먼저 도착한 좌석 문서
 
-        function seatingTodayStr() { return new Date().toISOString().slice(0, 10); }
+        // 날짜는 KST 기준. UTC 로 자르면 토 09:00 KST 이전 작업이 금요일로 기록돼 좌석 캐시가 폐기된다
+        function seatingTodayStr() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }
         function seatingIds(snap) { return snap ? snap.map(tbl => tbl.map(m => m.id)) : null; }
         // Firestore 는 중첩 배열을 저장하지 못한다. 문자열로 직렬화해서 넣는다.
         function seatingEncode(snap) { const ids = seatingIds(snap); return ids ? JSON.stringify(ids) : null; }
@@ -2659,6 +2660,13 @@
                         lastPublishedSeatingSig = prevSig;   // 실패했으면 다음에 다시 시도한다
                         console.warn("좌석 공유 실패 (로컬 배치는 유지됨):", e);
                     });
+                // 2부로 넘어갔다 = 실제 모임 중. 수동 [이력 저장]을 잊어도 만남 이력이 남게 한다.
+                // 문서 id 가 날짜-부라 반복 저장은 덮어쓰기다.
+                // ponytail: 조기 퇴장자는 1부 스냅샷에서도 빠져 1부 이력에 안 남는다 — 정확히 하려면 1부 원본을 따로 보관
+                if (isPart2Shuffle && part1SeatingSnapshot && part2SeatingSnapshot) {
+                    saveSeatingSession(1, part1SeatingSnapshot).catch(e => console.warn("1부 만남 이력 자동 저장 실패:", e));
+                    saveSeatingSession(2, part2SeatingSnapshot).catch(e => console.warn("2부 만남 이력 자동 저장 실패:", e));
+                }
             } catch (e) {
                 console.warn("좌석 게시 중단 (화면 표시에는 영향 없음):", e);
             }
@@ -2667,7 +2675,7 @@
         function loadSeatingSnapshots() {
             try {
                 const raw = JSON.parse(localStorage.getItem(SEATING_CACHE_KEY) || 'null');
-                if (!raw || raw.date !== new Date().toISOString().slice(0, 10)) {
+                if (!raw || raw.date !== seatingTodayStr()) {
                     localStorage.removeItem(SEATING_CACHE_KEY);
                     return false;
                 }
@@ -4478,7 +4486,9 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             const wasToday = !!m.isToday;
                             const curTotal = (m.totalAttended !== undefined && m.totalAttended !== null && !isNaN(m.totalAttended)) ? parseInt(m.totalAttended, 10) : 0;
                             const newTotal = (shouldIncrementAttended && wasToday) ? curTotal + 1 : curTotal;
-                            const needsUpdate = wasToday || m.checkedInOnTime || m.checkedInReview || m.leftEarly;
+                            // 리더는 매주 참석한다 — 초기화 후에도 참석 상태를 유지해 수동 추가 없이 T1 에 고정되게 한다
+                            const keepToday = !!(m.isLeader || (m.name || '').includes('Jett'));
+                            const needsUpdate = wasToday || keepToday || m.checkedInOnTime || m.checkedInReview || m.leftEarly;
 
                             m.checkedInOnTime = false;
                             m.checkedInReview = false;
@@ -4488,12 +4498,12 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             if (shouldIncrementAttended && wasToday) {
                                 m.lastAttendedAt = now;
                             }
-                            m.isToday = false; // 오늘 참석자 상태 모두 비우기
+                            m.isToday = keepToday; // 오늘 참석자 상태 비우기 (리더 제외)
                             m.updatedAt = now;
 
                             if (needsUpdate) {
                                 const updateObj = {
-                                    isToday: false,
+                                    isToday: keepToday,
                                     checkedInOnTime: false,
                                     checkedInReview: false,
                                     leftEarly: false,
@@ -5770,7 +5780,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
         function pairKey(a, b) { return a < b ? a + '\u0000' + b : b + '\u0000' + a; }
 
         function buildPairMeetingMap() {
-            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayStr = seatingTodayStr();
             const map = new Map();
             for (const session of tableSessionsData) {
                 if (session.date === todayStr) continue;
@@ -5790,7 +5800,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
         function getPairMeetingCount(m1, m2) {
             if (!m1 || !m2 || m1.id === m2.id) return 0;
-            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayStr = seatingTodayStr();
             if (!pairMeetingCache || pairMeetingCache.src !== tableSessionsData || pairMeetingCache.today !== todayStr) {
                 pairMeetingCache = buildPairMeetingMap();
             }
@@ -6887,6 +6897,28 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             ]);
         }
 
+        // 만남 이력 1건 저장 (로컬 즉시 + 서버). 수동 저장과 2부 자동 저장이 공유한다.
+        function saveSeatingSession(part, snap) {
+            const tables = snap.filter(tbl => tbl.length > 0);
+            const dateStr = seatingTodayStr();
+            const sessionDocId = `${dateStr}-p${part}`;
+            const newSession = {
+                id: sessionDocId,
+                date: dateStr,
+                part: part,
+                tables: tables.map(tbl => tbl.map(m => m.id || m.name)),
+                tableNames: tables.map(tbl => tbl.map(m => m.name)),
+                createdAt: new Date().toISOString()
+            };
+            persistTableSessions([newSession, ...tableSessionsData.filter(s => s.id !== sessionDocId)]);
+            // Firestore 는 중첩 배열을 저장하지 못한다 (HANDOFF 5a46354). 경계에서 JSON 문자열로 인코딩한다.
+            return setDoc(doc(sessionsCollectionRef, sessionDocId), {
+                ...newSession,
+                tables: JSON.stringify(newSession.tables),
+                tableNames: JSON.stringify(newSession.tableNames)
+            });
+        }
+
         window.requestSaveSeatingHistory = function() {
             if (!currentSeatingTables || currentSeatingTables.length === 0) {
                 showToast("저장할 테이블 배치 정보가 없습니다.", "warning");
@@ -6894,32 +6926,9 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             }
 
             requireLeaderAuth(async () => {
-                const dateStr = new Date().toISOString().slice(0, 10);
                 const part = isPart2Shuffle ? 2 : 1;
-                const sessionDocId = `${dateStr}-p${part}`;
-                const newSession = {
-                    id: sessionDocId,
-                    date: dateStr,
-                    part: part,
-                    tables: currentSeatingTables.map(tbl => tbl.map(m => m.id || m.name)),
-                    tableNames: currentSeatingTables.map(tbl => tbl.map(m => m.name)),
-                    createdAt: new Date().toISOString()
-                };
-
-                const updatedSessions = [newSession, ...tableSessionsData.filter(s => s.id !== sessionDocId)];
-                persistTableSessions(updatedSessions);
-
                 try {
-                    // Firestore 는 중첩 배열을 저장하지 못한다 (HANDOFF 5a46354). 좌석 문서와 동일하게
-                    // 경계에서 JSON 문자열로 인코딩한다.
-                    await withWriteTimeout(setDoc(doc(sessionsCollectionRef, sessionDocId), {
-                        id: sessionDocId,
-                        date: dateStr,
-                        part: part,
-                        tables: JSON.stringify(newSession.tables),
-                        tableNames: JSON.stringify(newSession.tableNames),
-                        createdAt: newSession.createdAt
-                    }));
+                    await withWriteTimeout(saveSeatingSession(part, currentSeatingTables));
                     showToast(`💾 오늘 ${part}부 테이블 구성이 만남 이력에 저장되었습니다!`, "success");
                 } catch (err) {
                     console.error("만남 이력 서버 저장 실패:", err);
