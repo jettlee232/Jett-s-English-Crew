@@ -815,6 +815,18 @@
             } catch (e) {}
         }
 
+        // 로컬 초안이 어느 서버 발행본(publishedAt)에서 왔는지, 그 뒤 손으로 고쳤는지 기억한다.
+        // 서버가 더 새롭고 손댄 적 없으면 자동으로 최신본을 받는다 (주간 자동 업데이트 대응).
+        function markLocalDraftDirty() {
+            try { localStorage.setItem('worksheet_cache_dirty', '1'); } catch (e) { console.warn('초안 상태 저장 실패:', e); }
+        }
+        function markLocalDraftClean(publishedAt) {
+            try {
+                localStorage.setItem('worksheet_cache_base', String(publishedAt || 0));
+                localStorage.removeItem('worksheet_cache_dirty');
+            } catch (e) { console.warn('초안 상태 저장 실패:', e); }
+        }
+
         function loadLocalState() {
             try {
                 const savedMd = localStorage.getItem('worksheet_markdown_cache');
@@ -853,6 +865,7 @@
                     document.getElementById('markdownInput').value = text;
                     renderLivePreview();
                     saveLocalState();
+                    markLocalDraftDirty();
                 }
             } catch (err) {
                 alert('클립보드 권한이 필요합니다. 텍스트를 직접 입력창에 Ctrl+V (Cmd+V) 해주세요.');
@@ -890,6 +903,7 @@
             renderTimeout = setTimeout(() => {
                 renderLivePreview();
                 saveLocalState();
+                markLocalDraftDirty();
             }, 150);
         }
 
@@ -2397,6 +2411,7 @@
                 window.renderLivePreview();
             }
             window.saveLocalState();
+            markLocalDraftClean(data.publishedAt);
             if (showNotification) {
                 showToast("☁️ 서버에 저장된 최신 워크시트를 불러왔습니다.", "success");
             }
@@ -2438,9 +2453,17 @@
                 applyPublishedToReader(data);
             } else {
                 const currentInput = document.getElementById('markdownInput').value.trim();
-                // 입력창이 비어있거나 샘플 데이터 상태이거나 로컬 캐시가 없으면 서버 최신본 자동 로드
+                const base = Number(localStorage.getItem('worksheet_cache_base') || 0);
+                const dirty = localStorage.getItem('worksheet_cache_dirty') === '1';
+                const serverNewer = Number(data.publishedAt || 0) > base;
+                // 입력창이 비었거나 샘플이거나, 서버가 더 새롭고 로컬에서 손댄 적 없으면 서버 최신본 자동 로드
                 if (!currentInput || window.isSampleDataLoaded || !localStorage.getItem('worksheet_markdown_cache')) {
                     applyPublishedToStudio(data, false);
+                } else if (serverNewer && !dirty) {
+                    applyPublishedToStudio(data, true);
+                } else if (serverNewer && currentInput !== data.markdown.trim()) {
+                    // 저장 안 한 수정본은 덮어쓰지 않는다
+                    showToast("☁️ 서버에 새 워크시트가 있습니다. 지금 입력창은 저장 안 된 수정본이라 그대로 두었어요. [최신 불러오기]를 누르면 바뀝니다.", "info");
                 }
             }
         }, (err) => {
@@ -2484,6 +2507,7 @@
                 const wm = document.getElementById('watermarkSelector')?.value || 'none';
 
                 // 1. Save to worksheet doc (마크다운, 판형, 글자크기, 워터마크 통째로 클라우드 저장)
+                const publishedAt = Date.now();
                 await setDoc(worksheetDocRef, {
                     markdown: rawMd,
                     title: parsed.title || "이번 주 스터디 주제",
@@ -2491,8 +2515,9 @@
                     edition: activeEdition,
                     fontSize: fs,
                     watermark: wm,
-                    publishedAt: Date.now()
+                    publishedAt
                 }, { merge: true });
+                markLocalDraftClean(publishedAt);
 
                 showToast("🎉 학습자료가 클라우드에 저장/연동되었습니다.", "success");
             } catch (error) {
