@@ -487,8 +487,6 @@
         html.light-theme .tab-btn-active *,
         html.light-theme #topicRoundDisplay,
         html.light-theme #topicRoundDisplay *,
-        html.light-theme #topicCarrotGatheringLink,
-        html.light-theme #topicCarrotGatheringLink *,
         html.light-theme #topicDocsLink,
         html.light-theme #topicDocsLink *,
         html.light-theme #topicPlayOverlay,
@@ -694,40 +692,6 @@
         html.light-theme #topicLocationLink i,
         html.light-theme #topicLocationLink span {
             color: #1d4ed8 !important;
-        }
-
-        /* Tab 1 Accordion details */
-        html.light-theme #timelineAccordionContent {
-            background-color: #f8fafc !important;
-            border-color: #e2e8f0 !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-zinc-900\/90 {
-            background-color: #ffffff !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-blue-950\/80 {
-            background-color: #eff6ff !important;
-            color: #1d4ed8 !important;
-            border-color: #bfdbfe !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-amber-950\/80 {
-            background-color: #fffbeb !important;
-            color: #b45309 !important;
-            border-color: #fde68a !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-rose-950\/80 {
-            background-color: #fff1f2 !important;
-            color: #be123c !important;
-            border-color: #fecdd3 !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-rose-950\/30 {
-            background-color: #fff1f2 !important;
-            border-color: #fecdd3 !important;
-            color: #e11d48 !important;
-        }
-        html.light-theme #timelineAccordionContent .bg-rose-950\/30 i {
-            color: #e11d48 !important;
         }
 
         /* 🥕 TAB 3: ATTENDANCE & BENTO GUIDE */
@@ -1053,94 +1017,6 @@
                 </div>
             </div>
 
-            <!-- 3. 참가비 & 취소 안내 섹션 -->
-            <div class="space-y-1.5">
-                <h3 class="text-xs sm:text-sm font-bold text-zinc-300 tracking-wider flex items-center gap-1.5 pl-1">
-                    <i class="fa-solid fa-wallet text-amber-400"></i>
-                    <span>참가비 & 신청/취소 안내</span>
-                </h3>
-                <div class="bg-[#121216] border border-[#23232b] p-3.5 sm:p-4 rounded-2xl space-y-2.5 shadow-lg">
-                    <!-- Fee Row -->
-                    <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-3">
-                        <div class="space-y-0.5">
-                            <div class="font-bold text-sm sm:text-base text-zinc-100 flex items-center gap-1.5 whitespace-nowrap">
-                                <span>참가비 3,000원</span>
-                            </div>
-                            <p class="text-xs text-zinc-400 font-normal whitespace-nowrap">당근Pay 일괄 요청 (음료 각자)</p>
-                        </div>
-                        <a id="topicCarrotGatheringLink" href="https://daangn.com/kr/share/community/ref/invite-group-meetup/bdb4m0qFXno" target="_blank" rel="noopener noreferrer" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5 active:scale-95 shrink-0 whitespace-nowrap btn-periodic-wiggle">
-                            <span>참가하기</span>
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </a>
-                    </div>
-
-                    <!-- Schedule Accordion Button -->
-                    <div class="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-900/60">
-                        <button onclick="toggleTimelineAccordion()" class="w-full p-3 flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 transition text-left">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-calendar-check text-blue-400 text-sm"></i>
-                                <span class="font-bold text-xs sm:text-sm text-zinc-200">참가 신청 일정 및 상세 안내</span>
-                            </div>
-                            <i id="timelineAccordionIcon" class="fa-solid fa-chevron-down text-zinc-400 text-xs sm:text-sm transition-transform duration-300"></i>
-                        </button>
-
-                        <!-- Accordion Body: Step Timeline List & Refund Policy -->
-                        <div id="timelineAccordionContent" class="hidden p-3 border-t border-zinc-800/80 space-y-2 text-xs sm:text-sm bg-zinc-950/80">
-                            <!-- Step 1 -->
-                            <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-start gap-2.5">
-                                <span class="bg-blue-600 text-white font-bold text-[11px] px-2 py-0.5 rounded-md shrink-0 mt-0.5 shadow-sm">STEP 1</span>
-                                <div class="space-y-1 flex-1">
-                                    <div class="flex items-center justify-between flex-wrap gap-1">
-                                        <span class="font-bold text-blue-400 text-xs sm:text-sm">화 ~ 목요일 자정 전</span>
-                                        <span class="text-[10px] sm:text-[11px] font-semibold text-blue-300 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-800/50">자유 참가 & 취소</span>
-                                    </div>
-                                    <p class="text-xs text-zinc-300 leading-relaxed font-normal">
-                                        • [참가하기] 누르고 자료 미리보기<br>
-                                        • 목요일 점심 당근Pay 입금<br>
-                                        • 불참 시 자정 전 나가기
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Step 2 -->
-                            <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-start gap-2.5">
-                                <span class="bg-amber-400 text-white font-bold text-[11px] px-2 py-0.5 rounded-md shrink-0 mt-0.5 shadow-sm">STEP 2</span>
-                                <div class="space-y-1 flex-1">
-                                    <div class="flex items-center justify-between flex-wrap gap-1">
-                                        <span class="font-bold text-amber-600 text-xs sm:text-sm">목요일 자정 (24:00)</span>
-                                        <span class="text-[10px] sm:text-[11px] font-semibold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/50">모임 마감</span>
-                                    </div>
-                                    <p class="text-xs text-zinc-300 leading-relaxed font-normal">
-                                        • 인원 확정 및 마감<br>
-                                        • 이후 [대기 신청]만 가능
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Step 3 -->
-                            <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-start gap-2.5">
-                                <span class="bg-rose-600 text-white font-bold text-[11px] px-2 py-0.5 rounded-md shrink-0 mt-0.5 shadow-sm">STEP 3</span>
-                                <div class="space-y-1 flex-1">
-                                    <div class="flex items-center justify-between flex-wrap gap-1">
-                                        <span class="font-bold text-rose-400 text-xs sm:text-sm">금요일 20:00 마감 전</span>
-                                        <span class="text-[10px] sm:text-[11px] font-semibold text-rose-300 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-800/50">선입금 후 승인</span>
-                                    </div>
-                                    <p class="text-xs text-zinc-300 leading-relaxed font-normal">
-                                        • 입금 확인 시 즉시 승인
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Refund Notice Box -->
-                            <div class="bg-rose-950/30 border border-rose-500/25 p-2.5 rounded-xl flex items-center justify-center text-center text-xs text-rose-300 font-semibold gap-1.5 mt-2">
-                                <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
-                                <span>송금 완료 후 환불 및 이월 불가</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
         </section>
 
         <!-- TAB 2: 스마트 테이블 배치도 -->
@@ -1246,7 +1122,7 @@
                                 <span class="text-amber-400 font-bold mt-0.5"><i class="fa-solid fa-scale-balanced"></i></span>
                                 <div>
                                     <strong class="text-zinc-200 block mb-0.5">세대 간 균형 및 공감대 페어링</strong>
-                                    1부에는 50대 이상 멤버가 테이블마다 한 분씩 젊은 세대와 함께 앉도록 고르게 섞고, 2부에는 20~30대·30~40대처럼 가까운 세대끼리 모아 깊은 공감대를 형성하며 대화하실 수 있게 합니다.
+                                    1부에는 여러 세대가 한 테이블에서 고르게 어울리도록 섞고, 2부에는 가까운 세대끼리 모아 깊은 공감대를 형성하며 대화하실 수 있게 합니다.
                                 </div>
                             </div>
                             <div class="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg">
@@ -1749,9 +1625,9 @@
                             <i class="fa-solid fa-carrot text-orange-400 text-xs"></i>
                             <span>공지글</span>
                         </button>
-                        <button onclick="copyFeeRequestToClipboard()" class="flex items-center gap-1 bg-emerald-950/80 hover:bg-emerald-900 active:scale-95 text-emerald-300 border border-emerald-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="당근 모임톡에 올릴 참가비 더치페이 요청 문구를 클립보드에 복사">
-                            <i class="fa-solid fa-won-sign text-emerald-400 text-xs"></i>
-                            <span>더치페이</span>
+                        <button onclick="copyWelcomeToClipboard()" class="flex items-center gap-1 bg-emerald-950/80 hover:bg-emerald-900 active:scale-95 text-emerald-300 border border-emerald-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="참석 확정 채팅방에 올릴 참여 환영 인사(일정·장소·웹앱 안내)를 클립보드에 복사">
+                            <i class="fa-solid fa-hand text-emerald-400 text-xs"></i>
+                            <span>환영인사</span>
                         </button>
                         <button onclick="copyMorningNoticeToClipboard()" class="flex items-center gap-1 bg-blue-950/80 hover:bg-blue-900 active:scale-95 text-blue-300 border border-blue-600/50 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap" title="스터디 당일 아침 정시 참가 독려 문구를 클립보드에 복사">
                             <i class="fa-solid fa-bell text-blue-400 text-xs"></i>
@@ -2792,20 +2668,6 @@
             window.open(finalWebUrl, '_blank', 'noopener,noreferrer');
         };
 
-        window.toggleTimelineAccordion = function() {
-            const content = document.getElementById('timelineAccordionContent');
-            const icon = document.getElementById('timelineAccordionIcon');
-            if (content && icon) {
-                if (content.classList.contains('hidden')) {
-                    content.classList.remove('hidden');
-                    icon.className = "fa-solid fa-chevron-up text-blue-400 text-xs sm:text-sm transition-transform duration-300";
-                } else {
-                    content.classList.add('hidden');
-                    icon.className = "fa-solid fa-chevron-down text-zinc-400 text-xs sm:text-sm transition-transform duration-300";
-                }
-            }
-        };
-
         window.toggleCurriculumAccordion = function() {
             const content = document.getElementById('curriculumAccordionContent');
             const icon = document.getElementById('curriculumAccordionIcon');
@@ -3110,7 +2972,6 @@
             const roundEl = document.getElementById('topicRoundDisplay');
             const locEl = document.getElementById('topicLocationDisplay');
             const locLinkEl = document.getElementById('topicLocationLink');
-            const carrotLinkEl = document.getElementById('topicCarrotGatheringLink');
             const titleEl = document.getElementById('topicTitleDisplay');
             const thumbEl = document.getElementById('topicVideoThumbnail');
             const docsEl = document.getElementById('topicDocsLink');
@@ -3119,7 +2980,6 @@
             if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '20회차')}</span>`;
             if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
             if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
-            if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
             if (titleEl) titleEl.innerText = topicData.title || '';
             if (docsEl) docsEl.href = topicData.docsUrl || "worksheet.html?view=reader";
 
@@ -3331,31 +3191,6 @@ ${ytUrl}
 
 ━━━━━━━━━━━━━━
 
-[ 참가비 & 신청/취소 안내 ]
-
-💸 참가비 3,000원
-    (당근Pay 일괄 요청)
-☕️ 개인 음료는 각자 주문
-
-[STEP 1] 화~목요일 자정 전
-자유 참가 & 취소
-• [참가하기] 누르고 자료 확인
-• 목요일 점심 당근Pay 입금
-• 불참 시 자정 전 나가기
-
-[STEP 2] 목요일 자정 24:00
-모임 마감
-• 인원 확정 및 마감
-• 이후 [대기 신청]만 가능
-
-[STEP 3] 금요일 20:00 전
-선입금 후 승인
-• 입금 확인 시 즉시 승인
-
-🚨 송금 후 환불·이월 불가
-
-—
-
 ✨ 실시간 스마트 좌석배치도와
 웹앱 링크는 참석 확정
 채팅방에서 공유됩니다.
@@ -3374,31 +3209,45 @@ ${ytUrl}
             }
         };
 
-        window.copyFeeRequestToClipboard = function() {
-            const text = `안녕하세요! 멤버 여러분
-이번 주 스터디 더치페이 요청드립니다!
+        window.copyWelcomeToClipboard = function() {
+            const round = (topicData && topicData.round) ? topicData.round.trim() : '';
+            const roundTag = round ? (round.startsWith('[') ? ` ${round}` : ` [${round}]`) : '';
+            const locUrl = (topicData && topicData.locationUrl) ? `\n${topicData.locationUrl}` : '';
+            const text = `안녕하세요! 😊
+이번 주 스터디에 참여해 주셔서
+감사합니다!
 
 ━━━━━━━━━━━
-▪️ 참가비: 3,000원
-▪️ 기한: 목요일 자정(24:00)까지
+🗓️ 이번 모임${roundTag}
+${(topicData && topicData.schedule) || ''}
+📍 ${(topicData && topicData.location) || ''}${locUrl}
 ━━━━━━━━━━━
 
-✔️ 목요일 자정 전까지 자유롭게
-송금 또는 일정 나가기가 가능합니다.
+📱 스터디 웹앱 (꼭 저장해 두세요!)
+https://jettlee232.github.io/Jett-s-English-Crew/
 
-⚠️ 송금 이후에는 환불이 불가하니
-신중한 참여 부탁드립니다!
+• 일정 탭: 이번 주 주제,
+  유튜브 영상, 학습 자료(PDF)
+• 자리 탭: 당일 내 테이블 확인
+  (이름을 한 번 선택해 두시면
+   다음부터 바로 보여요)
+• 출석 탭: 내 당근 현황
 
-🥕 [당근으로 참가 시]
-채팅창에 '6당근 사용'이라고
-남겨주시면 확인 후 반영해 드립니다.
+▶️ 모임 전 영상 1회 시청과
+학습 자료 확인 부탁드립니다!
 
-보유 당근 확인하기:
+🥕 [당근으로 무료 참가]
+당근 6개를 모으셨다면
+채팅창에 '당근사용'이라고
+남겨주세요! 확인 후 반영해 드립니다.
+
+내 당근 확인하기:
 https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
-이번 주도 즐거운 스터디로 봬요! 😊`;
+궁금한 점은 편하게 물어봐 주시고,
+모임에서 반갑게 봬요! 🙌`;
 
-            const successMsg = "💬 참가비 더치페이 요청 문구가 복사되었습니다!";
+            const successMsg = "👋 참여 환영 인사가 복사되었습니다!";
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     showToast(successMsg, "success");
