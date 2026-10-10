@@ -6909,7 +6909,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                 return (a.name || '').localeCompare(b.name || '', 'ko');
             });
 
-            container.innerHTML = nonLeaderMembers.map(m => {
+            const renderBoardRow = m => {
                 const coins = m.coins || 0;
                 const isKing = coins >= 6;
 
@@ -6977,7 +6977,17 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                         </div>
                     </div>
                 `;
-            }).join('');
+            };
+
+            // 한 번도 출석하지 않은 신규는 접어 둔다 (검색 중에는 펼쳐서 보여준다)
+            const newbies = searchQuery ? [] : nonLeaderMembers.filter(m => (m.totalAttended || 0) === 0);
+            const regulars = searchQuery ? nonLeaderMembers : nonLeaderMembers.filter(m => (m.totalAttended || 0) > 0);
+            container.innerHTML = regulars.map(renderBoardRow).join('') + (newbies.length ? `
+                <details ${window.showNewbieBoard ? 'open' : ''} ontoggle="window.showNewbieBoard = this.open" class="space-y-1.5">
+                    <summary class="cursor-pointer select-none text-xs text-zinc-400 hover:text-zinc-200 py-2 text-center">아직 출석 전인 신규 ${newbies.length}명</summary>
+                    ${newbies.map(renderBoardRow).join('')}
+                </details>
+            ` : '');
         };
 
         window.addNewMember = async function() {
