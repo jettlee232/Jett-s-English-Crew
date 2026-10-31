@@ -5417,6 +5417,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                 member.isToday = false;
                 member.leftEarly = false;
                 member.lastAction = '사전 취소 (+2당근)';
+                member.lastAttendedAt = new Date().toISOString();   // 적립이므로 유효기간 갱신
                 member.updatedAt = new Date().toISOString();
 
                 persistMembers([...membersData]);
