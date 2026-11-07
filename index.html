@@ -144,6 +144,15 @@
             will-change: transform, box-shadow;
         }
 
+        /* 이번 주 주제를 서버에서 받기 전(topic-ready 없음)에는 영상 카드를 누를 수 없다 */
+        #topicVideoContainer:not(.topic-ready) {
+            pointer-events: none;
+            cursor: progress;
+            animation: none;
+        }
+        #topicVideoContainer:not(.topic-ready) #topicVideoThumbnail { visibility: hidden; }
+        #topicVideoContainer:not(.topic-ready) #topicPlayOverlay { opacity: 0.3; }
+
         .yt-breathing-card:hover {
             animation-play-state: paused;
             transform: scale(1.025);
@@ -969,12 +978,12 @@
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
                             <span id="topicScheduleDisplay" class="font-bold text-xs sm:text-sm text-zinc-100 flex items-center gap-2 truncate">
-                                <i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>9월 5일 (토) 10:00 - 11:50</span>
+                                <i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>불러오는 중…</span>
                             </span>
                         </div>
                         <span id="topicRoundDisplay" class="bg-blue-600 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg shadow-sm shrink-0 whitespace-nowrap flex items-center justify-center gap-1 min-w-[62px]">
                             <i class="fa-solid fa-flag text-[9px]"></i>
-                            <span>20회차</span>
+                            <span>…</span>
                         </span>
                     </div>
 
@@ -982,7 +991,7 @@
                     <div class="bg-zinc-900/90 p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 truncate">
                             <span id="topicLocationDisplay" class="font-bold text-xs sm:text-sm text-zinc-100 flex items-center gap-2 truncate">
-                                <i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>투썸 아리랑힐 호텔점 2층</span>
+                                <i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>불러오는 중…</span>
                             </span>
                         </div>
                         <a id="topicLocationLink" href="https://kko.to/eZx7E9kExG" target="_blank" rel="noopener noreferrer" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold text-[11px] px-2.5 py-1 rounded-lg transition flex items-center justify-center gap-1 shrink-0 shadow-sm active:scale-95 whitespace-nowrap min-w-[62px]">
@@ -1003,14 +1012,14 @@
                     <div class="w-full flex items-start sm:items-center justify-between border-b border-zinc-800/80 pb-3 gap-2">
                         <h2 class="text-sm sm:text-lg md:text-xl font-bold text-white flex items-start sm:items-center gap-2 leading-snug tracking-tight flex-1 min-w-0">
                             <span class="badge-topic-tag bg-blue-600 text-white text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold shadow-sm shrink-0 whitespace-nowrap mt-0.5 sm:mt-0">TOPIC</span>
-                            <span id="topicTitleDisplay" class="font-bold text-white break-keep break-words leading-snug">"청중을 사로잡는 4가지 스토리텔링 비법 📖✨"</span>
+                            <span id="topicTitleDisplay" class="font-bold text-white break-keep break-words leading-snug">이번 주 주제를 불러오는 중…</span>
                         </h2>
                         <span class="text-xs font-semibold text-zinc-400 shrink-0 hidden md:inline bg-zinc-800/60 px-2 py-0.5 rounded-md border border-zinc-700/50">TED-Ed Series</span>
                     </div>
 
                     <!-- YouTube Full Cover Thumbnail Container with Breathing Animation -->
                     <div id="topicVideoContainer" onclick="openYoutubeDirect()" class="relative w-full aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl group cursor-pointer yt-breathing-card">
-                        <img id="topicVideoThumbnail" src="https://img.youtube.com/vi/JOs-q7rXqdk/hqdefault.jpg" alt="유튜브 썸네일" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                        <img id="topicVideoThumbnail" alt="" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
                         
                         <!-- Simple Center Play Button with Pulse Effect -->
                         <div id="topicPlayOverlay" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
@@ -1019,25 +1028,6 @@
                             </div>
                         </div>
                     </div>
-                    <script>
-                        (function() {
-                            try {
-                                const saved = localStorage.getItem('localTopicData');
-                                if (saved) {
-                                    const p = JSON.parse(saved);
-                                    const thumb = document.getElementById('topicVideoThumbnail');
-                                    if (thumb && p) {
-                                        if (p.customThumbnailUrl && p.customThumbnailUrl.trim()) {
-                                            thumb.src = p.customThumbnailUrl;
-                                        } else if (p.youtubeUrl) {
-                                            const m = p.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
-                                            if (m && m[1]) thumb.src = 'https://img.youtube.com/vi/' + m[1] + '/hqdefault.jpg';
-                                        }
-                                    }
-                                }
-                            } catch(e) {}
-                        })();
-                    </script>
 
                     <!-- Download Script / Docs Button Directly Below Video -->
                     <a id="topicDocsLink" href="worksheet.html?view=reader" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-600/40 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95 whitespace-nowrap">
@@ -2744,6 +2734,10 @@
         let customPinCallback = null;
         let customConfirmCallback = null;
 
+        // 서버(Firestore)에서 이번 주 주제를 받은 뒤에만 true. 그 전엔 일정·주제·영상을 그리지도 열지도 않는다
+        // (HTML 기본값·지난 방문 localStorage 는 지난 주 영상일 수 있다 — 2026-11-07 회원들이 옛 영상을 보고 온 사고).
+        let topicReady = false;
+
         let topicData = {
             round: "20회차",
             schedule: "9월 5일 (토) 10:00 - 11:50",
@@ -2758,6 +2752,7 @@
         };
 
         window.openYoutubeDirect = function() {
+            if (!topicReady) { showToast("이번 주 영상을 불러오는 중이에요. 잠시만요!", "info"); return; }
             const targetUrl = (topicData && topicData.youtubeUrl) ? topicData.youtubeUrl : "https://youtu.be/JOs-q7rXqdk?si=5W-i8DqKjc80r8Yw";
             const ytId = extractYoutubeId(targetUrl);
 
@@ -3116,19 +3111,23 @@
             const thumbEl = document.getElementById('topicVideoThumbnail');
             const docsEl = document.getElementById('topicDocsLink');
 
-            if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${esc(topicData.schedule || '')}</span>`;
-            if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '20회차')}</span>`;
-            if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
-            if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
-            if (titleEl) titleEl.innerText = topicData.title || '';
-            if (docsEl) docsEl.href = topicData.docsUrl || "worksheet.html?view=reader";
+            if (topicReady) {
+                if (schEl) schEl.innerHTML = `<i class="fa-regular fa-clock text-blue-400 shrink-0"></i><span>${esc(topicData.schedule || '')}</span>`;
+                if (roundEl) roundEl.innerHTML = `<i class="fa-solid fa-flag text-[9px]"></i><span>${esc(topicData.round || '20회차')}</span>`;
+                if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i><span>${esc(topicData.location || '')}</span>`;
+                if (locLinkEl) locLinkEl.href = topicData.locationUrl || "https://kko.to/eZx7E9kExG";
+                if (titleEl) titleEl.innerText = topicData.title || '';
+                if (docsEl) docsEl.href = topicData.docsUrl || "worksheet.html?view=reader";
 
-            const ytId = extractYoutubeId(topicData.youtubeUrl);
-            const finalThumbUrl = topicData.customThumbnailUrl && topicData.customThumbnailUrl.trim() !== "" 
-                ? topicData.customThumbnailUrl 
-                : `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                const ytId = extractYoutubeId(topicData.youtubeUrl);
+                const finalThumbUrl = topicData.customThumbnailUrl && topicData.customThumbnailUrl.trim() !== "" 
+                    ? topicData.customThumbnailUrl 
+                    : `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
-            if (thumbEl) thumbEl.src = finalThumbUrl;
+                if (thumbEl) thumbEl.src = finalThumbUrl;
+                const videoEl = document.getElementById('topicVideoContainer');
+                if (videoEl) videoEl.classList.add('topic-ready');
+            }
 
             const carrotLinkEl = document.getElementById('topicCarrotGatheringLink');
             if (carrotLinkEl) carrotLinkEl.href = topicData.carrotGatheringUrl || "https://daangn.com";
@@ -3254,6 +3253,7 @@
 
             const modeChanged = prevMode !== newObj.seatingOrderMode;
             topicData = newObj;
+            topicReady = true;
             if (modeChanged) {
                 part1SeatingSnapshot = null;
                 part2SeatingSnapshot = null;
@@ -4861,6 +4861,7 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                     if (snap.exists()) {
                         const oldMode = topicData.seatingOrderMode;
                         topicData = { ...topicData, ...snap.data() };
+                        topicReady = true;
                         localStorage.setItem('localTopicData', JSON.stringify(topicData));
                         updateTopicUI();
                         if (oldMode !== topicData.seatingOrderMode) {
@@ -4870,9 +4871,15 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
                             renderSeatingPlan(isPart2Shuffle, true);
                         }
                     } else {
+                        // 오프라인이면 SDK 가 '문서 없음(fromCache)'을 먼저 줄 수 있다 — 그땐 기본값(지난 주제)을 열지 않는다
+                        if (!snap.metadata.fromCache) topicReady = true;
                         updateTopicUI();
                     }
-                }, (err) => console.warn(err));
+                }, (err) => {
+                    console.warn("주제 구독 실패:", err);
+                    const titleEl = document.getElementById('topicTitleDisplay');
+                    if (titleEl && !topicReady) titleEl.innerText = "주제를 불러오지 못했어요. 새로고침해 주세요.";
+                });
 
                 onSnapshot(seatingDocRef, (snap) => {
                     if (!snap.exists() || snap.metadata.hasPendingWrites) return;
