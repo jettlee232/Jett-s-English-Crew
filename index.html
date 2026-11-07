@@ -1155,6 +1155,9 @@
                                 <i class="fa-solid fa-user-plus text-[10px]"></i>
                                 <span>추가</span>
                             </button>
+                            <button id="btnSeatTogether" onclick="openSeatTogetherModal()" class="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white shadow-sm transition active:scale-95 cursor-pointer" title="같이 앉기 (한 테이블에 묶기)">
+                                <i class="fa-solid fa-people-group text-[11px]"></i>
+                            </button>
 
                             <button id="btnPart1Restore" onclick="restorePart1Seating()" class="hidden items-center justify-center w-7 h-7 rounded-lg bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition active:scale-95" title="1부 배치 복원">
                                 <i class="fa-solid fa-rotate-left text-[11px]"></i>
@@ -2212,6 +2215,30 @@
                     </button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- 같이 앉기 묶음 (Leader Only) -->
+    <div id="seatTogetherModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-[#121216] border border-[#23232b] w-full max-w-md rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50 flex items-center justify-center text-sm shrink-0">
+                        <i class="fa-solid fa-people-group"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base text-white whitespace-nowrap">같이 앉기</h3>
+                        <p class="text-xs text-zinc-400">고른 사람들은 1부·2부 모두 한 테이블에 앉습니다.</p>
+                    </div>
+                </div>
+                <button onclick="closeSeatTogetherModal()" class="text-zinc-400 hover:text-white p-1 text-base cursor-pointer">✕</button>
+            </div>
+            <div id="seatTogetherCount" class="text-xs font-bold text-emerald-300"></div>
+            <div id="seatTogetherList" class="flex-1 overflow-y-auto max-h-[50vh] grid grid-cols-2 gap-1.5 bg-zinc-950 p-2 rounded-xl border border-zinc-800"></div>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="clearSeatTogether()" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold text-xs sm:text-sm transition active:scale-95 cursor-pointer">묶음 풀기</button>
+                <button onclick="saveSeatTogether()" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition active:scale-95 cursor-pointer">묶고 다시 배치</button>
             </div>
         </div>
     </div>
@@ -5914,7 +5941,30 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             return c;
         }
 
+        // 같이 앉기 묶음: 리더 기기에만 오늘 날짜로 기억한다(회원 기기는 게시된 좌석만 받는다).
+        const SEAT_TOGETHER_KEY = 'seatTogether_v1';
+        function loadSeatTogetherIds() {
+            try {
+                const raw = JSON.parse(localStorage.getItem(SEAT_TOGETHER_KEY) || 'null');
+                return (raw && raw.date === seatingTodayStr() && Array.isArray(raw.ids)) ? raw.ids : [];
+            } catch (e) { console.warn('같이 앉기 묶음 읽기 실패:', e); return []; }
+        }
+
+        // 묶음(2명 이상)은 인원과 상관없이 따로 한 테이블로 두고, 나머지만 평소 규칙으로 배치한다.
+        // 리더가 묶음에 있으면 묶음 테이블이 T1, 아니면 맨 뒤. 남는 사람이 1명뿐이면 묶음 테이블에 합류.
         function generateSeatingPlan(todayMembers, peer, isPart2) {
+            const togetherIds = new Set(loadSeatTogetherIds());
+            const group = todayMembers.filter(m => togetherIds.has(m.id));
+            if (group.length >= 2) {
+                const others = todayMembers.filter(m => !togetherIds.has(m.id));
+                if (others.length <= 1) return [[...group, ...others]];
+                const rest = generateSeatingPlanCore(others, peer, isPart2);
+                return group.some(isLeaderMember) ? [group, ...rest] : [...rest, group];
+            }
+            return generateSeatingPlanCore(todayMembers, peer, isPart2);
+        }
+
+        function generateSeatingPlanCore(todayMembers, peer, isPart2) {
             const n = todayMembers.length;
             if (n === 0) return [];
             const numTables = Math.max(1, Math.floor(n / 3));
@@ -6182,6 +6232,10 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
             }
 
             const mySeatId = getMySeatId();
+            const togetherSet = new Set(isLeaderAuthenticated ? loadSeatTogetherIds() : []);
+            const togetherTableIdx = togetherSet.size >= 2
+                ? tables.findIndex(tbl => tbl.filter(m => togetherSet.has(m.id)).length >= 2)
+                : -1;
             container.innerHTML = tables.map((members, idx) => {
                 const tableNo = idx + 1;
                 const capacity = members.length;
@@ -6242,7 +6296,7 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
                                 ${tBadgeHtml}
                                 <div>
                                     <h3 class="font-bold text-sm sm:text-base text-white whitespace-nowrap">${tableNo}번 테이블</h3>
-                                    <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${hasLeader ? '리더 및 신규 우선' : `그룹 ${tableNo}`}</p>
+                                    <p class="text-[11px] sm:text-xs text-zinc-400 whitespace-nowrap">${togetherTableIdx === idx ? '🤝 같이 앉기' : hasLeader ? '리더 및 신규 우선' : `그룹 ${tableNo}`}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -6699,6 +6753,56 @@ function renderSeatingPlan(isShuffle = false, forceNew = false) {
         window.restorePart1Seating = function() {
             renderSeatingPlan(false);
             showToast("↩️ 1부 테이블 배치로 복원되었습니다.", "info");
+        };
+
+        let seatTogetherDraft = new Set();
+        window.openSeatTogetherModal = function() {
+            requireLeaderAuth(() => {
+                seatTogetherDraft = new Set(loadSeatTogetherIds());
+                renderSeatTogetherList();
+                document.getElementById('seatTogetherModal')?.classList.remove('hidden');
+            });
+        };
+        window.closeSeatTogetherModal = function() {
+            document.getElementById('seatTogetherModal')?.classList.add('hidden');
+        };
+        window.toggleSeatTogether = function(id) {
+            if (seatTogetherDraft.has(id)) seatTogetherDraft.delete(id); else seatTogetherDraft.add(id);
+            renderSeatTogetherList();
+        };
+        function renderSeatTogetherList() {
+            const list = document.getElementById('seatTogetherList');
+            const count = document.getElementById('seatTogetherCount');
+            if (!list) return;
+            const today = membersData.filter(m => m.isToday && !m.leftEarly)
+                .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+            list.innerHTML = today.length === 0
+                ? '<div class="col-span-2 text-center text-xs text-zinc-500 py-6">오늘 참석자가 없습니다.</div>'
+                : today.map(m => {
+                    const on = seatTogetherDraft.has(m.id);
+                    return `<button type="button" onclick="toggleSeatTogether('${m.id}')" class="p-2 rounded-xl border text-left text-xs sm:text-sm font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer ${on ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-200'}">
+                        <i class="fa-solid ${on ? 'fa-square-check' : 'fa-square'} text-[11px] shrink-0"></i><span class="truncate">${esc(m.name)}</span></button>`;
+                }).join('');
+            const n = today.filter(m => seatTogetherDraft.has(m.id)).length;
+            if (count) count.textContent = n >= 2 ? `${n}명을 한 테이블에 앉힙니다` : '같이 앉을 사람을 2명 이상 고르세요';
+        }
+        function applySeatTogether(ids, msg) {
+            try {
+                localStorage.setItem(SEAT_TOGETHER_KEY, JSON.stringify({ date: seatingTodayStr(), ids }));
+            } catch (e) { console.warn('같이 앉기 묶음 저장 실패:', e); }
+            closeSeatTogetherModal();
+            playShuffleSound();
+            renderSeatingPlan(isPart2Shuffle, true);
+            showToast(msg, "success");
+        }
+        window.saveSeatTogether = function() {
+            const ids = membersData.filter(m => m.isToday && !m.leftEarly && seatTogetherDraft.has(m.id)).map(m => m.id);
+            if (ids.length < 2) { showToast("같이 앉을 사람을 2명 이상 골라 주세요.", "warning"); return; }
+            applySeatTogether(ids, `🤝 ${ids.length}명을 한 테이블로 묶고 ${isPart2Shuffle ? '2부' : '1부'} 자리를 다시 배치했습니다.`);
+        };
+        window.clearSeatTogether = function() {
+            seatTogetherDraft = new Set();
+            applySeatTogether([], `묶음을 풀고 ${isPart2Shuffle ? '2부' : '1부'} 자리를 다시 배치했습니다.`);
         };
 
         window.requestRerollPart1WithPin = function() {
