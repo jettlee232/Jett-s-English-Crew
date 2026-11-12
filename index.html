@@ -5092,10 +5092,11 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
 
                 m.coinsBeforeExpiry = m.coins;              // 복구용 기록
                 m.coinsExpiredAt = new Date().toISOString();
+                const tx = appendCoinHistory(m, m.coins, 0, `유효기간 만료 (${COIN_EXPIRY_DAYS}일)`, 'expire');
                 m.coins = 0;
                 m.lastAction = '당근 유효기간 만료';
                 m.updatedAt = new Date().toISOString();
-                expired.push(m);
+                expired.push({ m, tx });
             }
 
             if (expired.length === 0) return;
@@ -5105,10 +5106,11 @@ https://jettlee232.github.io/Jett-s-English-Crew/#tab3
             showToast(`⏳ ${expired.length}명의 당근이 유효기간 만료로 소멸되었습니다.`, "warning");
 
             try {
-                await Promise.all(expired.map(m => updateDoc(doc(membersCollectionRef, m.id), {
+                await Promise.all(expired.map(({ m, tx }) => updateDoc(doc(membersCollectionRef, m.id), {
                     coins: 0,
                     coinsBeforeExpiry: m.coinsBeforeExpiry,
                     coinsExpiredAt: m.coinsExpiredAt,
+                    coinHistory: arrayUnion(tx),
                     lastAction: m.lastAction,
                     updatedAt: m.updatedAt
                 })));
